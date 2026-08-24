@@ -5,6 +5,7 @@ import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
 import { VOLKORNES_DATA } from '../data/volkornes';
 import { ALL_MOUNTS_DATA } from '../data/allMounts';
+import { MountAvatar } from './MountAvatar';
 
 export const BreedingHelper: React.FC = () => {
   const [species, setSpecies] = useState<SpeciesType>('dragopavo');
@@ -109,17 +110,28 @@ export const BreedingHelper: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {catalog.map((m) => (
-            <div key={m.id} className="p-3.5 bg-slate-900/60 rounded-xl border border-dofus-border hover:border-slate-700 transition">
-              <div className="flex justify-between items-start">
-                <span className="font-bold text-xs text-white">{m.name}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold">Gen {m.generation}</span>
+            <div key={m.id} className="p-3.5 bg-slate-900/60 rounded-xl border border-dofus-border hover:border-slate-700 transition space-y-2">
+              <div className="flex items-center gap-2.5">
+                <MountAvatar
+                  species={species}
+                  breed={m.name}
+                  imageUrl={m.imageUrl}
+                  size="sm"
+                  generation={m.generation}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start">
+                    <span className="font-bold text-xs text-white truncate">{m.name}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold">Gen {m.generation}</span>
+                  </div>
+                </div>
               </div>
               {m.parents && (
-                <p className="text-[11px] text-amber-400 mt-2 font-mono bg-amber-500/5 p-1.5 rounded border border-amber-500/20">
+                <p className="text-[11px] text-amber-400 font-mono bg-amber-500/5 p-1.5 rounded border border-amber-500/20">
                   Cruzar: <strong className="text-amber-300">{getParentName(m.parents[0])}</strong> + <strong className="text-amber-300">{getParentName(m.parents[1])}</strong>
                 </p>
               )}
-              <div className="mt-2 text-[10px] text-slate-400">
+              <div className="text-[10px] text-slate-400">
                 {m.bonuses.join(' • ')}
               </div>
             </div>

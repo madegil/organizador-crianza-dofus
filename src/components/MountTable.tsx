@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { 
   Search, Filter, Plus, Trash2, Edit3, CheckCircle, Zap, Shield, Heart, 
-  Sparkles, ExternalLink, Calculator, ChevronRight, X 
+  Sparkles, ExternalLink, Calculator, ChevronRight, X, Image as ImageIcon 
 } from 'lucide-react';
 import type { FertilityStatus, SpecialCapacity, SpeciesType, UserMount } from '../types/mount';
 import { MAX_MOUNT_XP } from '../data/fuelData';
 import { db } from '../db/mountsDb';
+import { ALL_MOUNTS_DATA, getMountsBySpecies } from '../data/allMounts';
+import { MountAvatar } from './MountAvatar';
 
 interface MountTableProps {
   mounts: UserMount[];
@@ -72,6 +74,32 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
     }
   };
 
+  const handleSpeciesChangeInModal = (newSpecies: SpeciesType) => {
+    const available = getMountsBySpecies(newSpecies);
+    const firstBreed = available[0];
+    setEditingMount({
+      ...editingMount,
+      species: newSpecies,
+      breed: firstBreed ? firstBreed.name : 'Personalizada',
+      definitionId: firstBreed ? firstBreed.id : 'custom',
+      generation: firstBreed ? firstBreed.generation : 1,
+      imageUrl: firstBreed?.imageUrl || '',
+    });
+  };
+
+  const handleBreedChangeInModal = (breedId: string) => {
+    const matched = ALL_MOUNTS_DATA.find((m) => m.id === breedId);
+    if (matched) {
+      setEditingMount({
+        ...editingMount,
+        breed: matched.name,
+        definitionId: matched.id,
+        generation: matched.generation,
+        imageUrl: matched.imageUrl || '',
+      });
+    }
+  };
+
   const handleSaveMount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingMount) return;
@@ -81,7 +109,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
       nickname: editingMount.nickname || 'Sin Nombre',
       definitionId: editingMount.definitionId || 'custom',
       species: editingMount.species || 'dragopavo',
-      breed: editingMount.breed || 'Personalizada',
+      breed: editingMount.breed || 'Almendrada',
       generation: Number(editingMount.generation) || 1,
       gender: (editingMount.gender as 'M' | 'F') || 'M',
       currentLevel: Number(editingMount.currentLevel) || 1,
@@ -92,6 +120,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
       love: Number(editingMount.love) || 0,
       maturity: Number(editingMount.maturity) || 0,
       stamina: Number(editingMount.stamina) || 0,
+      imageUrl: editingMount.imageUrl || '',
       notes: editingMount.notes || '',
       createdAt: editingMount.createdAt || Date.now(),
       updatedAt: Date.now(),
@@ -113,6 +142,8 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
         return <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold">Vueloceronte</span>;
     }
   };
+
+  const availableBreedsForModal = editingMount?.species ? getMountsBySpecies(editingMount.species) : [];
 
   return (
     <div className="bg-dofus-card rounded-2xl border border-dofus-border p-6 shadow-xl space-y-6">
@@ -164,9 +195,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
           <button
             onClick={() => {
+              const defaultBreeds = getMountsBySpecies('dragopavo');
+              const first = defaultBreeds[0];
               setEditingMount({
                 species: 'dragopavo',
-                generation: 1,
+                breed: first ? first.name : 'Almendrada',
+                definitionId: first ? first.id : 'dd_amande',
+                generation: first ? first.generation : 1,
                 gender: 'M',
                 currentLevel: 1,
                 currentXp: 0,
@@ -179,7 +214,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
               });
               setIsEditModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 transition"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 transition"
           >
             <Plus className="w-4 h-4" />
             Nueva Montura
@@ -263,14 +298,23 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                       />
                     </td>
                     <td className="p-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
+                        <MountAvatar
+                          species={m.species}
+                          breed={m.breed}
+                          imageUrl={m.imageUrl}
+                          size="md"
+                          generation={m.generation}
+                        />
                         <div>
-                          <p className="font-bold text-slate-100">{m.nickname}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-bold text-slate-100 text-sm">{m.nickname}</p>
+                            <span className={`text-xs ${m.gender === 'F' ? 'text-rose-400' : 'text-sky-400'}`}>
+                              {m.gender === 'F' ? '♀' : '♂'}
+                            </span>
+                          </div>
                           <p className="text-[11px] text-slate-400">{m.breed}</p>
                         </div>
-                        <span className={`text-xs ${m.gender === 'F' ? 'text-rose-400' : 'text-sky-400'}`}>
-                          {m.gender === 'F' ? '♀' : '♂'}
-                        </span>
                       </div>
                     </td>
                     <td className="p-3">
@@ -283,7 +327,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                       <div className="w-36 space-y-1">
                         <div className="flex justify-between text-[11px]">
                           <span className="font-bold text-white">Nivel {m.currentLevel}</span>
-                          <span className="text-slate-400">{progressPercent}%</span>
+                          <span className="text-slate-400 font-mono">{progressPercent}%</span>
                         </div>
                         <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                           <div
@@ -359,14 +403,28 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
         </table>
       </div>
 
-      {/* Modal de Creación / Edición */}
+      {/* Modal de Creación / Edición con Selector de Razas e Imagen */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-dofus-card border border-dofus-border rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-dofus-border pb-3 mb-4">
-              <h3 className="text-lg font-bold text-white">
-                {editingMount?.id ? 'Editar Montura' : 'Nueva Montura'}
-              </h3>
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-dofus-card border border-dofus-border rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
+            <div className="flex items-center justify-between border-b border-dofus-border pb-3">
+              <div className="flex items-center gap-3">
+                <MountAvatar
+                  species={editingMount?.species || 'dragopavo'}
+                  breed={editingMount?.breed || 'Almendrada'}
+                  imageUrl={editingMount?.imageUrl}
+                  size="md"
+                  generation={editingMount?.generation}
+                />
+                <div>
+                  <h3 className="text-lg font-bold text-white">
+                    {editingMount?.id ? 'Editar Montura' : 'Nueva Montura'}
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Selecciona la especie y raza oficial para configurar automáticamente su icono y generación.
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 className="text-slate-400 hover:text-white p-1 rounded-lg"
@@ -377,54 +435,52 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
             <form onSubmit={handleSaveMount} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Especie */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Apodo / Nombre</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Especie</label>
+                  <select
+                    value={editingMount?.species || 'dragopavo'}
+                    onChange={(e) => handleSpeciesChangeInModal(e.target.value as SpeciesType)}
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500 font-semibold"
+                  >
+                    <option value="dragopavo">Dragopavo (66 Razas)</option>
+                    <option value="muluaga">Muluaga (120 Razas)</option>
+                    <option value="vueloceronte">Vueloceronte (120 Razas)</option>
+                  </select>
+                </div>
+
+                {/* Lista desplegable de Razas Oficiales */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Raza Oficial / Color ({availableBreedsForModal.length} disponibles)
+                  </label>
+                  <select
+                    value={editingMount?.definitionId || ''}
+                    onChange={(e) => handleBreedChangeInModal(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                  >
+                    {availableBreedsForModal.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        Gen. {b.generation} • {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Apodo / Nombre */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Apodo / Nombre de la Montura</label>
                   <input
                     type="text"
                     required
+                    placeholder="Ej. Made, Trueno, MiMontura..."
                     value={editingMount?.nickname || ''}
                     onChange={(e) => setEditingMount({ ...editingMount, nickname: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Especie</label>
-                  <select
-                    value={editingMount?.species || 'dragopavo'}
-                    onChange={(e) => setEditingMount({ ...editingMount, species: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
-                  >
-                    <option value="dragopavo">Dragopavo</option>
-                    <option value="muluaga">Muluaga</option>
-                    <option value="vueloceronte">Vueloceronte</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Raza / Color</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej. Marfil, Almendrada y Dorada..."
-                    value={editingMount?.breed || ''}
-                    onChange={(e) => setEditingMount({ ...editingMount, breed: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Generación (1 a 10)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={10}
-                    value={editingMount?.generation || 1}
-                    onChange={(e) => setEditingMount({ ...editingMount, generation: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-
+                {/* Sexo */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Sexo</label>
                   <select
@@ -432,28 +488,12 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     onChange={(e) => setEditingMount({ ...editingMount, gender: e.target.value as any })}
                     className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
                   >
-                    <option value="M">Macho</option>
-                    <option value="F">Hembra</option>
+                    <option value="M">Macho (♂)</option>
+                    <option value="F">Hembra (♀)</option>
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Capacidad Especial</label>
-                  <select
-                    value={editingMount?.capacity || 'ninguna'}
-                    onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
-                  >
-                    <option value="ninguna">Ninguna</option>
-                    <option value="sabia">Sabia • XP x2</option>
-                    <option value="enamoradiza">Enamoradiza • Amor x2</option>
-                    <option value="resistente">Resistente • Resistencia x2</option>
-                    <option value="precoz">Precoz • Madurez x2</option>
-                    <option value="reproductora">Reproductora • +1 Cría</option>
-                    <option value="camaleon">Camaleón</option>
-                  </select>
-                </div>
-
+                {/* Nivel Actual */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Nivel Actual (1 a 200)</label>
                   <input
@@ -462,18 +502,67 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     max={200}
                     value={editingMount?.currentLevel || 1}
                     onChange={(e) => setEditingMount({ ...editingMount, currentLevel: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
                   />
                 </div>
 
+                {/* XP Actual */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">XP Actual</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">XP Actual (Máx. 867.582)</label>
                   <input
                     type="number"
                     min={0}
                     max={867582}
                     value={editingMount?.currentXp || 0}
                     onChange={(e) => setEditingMount({ ...editingMount, currentXp: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                {/* Fertilidad */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Estado de Fertilidad</label>
+                  <select
+                    value={editingMount?.fertility || 'fertil'}
+                    onChange={(e) => setEditingMount({ ...editingMount, fertility: e.target.value as any })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="fertil">Fértil</option>
+                    <option value="fecunda">Fecunda</option>
+                    <option value="esteril">Estéril</option>
+                    <option value="senil">Senil</option>
+                  </select>
+                </div>
+
+                {/* Capacidad Especial */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Capacidad Especial</label>
+                  <select
+                    value={editingMount?.capacity || 'ninguna'}
+                    onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as any })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="ninguna">Ninguna</option>
+                    <option value="sabia">Sabia • Duplica ganancia de XP</option>
+                    <option value="enamoradiza">Enamoradiza • Duplica ganancia de Amor</option>
+                    <option value="resistente">Resistente • Duplica ganancia de Resistencia</option>
+                    <option value="precoz">Precoz • Duplica ganancia de Madurez</option>
+                    <option value="reproductora">Reproductora • +1 Cría en parto</option>
+                    <option value="camaleon">Camaleón</option>
+                  </select>
+                </div>
+
+                {/* URL de Imagen Personalizada */}
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                    URL de Imagen Personalizada (Opcional)
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://ejemplo.com/mi-montura.png (dejar vacío para usar imagen estándar)"
+                    value={editingMount?.imageUrl || ''}
+                    onChange={(e) => setEditingMount({ ...editingMount, imageUrl: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>

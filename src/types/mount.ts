@@ -9,6 +9,7 @@ export interface MountDefinition {
   name: string;
   parents?: [string, string];
   bonuses: string[];
+  imageUrl?: string;
 }
 
 export interface UserMount {
@@ -27,6 +28,7 @@ export interface UserMount {
   love: number;
   maturity: number;
   stamina: number;
+  imageUrl?: string;
   notes?: string;
   createdAt: number;
   updatedAt: number;

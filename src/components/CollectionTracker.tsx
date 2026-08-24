@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Layers, CheckCircle2, Circle, Sparkles, Filter } from 'lucide-react';
+import { Layers, CheckCircle2, Circle, Sparkles, Filter, Plus } from 'lucide-react';
 import type { SpeciesType, UserMount } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
 import { VOLKORNES_DATA } from '../data/volkornes';
 import { db } from '../db/mountsDb';
+import { MountAvatar } from './MountAvatar';
 
 export const CollectionTracker: React.FC = () => {
   const [userMounts, setUserMounts] = useState<UserMount[]>([]);
   const [activeSpecies, setActiveSpecies] = useState<SpeciesType>('dragopavo');
   const [onlyMissing200, setOnlyMissing200] = useState<boolean>(false);
 
-  useEffect(() => {
+  const fetchMounts = () => {
     db.mounts.toArray().then(setUserMounts);
+  };
+
+  useEffect(() => {
+    fetchMounts();
   }, []);
 
   const catalog = activeSpecies === 'dragopavo' ? DRAGODINDES_DATA : activeSpecies === 'muluaga' ? MULDOS_DATA : VOLKORNES_DATA;
@@ -22,6 +27,31 @@ export const CollectionTracker: React.FC = () => {
   const totalSpeciesBreeds = catalog.length;
   const ownedBreedsCount = catalog.filter((def) => userMounts.some((m) => m.species === activeSpecies && m.breed.toLowerCase().includes(def.name.toLowerCase().split(' ')[0]))).length;
   const level200BreedsCount = catalog.filter((def) => userMounts.some((m) => m.species === activeSpecies && m.currentLevel >= 200 && m.breed.toLowerCase().includes(def.name.toLowerCase().split(' ')[0]))).length;
+
+  const quickRegisterMount = async (def: any) => {
+    const newMount: UserMount = {
+      id: `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      nickname: def.name,
+      definitionId: def.id,
+      species: activeSpecies,
+      breed: def.name,
+      generation: def.generation,
+      gender: 'M',
+      currentLevel: 1,
+      currentXp: 0,
+      fertility: 'fertil',
+      capacity: 'ninguna',
+      serenity: 0,
+      love: 0,
+      maturity: 0,
+      stamina: 0,
+      imageUrl: def.imageUrl || '',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    await db.mounts.put(newMount);
+    fetchMounts();
+  };
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -33,7 +63,7 @@ export const CollectionTracker: React.FC = () => {
             Progreso de Colección y Metas a Nivel 200
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Rastrea qué razas de las 10 generaciones ya posees y cuáles te faltan por subir al nivel máximo 200.
+            Rastrea con sus imágenes estándar qué razas ya posees en el establo y cuáles te faltan por subir a nivel 200.
           </p>
         </div>
 
@@ -83,7 +113,7 @@ export const CollectionTracker: React.FC = () => {
             <span className="text-xs font-bold text-amber-400">{ownedBreedsCount} de {totalSpeciesBreeds} • {Math.round((ownedBreedsCount/totalSpeciesBreeds)*100)}%</span>
           </div>
           <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-            <div className="h-full bg-amber-500" style={{ width: `${(ownedBreedsCount/totalSpeciesBreeds)*100}%` }} />
+            <div className="h-full bg-amber-500 transition-all" style={{ width: `${(ownedBreedsCount/totalSpeciesBreeds)*100}%` }} />
           </div>
         </div>
 
@@ -93,7 +123,7 @@ export const CollectionTracker: React.FC = () => {
             <span className="text-xs font-bold text-emerald-400">{level200BreedsCount} de {totalSpeciesBreeds} • {Math.round((level200BreedsCount/totalSpeciesBreeds)*100)}%</span>
           </div>
           <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-            <div className="h-full bg-emerald-500" style={{ width: `${(level200BreedsCount/totalSpeciesBreeds)*100}%` }} />
+            <div className="h-full bg-emerald-500 transition-all" style={{ width: `${(level200BreedsCount/totalSpeciesBreeds)*100}%` }} />
           </div>
         </div>
       </div>
@@ -111,7 +141,7 @@ export const CollectionTracker: React.FC = () => {
         </label>
       </div>
 
-      {/* Cuadrícula por Generaciones */}
+      {/* Cuadrícula por Generaciones con Imágenes de Montura */}
       <div className="space-y-6">
         {generations.map((gen) => {
           const genBreeds = catalog.filter((b) => b.generation === gen);
@@ -129,11 +159,14 @@ export const CollectionTracker: React.FC = () => {
           return (
             <div key={gen} className="bg-dofus-card rounded-2xl border border-dofus-border p-6 shadow-lg space-y-4">
               <h3 className="text-base font-bold text-white flex items-center justify-between border-b border-dofus-border pb-2">
-                <span>Generación {gen}</span>
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                  Generación {gen}
+                </span>
                 <span className="text-xs text-slate-400 font-normal">{filteredGenBreeds.length} razas</span>
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {filteredGenBreeds.map((def) => {
                   const match = userMounts.find((m) => m.species === activeSpecies && m.breed.toLowerCase().includes(def.name.toLowerCase().split(' ')[0]));
                   const isOwned = !!match;
@@ -142,27 +175,47 @@ export const CollectionTracker: React.FC = () => {
                   return (
                     <div
                       key={def.id}
-                      className={`p-3.5 rounded-xl border transition ${
+                      className={`p-4 rounded-2xl border transition flex flex-col justify-between space-y-3 ${
                         is200
-                          ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-100'
+                          ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-100 shadow-md shadow-emerald-500/5'
                           : isOwned
-                          ? 'bg-amber-500/10 border-amber-500/40 text-amber-100'
-                          : 'bg-slate-900/60 border-dofus-border opacity-70 text-slate-400'
+                          ? 'bg-amber-500/10 border-amber-500/40 text-amber-100 shadow-md shadow-amber-500/5'
+                          : 'bg-slate-900/60 border-dofus-border opacity-75 text-slate-400'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-bold text-xs text-white">{def.name}</p>
-                        {is200 ? (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">200 ✓</span>
-                        ) : isOwned ? (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">Nivel {match.currentLevel}</span>
-                        ) : (
-                          <span className="text-[10px] text-slate-500">Falta</span>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <MountAvatar
+                          species={activeSpecies}
+                          breed={def.name}
+                          imageUrl={def.imageUrl}
+                          size="md"
+                          generation={def.generation}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-xs text-white truncate">{def.name}</p>
+                          <div className="mt-1">
+                            {is200 ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                                Nivel 200 ✓
+                              </span>
+                            ) : isOwned ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                                Nivel {match.currentLevel} ({Math.max(0, 867582 - match.currentXp).toLocaleString()} XP falta)
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => quickRegisterMount(def)}
+                                className="flex items-center gap-1 text-[10px] text-amber-400 hover:text-amber-300 hover:underline"
+                              >
+                                <Plus className="w-3 h-3" /> Registrar en establo
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="mt-2 text-[10px] text-slate-400 space-y-0.5">
-                        {def.bonuses.map((b, idx) => (
+                      <div className="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 space-y-0.5">
+                        {def.bonuses.map((b: string, idx: number) => (
                           <p key={idx} className="truncate">• {b}</p>
                         ))}
                       </div>
