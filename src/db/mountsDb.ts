@@ -22,7 +22,7 @@ export async function initSeedDataIfEmpty() {
       {
         id: 'sample-vueloceronte-made',
         nickname: 'Made',
-        definitionId: 'vueloceronte_ivoire',
+        definitionId: 'volkorne_ivoire',
         species: 'vueloceronte',
         breed: 'Marfil',
         generation: 3,

@@ -3,9 +3,9 @@ import type { MountDefinition } from '../types/mount';
 export const DRAGODINDES_DATA: MountDefinition[] = [
   {
     "id": "dd_amande",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 1,
-    "name": "Almendrada (Amande)",
+    "name": "Almendrada",
     "bonuses": [
       "400 Vitalidad",
       "1700 Iniciativa"
@@ -14,9 +14,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 1,
-    "name": "Dorada (Dorée)",
+    "name": "Dorada",
     "bonuses": [
       "400 Vitalidad",
       "2 Invocaciones"
@@ -25,9 +25,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 1,
-    "name": "Pelirroja (Rousse)",
+    "name": "Pelirroja",
     "bonuses": [
       "400 Vitalidad",
       "60 Curas"
@@ -36,7 +36,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 2,
     "name": "Almendrada y Pelirroja",
     "bonuses": [
@@ -51,7 +51,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 2,
     "name": "Dorada y Pelirroja",
     "bonuses": [
@@ -66,7 +66,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_doree",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 2,
     "name": "Almendrada y Dorada",
     "bonuses": [
@@ -81,9 +81,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ebene",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 3,
-    "name": "Ébano (Ébène)",
+    "name": "Ébano",
     "bonuses": [
       "400 Vitalidad",
       "120 Agilidad"
@@ -95,9 +95,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_indigo",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 3,
-    "name": "Índigo (Indigo)",
+    "name": "Índigo",
     "bonuses": [
       "400 Vitalidad",
       "120 Suerte"
@@ -109,7 +109,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_ebene",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 4,
     "name": "Almendrada y Ébano",
     "bonuses": [
@@ -124,7 +124,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_indigo",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 4,
     "name": "Almendrada e Índigo",
     "bonuses": [
@@ -139,7 +139,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_ebene",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 4,
     "name": "Dorada y Ébano",
     "bonuses": [
@@ -154,7 +154,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_indigo",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 4,
     "name": "Dorada e Índigo",
     "bonuses": [
@@ -169,7 +169,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ebene_indigo",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 4,
     "name": "Ébano e Índigo",
     "bonuses": [
@@ -184,7 +184,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_rousse_ebene",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 4,
     "name": "Pelirroja y Ébano",
     "bonuses": [
@@ -199,7 +199,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_rousse_indigo",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 4,
     "name": "Pelirroja e Índigo",
     "bonuses": [
@@ -214,9 +214,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_pourpre",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 5,
-    "name": "Púrpura (Pourpre)",
+    "name": "Púrpura",
     "bonuses": [
       "400 Vitalidad",
       "120 Fuerza"
@@ -228,9 +228,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_orchidee",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 5,
-    "name": "Orquídea (Orchidée)",
+    "name": "Orquídea",
     "bonuses": [
       "400 Vitalidad",
       "120 Inteligencia"
@@ -242,7 +242,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_pourpre",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Almendrada y Púrpura",
     "bonuses": [
@@ -257,7 +257,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_orchidee",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Almendrada y Orquídea",
     "bonuses": [
@@ -272,7 +272,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_pourpre",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Dorada y Púrpura",
     "bonuses": [
@@ -287,7 +287,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_orchidee",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Dorada y Orquídea",
     "bonuses": [
@@ -302,7 +302,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ebene_pourpre",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Ébano y Púrpura",
     "bonuses": [
@@ -317,7 +317,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ebene_orchidee",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Ébano y Orquídea",
     "bonuses": [
@@ -332,7 +332,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_indigo_pourpre",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Índigo y Púrpura",
     "bonuses": [
@@ -347,7 +347,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_indigo_orchidee",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Índigo y Orquídea",
     "bonuses": [
@@ -362,7 +362,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_orchidee_pourpre",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Orquídea y Púrpura",
     "bonuses": [
@@ -377,7 +377,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_pourpre_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Pelirroja y Púrpura",
     "bonuses": [
@@ -392,7 +392,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_orchidee_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 6,
     "name": "Pelirroja y Orquídea",
     "bonuses": [
@@ -407,9 +407,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ivoire",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 7,
-    "name": "Marfil (Ivoire)",
+    "name": "Marfil",
     "bonuses": [
       "400 Vitalidad",
       "90 Potencia"
@@ -421,9 +421,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 7,
-    "name": "Turquesa (Turquoise)",
+    "name": "Turquesa",
     "bonuses": [
       "400 Vitalidad",
       "90 Prospección"
@@ -435,7 +435,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_ivoire",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Almendrada y Marfil",
     "bonuses": [
@@ -450,7 +450,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Almendrada y Turquesa",
     "bonuses": [
@@ -465,7 +465,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_ivoire",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Dorada y Marfil",
     "bonuses": [
@@ -480,7 +480,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Dorada y Turquesa",
     "bonuses": [
@@ -495,7 +495,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ebene_ivoire",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Ébano y Marfil",
     "bonuses": [
@@ -510,7 +510,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ebene_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Ébano y Turquesa",
     "bonuses": [
@@ -525,7 +525,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_indigo_ivoire",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Índigo y Marfil",
     "bonuses": [
@@ -540,7 +540,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_indigo_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Índigo y Turquesa",
     "bonuses": [
@@ -555,7 +555,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ivoire_pourpre",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Marfil y Púrpura",
     "bonuses": [
@@ -570,7 +570,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ivoire_orchidee",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Marfil y Orquídea",
     "bonuses": [
@@ -585,7 +585,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ivoire_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Marfil y Pelirroja",
     "bonuses": [
@@ -600,7 +600,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ivoire_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Marfil y Turquesa",
     "bonuses": [
@@ -615,7 +615,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_pourpre_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Púrpura y Turquesa",
     "bonuses": [
@@ -630,7 +630,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_orchidee_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Orquídea y Turquesa",
     "bonuses": [
@@ -645,7 +645,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_turquoise_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 8,
     "name": "Pelirroja y Turquesa",
     "bonuses": [
@@ -660,9 +660,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_emeraude",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 9,
-    "name": "Esmeralda (Émeraude)",
+    "name": "Esmeralda",
     "bonuses": [
       "400 Vitalidad",
       "1 PM"
@@ -674,9 +674,9 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 9,
-    "name": "Ciruela (Prune)",
+    "name": "Ciruela",
     "bonuses": [
       "400 Vitalidad",
       "2 Alcance"
@@ -688,7 +688,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_emeraude",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Almendrada y Esmeralda",
     "bonuses": [
@@ -703,7 +703,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_amande_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Almendrada y Ciruela",
     "bonuses": [
@@ -718,7 +718,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_emeraude",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Dorada y Esmeralda",
     "bonuses": [
@@ -733,7 +733,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_doree_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Dorada y Ciruela",
     "bonuses": [
@@ -748,7 +748,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ebene_emeraude",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Ébano y Esmeralda",
     "bonuses": [
@@ -763,7 +763,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ebene_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Ébano y Ciruela",
     "bonuses": [
@@ -778,7 +778,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_emeraude_pourpre",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Esmeralda y Púrpura",
     "bonuses": [
@@ -793,7 +793,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_emeraude_orchidee",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Esmeralda y Orquídea",
     "bonuses": [
@@ -808,7 +808,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_emeraude_indigo",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Esmeralda e Índigo",
     "bonuses": [
@@ -823,7 +823,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_emeraude_ivoire",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Esmeralda y Marfil",
     "bonuses": [
@@ -838,7 +838,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_emeraude_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Esmeralda y Turquesa",
     "bonuses": [
@@ -853,7 +853,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_emeraude_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Esmeralda y Pelirroja",
     "bonuses": [
@@ -868,7 +868,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_indigo_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Índigo y Ciruela",
     "bonuses": [
@@ -883,7 +883,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_ivoire_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Marfil y Ciruela",
     "bonuses": [
@@ -898,7 +898,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_pourpre_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Púrpura y Ciruela",
     "bonuses": [
@@ -913,7 +913,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_orchidee_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Orquídea y Ciruela",
     "bonuses": [
@@ -928,7 +928,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_prune_rousse",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Ciruela y Pelirroja",
     "bonuses": [
@@ -943,7 +943,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_prune_turquoise",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Ciruela y Turquesa",
     "bonuses": [
@@ -958,7 +958,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
   },
   {
     "id": "dd_emeraude_prune",
-    "species": "dragodinde",
+    "species": "dragopavo",
     "generation": 10,
     "name": "Esmeralda y Ciruela",
     "bonuses": [

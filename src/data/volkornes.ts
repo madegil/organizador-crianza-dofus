@@ -3,9 +3,9 @@ import type { MountDefinition } from "../types/mount";
 export const VOLKORNES_DATA: MountDefinition[] = [
   {
     "id": "volkorne_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 1,
-    "name": "Ébano (Ébène)",
+    "name": "Ébano",
     "bonuses": [
       "1 PA",
       "Estadísticas base Gen 1"
@@ -14,9 +14,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 1,
-    "name": "Índigo (Indigo)",
+    "name": "Índigo",
     "bonuses": [
       "1 PA",
       "Estadísticas base Gen 1"
@@ -25,9 +25,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 1,
-    "name": "Púrpura (Pourpre)",
+    "name": "Púrpura",
     "bonuses": [
       "1 PA",
       "Estadísticas base Gen 1"
@@ -36,9 +36,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 1,
-    "name": "Orquídea (Orchidée)",
+    "name": "Orquídea",
     "bonuses": [
       "1 PA",
       "Estadísticas base Gen 1"
@@ -47,7 +47,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_ebene_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 2,
     "name": "Ébano y Índigo",
     "bonuses": [
@@ -61,7 +61,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_ebene_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 2,
     "name": "Ébano y Púrpura",
     "bonuses": [
@@ -75,7 +75,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_ebene_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 2,
     "name": "Ébano y Orquídea",
     "bonuses": [
@@ -89,7 +89,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_indigo_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 2,
     "name": "Índigo y Púrpura",
     "bonuses": [
@@ -103,7 +103,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_indigo_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 2,
     "name": "Índigo y Orquídea",
     "bonuses": [
@@ -117,7 +117,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_pourpre_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 2,
     "name": "Púrpura y Orquídea",
     "bonuses": [
@@ -131,9 +131,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_roux",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 3,
-    "name": "Pelirrojo (Roux)",
+    "name": "Pelirrojo",
     "bonuses": [
       "1 PA",
       "Bonus especial Gen 3"
@@ -142,9 +142,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_amande",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 3,
-    "name": "Almendrado (Amande)",
+    "name": "Almendrado",
     "bonuses": [
       "1 PA",
       "Bonus especial Gen 3"
@@ -153,9 +153,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_ivoire",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 3,
-    "name": "Marfil (Ivoire)",
+    "name": "Marfil",
     "bonuses": [
       "1 PA",
       "Bonus especial Gen 3"
@@ -164,9 +164,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_turquoise",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 3,
-    "name": "Turquesa (Turquoise)",
+    "name": "Turquesa",
     "bonuses": [
       "1 PA",
       "Bonus especial Gen 3"
@@ -175,7 +175,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_roux_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Pelirrojo y Ébano",
     "bonuses": [
@@ -189,7 +189,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_roux_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Pelirrojo y Índigo",
     "bonuses": [
@@ -203,7 +203,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_roux_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Pelirrojo y Púrpura",
     "bonuses": [
@@ -217,7 +217,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_roux_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Pelirrojo y Orquídea",
     "bonuses": [
@@ -231,7 +231,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_amande_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Almendrado y Ébano",
     "bonuses": [
@@ -245,7 +245,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_amande_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Almendrado y Índigo",
     "bonuses": [
@@ -259,7 +259,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_amande_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Almendrado y Púrpura",
     "bonuses": [
@@ -273,7 +273,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_amande_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Almendrado y Orquídea",
     "bonuses": [
@@ -287,7 +287,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_ivoire_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Marfil y Ébano",
     "bonuses": [
@@ -301,7 +301,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_ivoire_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Marfil y Índigo",
     "bonuses": [
@@ -315,7 +315,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_ivoire_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Marfil y Púrpura",
     "bonuses": [
@@ -329,7 +329,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_ivoire_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Marfil y Orquídea",
     "bonuses": [
@@ -343,7 +343,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_turquoise_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Turquesa y Ébano",
     "bonuses": [
@@ -357,7 +357,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_turquoise_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Turquesa y Índigo",
     "bonuses": [
@@ -371,7 +371,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_turquoise_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Turquesa y Púrpura",
     "bonuses": [
@@ -385,7 +385,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_turquoise_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 4,
     "name": "Turquesa y Orquídea",
     "bonuses": [
@@ -399,9 +399,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 5,
-    "name": "Ciruela (Prune)",
+    "name": "Ciruela",
     "bonuses": [
       "1 PA",
       "Bonus especial Gen 5"
@@ -410,9 +410,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 5,
-    "name": "Esmeralda (Émeraude)",
+    "name": "Esmeralda",
     "bonuses": [
       "1 PA",
       "Bonus especial Gen 5"
@@ -421,7 +421,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 6,
     "name": "Ciruela y Ébano",
     "bonuses": [
@@ -435,7 +435,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 6,
     "name": "Ciruela y Índigo",
     "bonuses": [
@@ -449,7 +449,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 6,
     "name": "Ciruela y Púrpura",
     "bonuses": [
@@ -463,7 +463,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 6,
     "name": "Ciruela y Orquídea",
     "bonuses": [
@@ -477,7 +477,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 6,
     "name": "Esmeralda y Ébano",
     "bonuses": [
@@ -491,7 +491,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 6,
     "name": "Esmeralda y Índigo",
     "bonuses": [
@@ -505,7 +505,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 6,
     "name": "Esmeralda y Púrpura",
     "bonuses": [
@@ -519,7 +519,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 6,
     "name": "Esmeralda y Orquídea",
     "bonuses": [
@@ -533,7 +533,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune_roux",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 7,
     "name": "Ciruela y Pelirrojo",
     "bonuses": [
@@ -547,7 +547,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune_amande",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 7,
     "name": "Ciruela y Almendrado",
     "bonuses": [
@@ -561,7 +561,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune_ivoire",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 7,
     "name": "Ciruela y Marfil",
     "bonuses": [
@@ -575,7 +575,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_prune_turquoise",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 7,
     "name": "Ciruela y Turquesa",
     "bonuses": [
@@ -589,7 +589,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude_roux",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 7,
     "name": "Esmeralda y Pelirrojo",
     "bonuses": [
@@ -603,7 +603,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude_amande",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 7,
     "name": "Esmeralda y Almendrado",
     "bonuses": [
@@ -617,7 +617,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude_ivoire",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 7,
     "name": "Esmeralda y Marfil",
     "bonuses": [
@@ -631,7 +631,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_emeraude_turquoise",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 7,
     "name": "Esmeralda y Turquesa",
     "bonuses": [
@@ -645,7 +645,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Ébano",
     "bonuses": [
@@ -657,7 +657,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Índigo",
     "bonuses": [
@@ -669,7 +669,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Púrpura",
     "bonuses": [
@@ -681,7 +681,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Orquídea",
     "bonuses": [
@@ -693,7 +693,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_roux",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Pelirrojo",
     "bonuses": [
@@ -705,7 +705,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_amande",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Almendrado",
     "bonuses": [
@@ -717,7 +717,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_ivoire",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Marfil",
     "bonuses": [
@@ -729,7 +729,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_turquoise",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Turquesa",
     "bonuses": [
@@ -741,7 +741,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_prune",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Ciruela",
     "bonuses": [
@@ -753,7 +753,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_dore_emeraude",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 8,
     "name": "Dorado y Esmeralda",
     "bonuses": [
@@ -765,7 +765,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_jade",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 9,
     "name": "Jade",
     "bonuses": [
@@ -776,9 +776,9 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_rubis",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 9,
-    "name": "Rubí (Rubis)",
+    "name": "Rubí",
     "bonuses": [
       "1 PA",
       "Bonus defensivo/ofensivo Gen 9"
@@ -787,7 +787,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_jade_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Jade y Ébano",
     "bonuses": [
@@ -801,7 +801,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_jade_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Jade y Índigo",
     "bonuses": [
@@ -815,7 +815,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_jade_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Jade y Púrpura",
     "bonuses": [
@@ -829,7 +829,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_jade_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Jade y Orquídea",
     "bonuses": [
@@ -843,7 +843,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_jade_prune",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Jade y Ciruela",
     "bonuses": [
@@ -857,7 +857,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_jade_emeraude",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Jade y Esmeralda",
     "bonuses": [
@@ -871,7 +871,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_rubis_ebene",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Rubí y Ébano",
     "bonuses": [
@@ -885,7 +885,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_rubis_indigo",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Rubí y Índigo",
     "bonuses": [
@@ -899,7 +899,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_rubis_pourpre",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Rubí y Púrpura",
     "bonuses": [
@@ -913,7 +913,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_rubis_orchidee",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Rubí y Orquídea",
     "bonuses": [
@@ -927,7 +927,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_rubis_prune",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Rubí y Ciruela",
     "bonuses": [
@@ -941,7 +941,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
   },
   {
     "id": "volkorne_rubis_emeraude",
-    "species": "volkorne",
+    "species": "vueloceronte",
     "generation": 10,
     "name": "Rubí y Esmeralda",
     "bonuses": [
