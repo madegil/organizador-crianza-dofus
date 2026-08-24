@@ -1,4 +1,5 @@
 ---
+import '../styles/global.css';
 import { Navbar } from '../components/Navbar';
 
 interface Props {
@@ -19,28 +20,6 @@ const currentPath = Astro.url.pathname;
     <meta name="generator" content={Astro.generator} />
     <title>{title} | Dofus 3.5 Éleveur</title>
     <meta name="description" content={description} />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              dofus: {
-                bg: '#0f1115',
-                card: '#161920',
-                hover: '#1f242e',
-                border: '#28303f',
-                text: '#e2e8f0',
-                muted: '#94a3b8',
-                gold: '#eab308',
-                accent: '#38bdf8',
-              }
-            }
-          }
-        }
-      }
-    </script>
   </head>
   <body class="bg-[#0b0d11] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
     <Navbar client:load currentPath={currentPath} />
