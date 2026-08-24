@@ -8,16 +8,15 @@ import { db } from '../db/mountsDb';
 
 export const CollectionTracker: React.FC = () => {
   const [userMounts, setUserMounts] = useState<UserMount[]>([]);
-  const [activeSpecies, setActiveSpecies] = useState<SpeciesType>('dragodinde');
+  const [activeSpecies, setActiveSpecies] = useState<SpeciesType>('dragopavo');
   const [onlyMissing200, setOnlyMissing200] = useState<boolean>(false);
 
   useEffect(() => {
     db.mounts.toArray().then(setUserMounts);
   }, []);
 
-  const catalog = activeSpecies === 'dragodinde' ? DRAGODINDES_DATA : activeSpecies === 'muldo' ? MULDOS_DATA : VOLKORNES_DATA;
+  const catalog = activeSpecies === 'dragopavo' ? DRAGODINDES_DATA : activeSpecies === 'muldo' ? MULDOS_DATA : VOLKORNES_DATA;
 
-  // Agrupar por generación 1-10
   const generations = [1,2,3,4,5,6,7,8,9,10];
 
   const totalSpeciesBreeds = catalog.length;
@@ -41,9 +40,9 @@ export const CollectionTracker: React.FC = () => {
         {/* Selector de Especies */}
         <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-dofus-border">
           <button
-            onClick={() => setActiveSpecies('dragodinde')}
+            onClick={() => setActiveSpecies('dragopavo')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
-              activeSpecies === 'dragodinde'
+              activeSpecies === 'dragopavo'
                 ? 'bg-amber-500 text-slate-950 shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
@@ -61,14 +60,14 @@ export const CollectionTracker: React.FC = () => {
             Muluagas ({MULDOS_DATA.length})
           </button>
           <button
-            onClick={() => setActiveSpecies('volkorne')}
+            onClick={() => setActiveSpecies('vueloceronte')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
-              activeSpecies === 'volkorne'
+              activeSpecies === 'vueloceronte'
                 ? 'bg-purple-500 text-white shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
-            Vuelocerones ({VOLKORNES_DATA.length})
+            Vuelocerontes ({VOLKORNES_DATA.length})
           </button>
         </div>
       </div>

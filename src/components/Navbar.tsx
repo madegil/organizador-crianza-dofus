@@ -23,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
             </div>
             <div>
               <span className="font-bold text-lg text-white tracking-wide flex items-center gap-2">
-                Dofus 3.5 <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-medium border border-amber-500/30">Éleveur</span>
+                Dofus 3.5 <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-medium border border-amber-500/30">Criador</span>
               </span>
               <p className="text-xs text-slate-400">Organizador de Crianza & XP</p>
             </div>

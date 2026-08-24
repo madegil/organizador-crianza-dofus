@@ -24,7 +24,7 @@ export const Dashboard: React.FC = () => {
   const totalMounts = mounts.length;
   const level200Mounts = mounts.filter((m) => m.currentLevel >= 200).length;
   const needXpMounts = mounts.filter((m) => m.currentLevel < 200);
-  const fecondeMounts = mounts.filter((m) => m.fertility === 'feconde').length;
+  const fecondeMounts = mounts.filter((m) => m.fertility === 'fecunda').length;
   const totalRemainingXp = needXpMounts.reduce((acc, m) => acc + Math.max(0, MAX_MOUNT_XP - m.currentXp), 0);
 
   if (loading) {

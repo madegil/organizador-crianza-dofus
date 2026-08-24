@@ -9,7 +9,7 @@ export const FuelCalculator: React.FC = () => {
   const [mounts, setMounts] = useState<UserMount[]>([]);
   const [selectedMountIds, setSelectedMountIds] = useState<string[]>([]);
   const [selectedTier, setSelectedTier] = useState<FuelTier>(2);
-  const [selectedVariant, setSelectedVariant] = useState<FuelVariant>('gigantesque');
+  const [selectedVariant, setSelectedVariant] = useState<FuelVariant>('gigantesco');
 
   // Modo Manual
   const [manualXpNeeded, setManualXpNeeded] = useState<number>(MAX_MOUNT_XP);
@@ -20,7 +20,6 @@ export const FuelCalculator: React.FC = () => {
       const all = await db.mounts.toArray();
       setMounts(all);
 
-      // Revisar query params si viene con batch
       const params = new URLSearchParams(window.location.search);
       const batchParam = params.get('batch');
       if (batchParam) {
@@ -58,7 +57,7 @@ export const FuelCalculator: React.FC = () => {
           <div>
             <h1 className="text-2xl font-black text-white">Calculadora de XP & Carburantes de Cercado</h1>
             <p className="text-xs text-slate-400">
-              Cálculo exacto para la jauge de <strong>Mangeoire (Pesebre)</strong> en Dofus 3.5. Capacidad máxima 100.000 y meta nivel 200 (867.582 XP).
+              Cálculo exacto para el medidor de <strong>Pesebre</strong> en Dofus 3.5. Capacidad máxima 100.000 y meta nivel 200 (867.582 XP).
             </p>
           </div>
         </div>
@@ -91,7 +90,7 @@ export const FuelCalculator: React.FC = () => {
                 <span className="text-xs text-slate-400 font-mono">+{info.gainPer10s / 10} XP/s</span>
               </div>
               <p className="text-xs text-slate-300 font-semibold mb-1">
-                Jauge: {info.rangeMin.toLocaleString()} - {info.rangeMax.toLocaleString()}
+                Medidor: {info.rangeMin.toLocaleString()} - {info.rangeMax.toLocaleString()}
               </p>
               <p className="text-[11px] text-slate-400">
                 Se vacía en: <strong>{Math.floor(info.drainDurationSeconds/3600)}h {Math.floor((info.drainDurationSeconds%3600)/60)}m</strong>
@@ -184,13 +183,13 @@ export const FuelCalculator: React.FC = () => {
               </div>
 
               <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700">
-                <span className="text-xs text-slate-400">Carburantes {FUEL_VARIANTS[selectedVariant].name} requeridos</span>
+                <span className="text-xs text-slate-400">Carburantes ({FUEL_VARIANTS[selectedVariant].name}) requeridos</span>
                 <p className="text-2xl font-black text-sky-400 mt-1">{batchResult.itemsNeeded} unidades</p>
                 <p className="text-[11px] text-slate-400">({batchResult.totalFuelUnitsConsumed.toLocaleString()} durabilidad total)</p>
               </div>
 
               <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700">
-                <span className="text-xs text-slate-400">Costo en Poussière d'élevage (Gigantesque)</span>
+                <span className="text-xs text-slate-400">Costo en Polvo de Crianza (Gigantesco)</span>
                 <p className="text-2xl font-black text-purple-300 mt-1">{batchResult.dustCostTotal.toLocaleString()} ⚗️</p>
               </div>
             </div>
@@ -238,14 +237,14 @@ export const FuelCalculator: React.FC = () => {
                 onChange={(e) => setManualIsSage(e.target.checked)}
                 className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500 w-4 h-4"
               />
-              <span>¿Tiene capacidad « Sage »? (XP x2)</span>
+              <span>¿Tiene capacidad « Sabia »? (XP x2)</span>
             </label>
           </div>
 
           <div className="bg-slate-900/90 p-4 rounded-xl border border-dofus-border flex flex-col justify-center">
             <span className="text-xs text-slate-400">Tiempo Requerido:</span>
             <p className="text-xl font-bold text-amber-400">{manualResult.formattedTime}</p>
-            <p className="text-xs text-slate-400">{manualResult.itemsNeeded} carburantes {FUEL_VARIANTS[selectedVariant].name}</p>
+            <p className="text-xs text-slate-400">{manualResult.itemsNeeded} carburantes ({FUEL_VARIANTS[selectedVariant].name})</p>
           </div>
         </div>
       </div>
