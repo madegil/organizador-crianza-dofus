@@ -5,7 +5,7 @@ import { findMountByBreedAndSpecies } from '../data/allMounts';
 export function downloadExcelTemplate() {
   const headers = [
     'Apodo / Nombre',
-    'Especie (dragopavo / muldo / vueloceronte)',
+    'Especie (dragopavo / muluaga / vueloceronte)',
     'Raza / Color',
     'Generación (1-10)',
     'Sexo (M / F)',
@@ -55,7 +55,7 @@ export function downloadExcelTemplate() {
     ],
     [
       'MuldoAgil',
-      'muldo',
+      'muluaga',
       'Ébano',
       1,
       'F',
@@ -82,7 +82,7 @@ export function exportMountsToExcel(mounts: UserMount[]) {
   const data = mounts.map((m) => ({
     'ID': m.id,
     'Apodo': m.nickname,
-    'Especie': m.species === 'dragopavo' ? 'Dragopavo' : m.species === 'muldo' ? 'Muluaga' : 'Vueloceronte',
+    'Especie': m.species === 'dragopavo' ? 'Dragopavo' : m.species === 'muluaga' ? 'Muluaga' : 'Vueloceronte',
     'Raza / Color': m.breed,
     'Generación': m.generation,
     'Sexo': m.gender === 'F' ? 'Hembra' : 'Macho',
@@ -138,7 +138,7 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     const nickname = String(row[0] || `Montura-${i + 1}`).trim();
     let rawSpecies = String(row[1] || 'dragopavo').toLowerCase().trim();
     let species: SpeciesType = 'dragopavo';
-    if (rawSpecies.includes('muldo') || rawSpecies.includes('muluaga')) species = 'muldo';
+    if (rawSpecies.includes('muldo') || rawSpecies.includes('muluaga')) species = 'muluaga';
     else if (rawSpecies.includes('volkorne') || rawSpecies.includes('vueloceronte')) species = 'vueloceronte';
 
     const breed = String(row[2] || 'Sin especificar').trim();

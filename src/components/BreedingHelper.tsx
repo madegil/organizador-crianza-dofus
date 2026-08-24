@@ -8,7 +8,7 @@ import { VOLKORNES_DATA } from '../data/volkornes';
 export const BreedingHelper: React.FC = () => {
   const [species, setSpecies] = useState<SpeciesType>('dragopavo');
 
-  const catalog = species === 'dragopavo' ? DRAGODINDES_DATA : species === 'muldo' ? MULDOS_DATA : VOLKORNES_DATA;
+  const catalog = species === 'dragopavo' ? DRAGODINDES_DATA : species === 'muluaga' ? MULDOS_DATA : VOLKORNES_DATA;
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -83,9 +83,9 @@ export const BreedingHelper: React.FC = () => {
               Dragopavos
             </button>
             <button
-              onClick={() => setSpecies('muldo')}
+              onClick={() => setSpecies('muluaga')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                species === 'muldo' ? 'bg-sky-500 text-slate-950' : 'bg-slate-800 text-slate-300'
+                species === 'muluaga' ? 'bg-sky-500 text-slate-950' : 'bg-slate-800 text-slate-300'
               }`}
             >
               Muluagas

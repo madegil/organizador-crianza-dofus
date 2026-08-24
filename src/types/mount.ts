@@ -1,4 +1,4 @@
-export type SpeciesType = 'dragopavo' | 'muldo' | 'vueloceronte';
+export type SpeciesType = 'dragopavo' | 'muluaga' | 'vueloceronte';
 export type FertilityStatus = 'fertil' | 'fecunda' | 'esteril' | 'senil';
 export type SpecialCapacity = 'ninguna' | 'sabia' | 'enamoradiza' | 'resistente' | 'precoz' | 'reproductora' | 'camaleon';
 

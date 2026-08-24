@@ -6,7 +6,6 @@ import {
 import type { FertilityStatus, SpecialCapacity, SpeciesType, UserMount } from '../types/mount';
 import { MAX_MOUNT_XP } from '../data/fuelData';
 import { db } from '../db/mountsDb';
-import { ALL_MOUNTS_DATA } from '../data/allMounts';
 
 interface MountTableProps {
   mounts: UserMount[];
@@ -81,14 +80,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
       id: editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       nickname: editingMount.nickname || 'Sin Nombre',
       definitionId: editingMount.definitionId || 'custom',
-      species: editingMount.species || 'dragodinde',
+      species: editingMount.species || 'dragopavo',
       breed: editingMount.breed || 'Personalizada',
       generation: Number(editingMount.generation) || 1,
       gender: (editingMount.gender as 'M' | 'F') || 'M',
       currentLevel: Number(editingMount.currentLevel) || 1,
       currentXp: Number(editingMount.currentXp) || 0,
-      fertility: (editingMount.fertility as FertilityStatus) || 'fertile',
-      capacity: (editingMount.capacity as SpecialCapacity) || 'none',
+      fertility: (editingMount.fertility as FertilityStatus) || 'fertil',
+      capacity: (editingMount.capacity as SpecialCapacity) || 'ninguna',
       serenity: Number(editingMount.serenity) || 0,
       love: Number(editingMount.love) || 0,
       maturity: Number(editingMount.maturity) || 0,
@@ -106,11 +105,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
   const getSpeciesBadge = (species: SpeciesType) => {
     switch (species) {
-      case 'dragodinde':
+      case 'dragopavo':
         return <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold">Dragopavo</span>;
-      case 'muldo':
+      case 'muluaga':
         return <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-semibold">Muluaga</span>;
-      case 'volkorne':
+      case 'vueloceronte':
         return <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold">Vueloceronte</span>;
     }
   };
@@ -137,9 +136,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
             className="px-3 py-2 bg-slate-900/80 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
           >
             <option value="all">Todas las Especies</option>
-            <option value="dragodinde">Dragopavos</option>
-            <option value="muldo">Muluagas</option>
-            <option value="volkorne">Vuelocerones</option>
+            <option value="dragopavo">Dragopavos</option>
+            <option value="muluaga">Muluagas</option>
+            <option value="vueloceronte">Vuelocerontes</option>
           </select>
 
           <select
@@ -166,13 +165,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
           <button
             onClick={() => {
               setEditingMount({
-                species: 'dragodinde',
+                species: 'dragopavo',
                 generation: 1,
                 gender: 'M',
                 currentLevel: 1,
                 currentXp: 0,
-                fertility: 'fertile',
-                capacity: 'none',
+                fertility: 'fertil',
+                capacity: 'ninguna',
                 serenity: 0,
                 love: 0,
                 maturity: 0,
@@ -231,7 +230,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
               <th className="p-3">Nivel & Progreso XP</th>
               <th className="p-3">XP Faltante (200)</th>
               <th className="p-3">Fertilidad & Capacidad</th>
-              <th className="p-3">Jauges de Cría</th>
+              <th className="p-3">Medidores de Cría</th>
               <th className="p-3 text-right">Acciones</th>
             </tr>
           </thead>
@@ -308,16 +307,16 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     <td className="p-3">
                       <div className="flex flex-col gap-1 items-start">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                          m.fertility === 'feconde' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
-                          m.fertility === 'sterile' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' :
-                          m.fertility === 'senile' ? 'bg-slate-700 text-slate-300' :
+                          m.fertility === 'fecunda' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                          m.fertility === 'esteril' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' :
+                          m.fertility === 'senil' ? 'bg-slate-700 text-slate-300' :
                           'bg-sky-500/20 text-sky-300 border border-sky-500/30'
                         }`}>
                           {m.fertility}
                         </span>
-                        {m.capacity !== 'none' && (
+                        {m.capacity !== 'ninguna' && (
                           <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px]">
-                            {m.capacity === 'sage' ? '✨ Sage (XP x2)' : m.capacity}
+                            {m.capacity === 'sabia' ? '✨ Sabia (XP x2)' : m.capacity}
                           </span>
                         )}
                       </div>
@@ -392,13 +391,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Especie</label>
                   <select
-                    value={editingMount?.species || 'dragodinde'}
+                    value={editingMount?.species || 'dragopavo'}
                     onChange={(e) => setEditingMount({ ...editingMount, species: e.target.value as any })}
                     className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
                   >
-                    <option value="dragodinde">Dragopavo</option>
-                    <option value="muldo">Muluaga</option>
-                    <option value="volkorne">Vueloceronte</option>
+                    <option value="dragopavo">Dragopavo</option>
+                    <option value="muluaga">Muluaga</option>
+                    <option value="vueloceronte">Vueloceronte</option>
                   </select>
                 </div>
 
@@ -407,7 +406,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   <input
                     type="text"
                     required
-                    placeholder="Ej. Marfil, Almendrado y Dorado..."
+                    placeholder="Ej. Marfil, Almendrada y Dorada..."
                     value={editingMount?.breed || ''}
                     onChange={(e) => setEditingMount({ ...editingMount, breed: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
@@ -441,17 +440,17 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Capacidad Especial</label>
                   <select
-                    value={editingMount?.capacity || 'none'}
+                    value={editingMount?.capacity || 'ninguna'}
                     onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as any })}
                     className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
                   >
-                    <option value="none">Ninguna</option>
-                    <option value="sage">Sage (XP x2)</option>
-                    <option value="amoureuse">Amoureuse (Amor x2)</option>
-                    <option value="endurante">Endurante (Resistencia x2)</option>
-                    <option value="precoce">Précoce (Madurez x2)</option>
-                    <option value="reproducteur">Reproducteur (+1 Cría)</option>
-                    <option value="cameleone">Caméléone</option>
+                    <option value="ninguna">Ninguna</option>
+                    <option value="sabia">Sabia (XP x2)</option>
+                    <option value="enamoradiza">Enamoradiza (Amor x2)</option>
+                    <option value="resistente">Resistente (Resistencia x2)</option>
+                    <option value="precoz">Precoz (Madurez x2)</option>
+                    <option value="reproductora">Reproductora (+1 Cría)</option>
+                    <option value="camaleon">Camaleón</option>
                   </select>
                 </div>
 

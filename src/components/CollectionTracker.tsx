@@ -15,7 +15,7 @@ export const CollectionTracker: React.FC = () => {
     db.mounts.toArray().then(setUserMounts);
   }, []);
 
-  const catalog = activeSpecies === 'dragopavo' ? DRAGODINDES_DATA : activeSpecies === 'muldo' ? MULDOS_DATA : VOLKORNES_DATA;
+  const catalog = activeSpecies === 'dragopavo' ? DRAGODINDES_DATA : activeSpecies === 'muluaga' ? MULDOS_DATA : VOLKORNES_DATA;
 
   const generations = [1,2,3,4,5,6,7,8,9,10];
 
@@ -50,9 +50,9 @@ export const CollectionTracker: React.FC = () => {
             Dragopavos ({DRAGODINDES_DATA.length})
           </button>
           <button
-            onClick={() => setActiveSpecies('muldo')}
+            onClick={() => setActiveSpecies('muluaga')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
-              activeSpecies === 'muldo'
+              activeSpecies === 'muluaga'
                 ? 'bg-sky-500 text-slate-950 shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
