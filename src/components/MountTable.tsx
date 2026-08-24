@@ -228,7 +228,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
               <th className="p-3">Montura & Apodo</th>
               <th className="p-3">Especie / Gen</th>
               <th className="p-3">Nivel & Progreso XP</th>
-              <th className="p-3">XP Faltante (200)</th>
+              <th className="p-3">XP Faltante para Nivel 200</th>
               <th className="p-3">Fertilidad & Capacidad</th>
               <th className="p-3">Medidores de Cría</th>
               <th className="p-3 text-right">Acciones</th>
@@ -316,7 +316,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                         </span>
                         {m.capacity !== 'ninguna' && (
                           <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px]">
-                            {m.capacity === 'sabia' ? '✨ Sabia (XP x2)' : m.capacity}
+                            {m.capacity === 'sabia' ? '✨ Sabia • XP x2' : m.capacity}
                           </span>
                         )}
                       </div>
@@ -414,7 +414,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Generación (1-10)</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Generación (1 a 10)</label>
                   <input
                     type="number"
                     min={1}
@@ -432,8 +432,8 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     onChange={(e) => setEditingMount({ ...editingMount, gender: e.target.value as any })}
                     className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
                   >
-                    <option value="M">Macho (♂)</option>
-                    <option value="F">Hembra (♀)</option>
+                    <option value="M">Macho</option>
+                    <option value="F">Hembra</option>
                   </select>
                 </div>
 
@@ -445,17 +445,17 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
                   >
                     <option value="ninguna">Ninguna</option>
-                    <option value="sabia">Sabia (XP x2)</option>
-                    <option value="enamoradiza">Enamoradiza (Amor x2)</option>
-                    <option value="resistente">Resistente (Resistencia x2)</option>
-                    <option value="precoz">Precoz (Madurez x2)</option>
-                    <option value="reproductora">Reproductora (+1 Cría)</option>
+                    <option value="sabia">Sabia • XP x2</option>
+                    <option value="enamoradiza">Enamoradiza • Amor x2</option>
+                    <option value="resistente">Resistente • Resistencia x2</option>
+                    <option value="precoz">Precoz • Madurez x2</option>
+                    <option value="reproductora">Reproductora • +1 Cría</option>
                     <option value="camaleon">Camaleón</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Nivel Actual (1-200)</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Nivel Actual (1 a 200)</label>
                   <input
                     type="number"
                     min={1}
@@ -467,7 +467,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">XP Actual (Max 867.582)</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">XP Actual</label>
                   <input
                     type="number"
                     min={0}

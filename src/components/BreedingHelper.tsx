@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { GitFork, Heart, Shield, Droplet, Sparkles, HelpCircle } from 'lucide-react';
+import { GitFork, Heart, Shield, Droplet, Sparkles } from 'lucide-react';
 import type { SpeciesType } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
 import { VOLKORNES_DATA } from '../data/volkornes';
+import { ALL_MOUNTS_DATA } from '../data/allMounts';
 
 export const BreedingHelper: React.FC = () => {
   const [species, setSpecies] = useState<SpeciesType>('dragopavo');
 
   const catalog = species === 'dragopavo' ? DRAGODINDES_DATA : species === 'muluaga' ? MULDOS_DATA : VOLKORNES_DATA;
+
+  const getParentName = (parentId: string) => {
+    const parent = ALL_MOUNTS_DATA.find((m) => m.id === parentId);
+    return parent ? parent.name : parentId;
+  };
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -32,23 +38,23 @@ export const BreedingHelper: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30">
             <span className="text-xs font-bold text-rose-300 flex items-center gap-1.5">
-              <Heart className="w-4 h-4" /> Amor (Dragonalgas)
+              <Heart className="w-4 h-4" /> Amor: Dragonalgas
             </span>
-            <p className="text-xs text-slate-300 mt-1 font-semibold">Requiere Serenidad &gt; 0</p>
+            <p className="text-xs text-slate-300 mt-1 font-semibold">Requiere Serenidad mayor a 0</p>
             <p className="text-[11px] text-slate-400">Si está entre 0 y 2.000, sube Amor y Madurez simultáneamente.</p>
           </div>
 
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
             <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-              <Shield className="w-4 h-4" /> Resistencia (Fulminador)
+              <Shield className="w-4 h-4" /> Resistencia: Fulminador
             </span>
-            <p className="text-xs text-slate-300 mt-1 font-semibold">Requiere Serenidad &lt; 0</p>
+            <p className="text-xs text-slate-300 mt-1 font-semibold">Requiere Serenidad menor a 0</p>
             <p className="text-[11px] text-slate-400">Si está entre -2.000 y -1, sube Resistencia y Madurez simultáneamente.</p>
           </div>
 
           <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/30">
             <span className="text-xs font-bold text-sky-300 flex items-center gap-1.5">
-              <Droplet className="w-4 h-4" /> Madurez (Abrevadero)
+              <Droplet className="w-4 h-4" /> Madurez: Abrevadero
             </span>
             <p className="text-xs text-slate-300 mt-1 font-semibold">Entre -2.000 y +2.000</p>
             <p className="text-[11px] text-slate-400">Zona neutra óptima para entrenar madurez.</p>
@@ -56,7 +62,7 @@ export const BreedingHelper: React.FC = () => {
 
           <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/30">
             <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4" /> XP (Pesebre)
+              <Sparkles className="w-4 h-4" /> Experiencia: Pesebre
             </span>
             <p className="text-xs text-slate-300 mt-1 font-semibold">Cualquier Serenidad</p>
             <p className="text-[11px] text-slate-400">Sube de nivel pasivamente a 200 en cualquier estado.</p>
@@ -64,8 +70,8 @@ export const BreedingHelper: React.FC = () => {
         </div>
 
         <div className="p-3 bg-slate-800/50 rounded-xl text-xs text-slate-300 border border-slate-700 flex items-center justify-between">
-          <span>• <strong>Aporreador:</strong> Disminuye la serenidad ($-$)</span>
-          <span>• <strong>Acariciador:</strong> Aumenta la serenidad ($+$)</span>
+          <span>• <strong>Aporreador:</strong> Disminuye la serenidad hacia valores negativos</span>
+          <span>• <strong>Acariciador:</strong> Aumenta la serenidad hacia valores positivos</span>
         </div>
       </div>
 
@@ -77,7 +83,7 @@ export const BreedingHelper: React.FC = () => {
             <button
               onClick={() => setSpecies('dragopavo')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                species === 'dragopavo' ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'
+                species === 'dragopavo' ? 'bg-amber-500 text-slate-950 shadow-md' : 'bg-slate-800 text-slate-300 hover:text-white'
               }`}
             >
               Dragopavos
@@ -85,7 +91,7 @@ export const BreedingHelper: React.FC = () => {
             <button
               onClick={() => setSpecies('muluaga')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                species === 'muluaga' ? 'bg-sky-500 text-slate-950' : 'bg-slate-800 text-slate-300'
+                species === 'muluaga' ? 'bg-sky-500 text-slate-950 shadow-md' : 'bg-slate-800 text-slate-300 hover:text-white'
               }`}
             >
               Muluagas
@@ -93,7 +99,7 @@ export const BreedingHelper: React.FC = () => {
             <button
               onClick={() => setSpecies('vueloceronte')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                species === 'vueloceronte' ? 'bg-purple-500 text-white' : 'bg-slate-800 text-slate-300'
+                species === 'vueloceronte' ? 'bg-purple-500 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:text-white'
               }`}
             >
               Vuelocerontes
@@ -103,14 +109,14 @@ export const BreedingHelper: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {catalog.map((m) => (
-            <div key={m.id} className="p-3.5 bg-slate-900/60 rounded-xl border border-dofus-border">
+            <div key={m.id} className="p-3.5 bg-slate-900/60 rounded-xl border border-dofus-border hover:border-slate-700 transition">
               <div className="flex justify-between items-start">
                 <span className="font-bold text-xs text-white">{m.name}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Gen {m.generation}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold">Gen {m.generation}</span>
               </div>
               {m.parents && (
-                <p className="text-[11px] text-amber-400 mt-2 font-mono">
-                  Cruzar: {m.parents[0].replace(species + '_', '').replace('dd_', '')} + {m.parents[1].replace(species + '_', '').replace('dd_', '')}
+                <p className="text-[11px] text-amber-400 mt-2 font-mono bg-amber-500/5 p-1.5 rounded border border-amber-500/20">
+                  Cruzar: <strong className="text-amber-300">{getParentName(m.parents[0])}</strong> + <strong className="text-amber-300">{getParentName(m.parents[1])}</strong>
                 </p>
               )}
               <div className="mt-2 text-[10px] text-slate-400">

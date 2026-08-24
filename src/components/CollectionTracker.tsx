@@ -30,7 +30,7 @@ export const CollectionTracker: React.FC = () => {
         <div>
           <h1 className="text-2xl font-black text-white flex items-center gap-3">
             <Layers className="w-7 h-7 text-amber-400" />
-            Progreso de Colección & Metas a Nivel 200
+            Progreso de Colección y Metas a Nivel 200
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             Rastrea qué razas de las 10 generaciones ya posees y cuáles te faltan por subir al nivel máximo 200.
@@ -41,33 +41,36 @@ export const CollectionTracker: React.FC = () => {
         <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-dofus-border">
           <button
             onClick={() => setActiveSpecies('dragopavo')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
               activeSpecies === 'dragopavo'
                 ? 'bg-amber-500 text-slate-950 shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
-            Dragopavos ({DRAGODINDES_DATA.length})
+            <span>Dragopavos</span>
+            <span className="text-[10px] opacity-75 font-normal">• {DRAGODINDES_DATA.length} razas</span>
           </button>
           <button
             onClick={() => setActiveSpecies('muluaga')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
               activeSpecies === 'muluaga'
                 ? 'bg-sky-500 text-slate-950 shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
-            Muluagas ({MULDOS_DATA.length})
+            <span>Muluagas</span>
+            <span className="text-[10px] opacity-75 font-normal">• {MULDOS_DATA.length} razas</span>
           </button>
           <button
             onClick={() => setActiveSpecies('vueloceronte')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
               activeSpecies === 'vueloceronte'
                 ? 'bg-purple-500 text-white shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
-            Vuelocerontes ({VOLKORNES_DATA.length})
+            <span>Vuelocerontes</span>
+            <span className="text-[10px] opacity-75 font-normal">• {VOLKORNES_DATA.length} razas</span>
           </button>
         </div>
       </div>
@@ -77,7 +80,7 @@ export const CollectionTracker: React.FC = () => {
         <div className="bg-dofus-card p-5 rounded-2xl border border-dofus-border shadow-lg">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-semibold text-slate-300">Colección de Razas Poseídas</span>
-            <span className="text-xs font-bold text-amber-400">{ownedBreedsCount} / {totalSpeciesBreeds} ({Math.round((ownedBreedsCount/totalSpeciesBreeds)*100)}%)</span>
+            <span className="text-xs font-bold text-amber-400">{ownedBreedsCount} de {totalSpeciesBreeds} • {Math.round((ownedBreedsCount/totalSpeciesBreeds)*100)}%</span>
           </div>
           <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
             <div className="h-full bg-amber-500" style={{ width: `${(ownedBreedsCount/totalSpeciesBreeds)*100}%` }} />
@@ -87,7 +90,7 @@ export const CollectionTracker: React.FC = () => {
         <div className="bg-dofus-card p-5 rounded-2xl border border-dofus-border shadow-lg">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-semibold text-slate-300">Completadas a Nivel 200</span>
-            <span className="text-xs font-bold text-emerald-400">{level200BreedsCount} / {totalSpeciesBreeds} ({Math.round((level200BreedsCount/totalSpeciesBreeds)*100)}%)</span>
+            <span className="text-xs font-bold text-emerald-400">{level200BreedsCount} de {totalSpeciesBreeds} • {Math.round((level200BreedsCount/totalSpeciesBreeds)*100)}%</span>
           </div>
           <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
             <div className="h-full bg-emerald-500" style={{ width: `${(level200BreedsCount/totalSpeciesBreeds)*100}%` }} />
@@ -152,7 +155,7 @@ export const CollectionTracker: React.FC = () => {
                         {is200 ? (
                           <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">200 ✓</span>
                         ) : isOwned ? (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">Niv. {match.currentLevel}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">Nivel {match.currentLevel}</span>
                         ) : (
                           <span className="text-[10px] text-slate-500">Falta</span>
                         )}

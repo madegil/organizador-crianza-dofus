@@ -71,7 +71,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
           <p className="text-3xl font-black text-sky-400 mt-2">{needXpMounts.length}</p>
-          <p className="text-xs text-slate-400 mt-1">Requieren pesebre / XP</p>
+          <p className="text-xs text-slate-400 mt-1">Requieren pesebre y entrenamiento</p>
         </div>
 
         <div className="bg-dofus-card rounded-2xl border border-dofus-border p-5 shadow-lg relative overflow-hidden">

@@ -55,9 +55,9 @@ export const FuelCalculator: React.FC = () => {
             <Calculator className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-white">Calculadora de XP & Carburantes de Cercado</h1>
+            <h1 className="text-2xl font-black text-white">Calculadora de Experiencia y Carburantes de Cercado</h1>
             <p className="text-xs text-slate-400">
-              Cálculo exacto para el medidor de <strong>Pesebre</strong> en Dofus 3.5. Capacidad máxima 100.000 y meta nivel 200 (867.582 XP).
+              Cálculo exacto para el medidor de <strong>Pesebre</strong> en Dofus 3.5. Capacidad máxima 100.000 y meta a nivel 200 con 867.582 XP.
             </p>
           </div>
         </div>
@@ -85,12 +85,12 @@ export const FuelCalculator: React.FC = () => {
                   tier === 3 ? 'bg-amber-500/20 text-amber-300' :
                   'bg-rose-500/20 text-rose-300'
                 }`}>
-                  Tier {tier}: {info.name}
+                  Nivel {tier}: {info.name}
                 </span>
                 <span className="text-xs text-slate-400 font-mono">+{info.gainPer10s / 10} XP/s</span>
               </div>
               <p className="text-xs text-slate-300 font-semibold mb-1">
-                Medidor: {info.rangeMin.toLocaleString()} - {info.rangeMax.toLocaleString()}
+                Medidor: {info.rangeMin.toLocaleString()} a {info.rangeMax.toLocaleString()}
               </p>
               <p className="text-[11px] text-slate-400">
                 Se vacía en: <strong>{Math.floor(info.drainDurationSeconds/3600)}h {Math.floor((info.drainDurationSeconds%3600)/60)}m</strong>
@@ -111,13 +111,14 @@ export const FuelCalculator: React.FC = () => {
             <button
               key={v}
               onClick={() => setSelectedVariant(v)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                 selectedVariant === v
                   ? 'bg-amber-500 text-slate-950 shadow-md'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
               }`}
             >
-              {FUEL_VARIANTS[v].name} ({FUEL_VARIANTS[v].durability.toLocaleString()} dur.)
+              <span>{FUEL_VARIANTS[v].name}</span>
+              <span className="text-[10px] opacity-75 font-normal">({FUEL_VARIANTS[v].durability.toLocaleString()} durabilidad)</span>
             </button>
           ))}
         </div>
@@ -129,14 +130,14 @@ export const FuelCalculator: React.FC = () => {
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <Box className="w-5 h-5 text-amber-400" />
-              Optimización de Cercado en Lote (1 a 10 Monturas)
+              Optimización de Cercado en Lote • 1 a 10 Monturas
             </h2>
             <p className="text-xs text-slate-400">
               En Dofus, el carburante se consume a velocidad fija haya 1 o 10 monturas. ¡Llena tu cercado para máxima eficiencia!
             </p>
           </div>
           <span className="text-xs font-bold px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl">
-            {selectedMounts.length} / 10 Seleccionadas
+            {selectedMounts.length} de 10 Seleccionadas
           </span>
         </div>
 
@@ -160,8 +161,8 @@ export const FuelCalculator: React.FC = () => {
                   <p className="text-[10px] text-slate-400 truncate">{m.breed}</p>
                 </div>
                 <div className="mt-2 pt-2 border-t border-slate-800 text-[10px] flex justify-between">
-                  <span>Niv. {m.currentLevel}</span>
-                  <span className="text-amber-400">{remaining.toLocaleString()} XP</span>
+                  <span>Nivel {m.currentLevel}</span>
+                  <span className="text-amber-400 font-mono">{remaining.toLocaleString()} XP</span>
                 </div>
               </button>
             );
@@ -183,13 +184,13 @@ export const FuelCalculator: React.FC = () => {
               </div>
 
               <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700">
-                <span className="text-xs text-slate-400">Carburantes ({FUEL_VARIANTS[selectedVariant].name}) requeridos</span>
+                <span className="text-xs text-slate-400">Carburantes {FUEL_VARIANTS[selectedVariant].name} requeridos</span>
                 <p className="text-2xl font-black text-sky-400 mt-1">{batchResult.itemsNeeded} unidades</p>
-                <p className="text-[11px] text-slate-400">({batchResult.totalFuelUnitsConsumed.toLocaleString()} durabilidad total)</p>
+                <p className="text-[11px] text-slate-400">{batchResult.totalFuelUnitsConsumed.toLocaleString()} durabilidad total</p>
               </div>
 
               <div className="p-4 bg-slate-800/80 rounded-xl border border-slate-700">
-                <span className="text-xs text-slate-400">Costo en Polvo de Crianza (Gigantesco)</span>
+                <span className="text-xs text-slate-400">Costo en Polvo de Crianza</span>
                 <p className="text-2xl font-black text-purple-300 mt-1">{batchResult.dustCostTotal.toLocaleString()} ⚗️</p>
               </div>
             </div>
@@ -200,7 +201,7 @@ export const FuelCalculator: React.FC = () => {
               <div className="space-y-1.5">
                 {batchResult.mountsBreakdown.map((item) => (
                   <div key={item.mount.id} className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50 text-xs">
-                    <span className="font-bold text-white">{item.mount.nickname} ({item.mount.breed})</span>
+                    <span className="font-bold text-white">{item.mount.nickname} • {item.mount.breed}</span>
                     <div className="flex items-center gap-4">
                       <span className="text-slate-400 font-mono">{item.xpNeeded.toLocaleString()} XP restante</span>
                       <span className="text-amber-300 font-bold">{item.individualFormattedTime}</span>
@@ -237,14 +238,14 @@ export const FuelCalculator: React.FC = () => {
                 onChange={(e) => setManualIsSage(e.target.checked)}
                 className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500 w-4 h-4"
               />
-              <span>¿Tiene capacidad « Sabia »? (XP x2)</span>
+              <span>¿Tiene capacidad « Sabia »? • Ganancia de XP duplicada</span>
             </label>
           </div>
 
           <div className="bg-slate-900/90 p-4 rounded-xl border border-dofus-border flex flex-col justify-center">
             <span className="text-xs text-slate-400">Tiempo Requerido:</span>
             <p className="text-xl font-bold text-amber-400">{manualResult.formattedTime}</p>
-            <p className="text-xs text-slate-400">{manualResult.itemsNeeded} carburantes ({FUEL_VARIANTS[selectedVariant].name})</p>
+            <p className="text-xs text-slate-400">{manualResult.itemsNeeded} carburantes {FUEL_VARIANTS[selectedVariant].name}</p>
           </div>
         </div>
       </div>
