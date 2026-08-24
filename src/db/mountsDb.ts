@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { UserMount } from '../types/mount';
+import { getFertilityLabel } from '../utils/badgeHelpers';
 
 export class BreedingDatabase extends Dexie {
   mounts!: EntityTable<UserMount, 'id'>;
@@ -14,7 +15,6 @@ export class BreedingDatabase extends Dexie {
 
 export const db = new BreedingDatabase();
 
-// Semilla inicial basada en los ejemplos de monturas
 export async function initSeedDataIfEmpty() {
   const count = await db.mounts.count();
   if (count === 0) {
@@ -61,5 +61,24 @@ export async function initSeedDataIfEmpty() {
       }
     ];
     await db.mounts.bulkAdd(sampleMounts);
+  } else {
+    // Normalizar registros existentes con nombres antiguos
+    const all = await db.mounts.toArray();
+    for (const m of all) {
+      let changed = false;
+      const cleanFert = getFertilityLabel(m.fertility).toLowerCase().replace('é', 'e');
+      const actualFert = cleanFert === 'fecunda' ? 'fecunda' : cleanFert === 'esteril' ? 'esteril' : cleanFert === 'senil' ? 'senil' : 'fertil';
+      if (m.fertility !== actualFert) {
+        m.fertility = actualFert as any;
+        changed = true;
+      }
+      if (m.capacity === 'none' as any || !m.capacity) {
+        m.capacity = 'ninguna';
+        changed = true;
+      }
+      if (changed) {
+        await db.mounts.put(m);
+      }
+    }
   }
 }

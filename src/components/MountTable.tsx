@@ -8,6 +8,7 @@ import { MAX_MOUNT_XP } from '../data/fuelData';
 import { db } from '../db/mountsDb';
 import { ALL_MOUNTS_DATA, getMountsBySpecies } from '../data/allMounts';
 import { MountAvatar } from './MountAvatar';
+import { getFertilityLabel, getFertilityBadgeClasses, getCapacityLabel } from '../utils/badgeHelpers';
 
 interface MountTableProps {
   mounts: UserMount[];
@@ -29,7 +30,15 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
   const filteredMounts = mounts.filter((m) => {
     if (speciesFilter !== 'all' && m.species !== speciesFilter) return false;
     if (generationFilter !== 'all' && m.generation !== Number(generationFilter)) return false;
-    if (fertilityFilter !== 'all' && m.fertility !== fertilityFilter) return false;
+    
+    if (fertilityFilter !== 'all') {
+      const normFertility = getFertilityLabel(m.fertility).toLowerCase();
+      if (fertilityFilter === 'fertil' && !normFertility.includes('fér') && !normFertility.includes('fer')) return false;
+      if (fertilityFilter === 'fecunda' && !normFertility.includes('fec')) return false;
+      if (fertilityFilter === 'esteril' && !normFertility.includes('est') && !normFertility.includes('ste')) return false;
+      if (fertilityFilter === 'senil' && !normFertility.includes('sen')) return false;
+    }
+
     if (level200Filter === 'need200' && m.currentLevel >= 200) return false;
     if (level200Filter === 'is200' && m.currentLevel < 200) return false;
 
@@ -184,6 +193,18 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
           </select>
 
           <select
+            value={fertilityFilter}
+            onChange={(e) => setFertilityFilter(e.target.value)}
+            className="px-3 py-2 bg-slate-900/80 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+          >
+            <option value="all">Fertilidad (Todas)</option>
+            <option value="fertil">Fértil</option>
+            <option value="fecunda">Fecunda</option>
+            <option value="esteril">Estéril</option>
+            <option value="senil">Senil</option>
+          </select>
+
+          <select
             value={level200Filter}
             onChange={(e) => setLevel200Filter(e.target.value as any)}
             className="px-3 py-2 bg-slate-900/80 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
@@ -281,6 +302,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                 const xpRemaining = Math.max(0, MAX_MOUNT_XP - m.currentXp);
                 const progressPercent = Math.min(100, Math.round((m.currentXp / MAX_MOUNT_XP) * 100));
                 const isSelected = selectedMountIds.has(m.id);
+                const capacityLabel = getCapacityLabel(m.capacity);
 
                 return (
                   <tr
@@ -350,17 +372,12 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     </td>
                     <td className="p-3">
                       <div className="flex flex-col gap-1 items-start">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                          m.fertility === 'fecunda' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
-                          m.fertility === 'esteril' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' :
-                          m.fertility === 'senil' ? 'bg-slate-700 text-slate-300' :
-                          'bg-sky-500/20 text-sky-300 border border-sky-500/30'
-                        }`}>
-                          {m.fertility}
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${getFertilityBadgeClasses(m.fertility)}`}>
+                          {getFertilityLabel(m.fertility)}
                         </span>
-                        {m.capacity !== 'ninguna' && (
-                          <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px]">
-                            {m.capacity === 'sabia' ? '✨ Sabia • XP x2' : m.capacity}
+                        {capacityLabel && (
+                          <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-medium">
+                            {capacityLabel}
                           </span>
                         )}
                       </div>
