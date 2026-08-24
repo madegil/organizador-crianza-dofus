@@ -1,4 +1,4 @@
-import { FUEL_TIERS, FUEL_VARIANTS, MAX_MOUNT_XP, LEVEL_100_XP } from '../data/fuelData';
+import { FUEL_TIERS, FUEL_VARIANTS, MAX_MOUNT_XP } from '../data/fuelData';
 import type { FuelTier, FuelVariant, UserMount } from '../types/mount';
 
 export function calculateRemainingXp(currentXp: number, targetXp: number = MAX_MOUNT_XP): number {
@@ -33,13 +33,13 @@ export interface FuelCalculation {
 export function calculateFuelForXp(
   xpNeeded: number,
   tier: FuelTier = 2,
-  variant: FuelVariant = 'gigantesque',
+  variant: FuelVariant = 'gigantesco',
   isSage: boolean = false
 ): FuelCalculation {
   const tierInfo = FUEL_TIERS[tier];
   const variantInfo = FUEL_VARIANTS[variant];
 
-  // Base gain per second (Tier 1: 1/s, Tier 2: 2/s, Tier 3: 3/s, Tier 4: 4/s)
+  // Ganancia base por segundo (Tier 1: 1/s, Tier 2: 2/s, Tier 3: 3/s, Tier 4: 4/s)
   const baseGainPerSec = tierInfo.gainPer10s / 10;
   const effectiveXpPerSec = isSage ? baseGainPerSec * 2 : baseGainPerSec;
 
@@ -80,7 +80,7 @@ export interface BatchCalculationResult {
 export function calculateEnclosBatch(
   mounts: UserMount[],
   tier: FuelTier = 2,
-  variant: FuelVariant = 'gigantesque',
+  variant: FuelVariant = 'gigantesco',
   targetXp: number = MAX_MOUNT_XP
 ): BatchCalculationResult {
   const tierInfo = FUEL_TIERS[tier];
@@ -88,7 +88,7 @@ export function calculateEnclosBatch(
 
   const breakdown = mounts.map((mount) => {
     const xpNeeded = calculateRemainingXp(mount.currentXp, targetXp);
-    const isSage = mount.capacity === 'sage';
+    const isSage = mount.capacity === 'sabia';
     const effectiveGainPerSec = isSage ? (tierInfo.gainPer10s / 10) * 2 : tierInfo.gainPer10s / 10;
     const individualSeconds = effectiveGainPerSec > 0 ? Math.ceil(xpNeeded / effectiveGainPerSec) : 0;
 

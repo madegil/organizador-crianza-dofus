@@ -1,6 +1,6 @@
-export type SpeciesType = 'dragodinde' | 'muldo' | 'volkorne';
-export type FertilityStatus = 'fertile' | 'feconde' | 'sterile' | 'senile';
-export type SpecialCapacity = 'none' | 'sage' | 'amoureuse' | 'endurante' | 'precoce' | 'reproducteur' | 'cameleone';
+export type SpeciesType = 'dragopavo' | 'muldo' | 'vueloceronte';
+export type FertilityStatus = 'fertil' | 'fecunda' | 'esteril' | 'senil';
+export type SpecialCapacity = 'ninguna' | 'sabia' | 'enamoradiza' | 'resistente' | 'precoz' | 'reproductora' | 'camaleon';
 
 export interface MountDefinition {
   id: string;
@@ -33,7 +33,7 @@ export interface UserMount {
 }
 
 export type FuelTier = 1 | 2 | 3 | 4;
-export type FuelVariant = 'minuscule' | 'petit' | 'normal' | 'grand' | 'gigantesque';
+export type FuelVariant = 'minusculo' | 'pequeno' | 'normal' | 'grande' | 'gigantesco';
 
 export interface FuelInfo {
   tier: FuelTier;

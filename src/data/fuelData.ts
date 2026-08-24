@@ -8,7 +8,7 @@ export const MAX_MOUNT_BREEDING_STAT = 20000;
 export const FUEL_TIERS: Record<FuelTier, FuelInfo> = {
   1: {
     tier: 1,
-    name: 'Extrait',
+    name: 'Extracto',
     rangeMin: 0,
     rangeMax: 40000,
     consumptionPer10s: 10,
@@ -18,7 +18,7 @@ export const FUEL_TIERS: Record<FuelTier, FuelInfo> = {
   },
   2: {
     tier: 2,
-    name: 'Philtre',
+    name: 'Filtro',
     rangeMin: 40001,
     rangeMax: 70000,
     consumptionPer10s: 20,
@@ -28,7 +28,7 @@ export const FUEL_TIERS: Record<FuelTier, FuelInfo> = {
   },
   3: {
     tier: 3,
-    name: 'Potion',
+    name: 'Poción',
     rangeMin: 70001,
     rangeMax: 90000,
     consumptionPer10s: 30,
@@ -38,7 +38,7 @@ export const FUEL_TIERS: Record<FuelTier, FuelInfo> = {
   },
   4: {
     tier: 4,
-    name: 'Élixir',
+    name: 'Elixir',
     rangeMin: 90001,
     rangeMax: 100000,
     consumptionPer10s: 40,
@@ -49,9 +49,9 @@ export const FUEL_TIERS: Record<FuelTier, FuelInfo> = {
 };
 
 export const FUEL_VARIANTS: Record<FuelVariant, { name: string; durability: number }> = {
-  minuscule: { name: 'Minuscule', durability: 1000 },
-  petit: { name: 'Petit', durability: 2000 },
+  minusculo: { name: 'Minúsculo', durability: 1000 },
+  pequeno: { name: 'Pequeño', durability: 2000 },
   normal: { name: 'Normal', durability: 3000 },
-  grand: { name: 'Grand', durability: 4000 },
-  gigantesque: { name: 'Gigantesque', durability: 5000 },
+  grande: { name: 'Grande', durability: 4000 },
+  gigantesco: { name: 'Gigantesco', durability: 5000 },
 };

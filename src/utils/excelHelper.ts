@@ -1,18 +1,18 @@
 import * as XLSX from 'xlsx';
 import type { FertilityStatus, SpecialCapacity, SpeciesType, UserMount } from '../types/mount';
-import { ALL_MOUNTS_DATA, findMountByBreedAndSpecies } from '../data/allMounts';
+import { findMountByBreedAndSpecies } from '../data/allMounts';
 
 export function downloadExcelTemplate() {
   const headers = [
     'Apodo / Nombre',
-    'Especie (dragopavo / muldo / volkorne)',
+    'Especie (dragopavo / muldo / vueloceronte)',
     'Raza / Color',
     'Generación (1-10)',
     'Sexo (M / F)',
     'Nivel Actual (1-200)',
     'XP Actual',
-    'Fertilidad (fertile / feconde / sterile / senile)',
-    'Capacidad (none / sage / amoureuse / endurante / precoce / reproducteur / cameleone)',
+    'Fertilidad (fertil / fecunda / esteril / senil)',
+    'Capacidad (ninguna / sabia / enamoradiza / resistente / precoz / reproductora / camaleon)',
     'Serenidad (-5000 a 5000)',
     'Amor (0-20000)',
     'Madurez (0-20000)',
@@ -23,14 +23,14 @@ export function downloadExcelTemplate() {
   const exampleRows = [
     [
       'Made',
-      'volkorne',
-      'Marfil (Ivoire)',
+      'vueloceronte',
+      'Marfil',
       3,
       'F',
       96,
       157620,
-      'sterile',
-      'none',
+      'esteril',
+      'ninguna',
       1918,
       20000,
       20000,
@@ -45,8 +45,8 @@ export function downloadExcelTemplate() {
       'M',
       1,
       0,
-      'fertile',
-      'sage',
+      'fertil',
+      'sabia',
       1918,
       0,
       0,
@@ -56,18 +56,18 @@ export function downloadExcelTemplate() {
     [
       'MuldoAgil',
       'muldo',
-      'Ébano (Ébène)',
+      'Ébano',
       1,
       'F',
       150,
       450000,
-      'feconde',
-      'none',
+      'fecunda',
+      'ninguna',
       0,
       20000,
       20000,
       20000,
-      'Muldo listo para cruzar',
+      'Muluaga lista para cruzar',
     ],
   ];
 
@@ -82,10 +82,10 @@ export function exportMountsToExcel(mounts: UserMount[]) {
   const data = mounts.map((m) => ({
     'ID': m.id,
     'Apodo': m.nickname,
-    'Especie': m.species,
+    'Especie': m.species === 'dragopavo' ? 'Dragopavo' : m.species === 'muldo' ? 'Muluaga' : 'Vueloceronte',
     'Raza / Color': m.breed,
     'Generación': m.generation,
-    'Sexo': m.gender,
+    'Sexo': m.gender === 'F' ? 'Hembra' : 'Macho',
     'Nivel Actual': m.currentLevel,
     'XP Actual': m.currentXp,
     'XP Faltante (Nivel 200)': Math.max(0, 867582 - m.currentXp),
@@ -128,7 +128,6 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     throw new Error('El archivo Excel está vacío o no contiene datos válidos.');
   }
 
-  // Detect header row or start at index 1
   const rows = rawRows.slice(1);
   const parsedMounts: UserMount[] = [];
 
@@ -137,10 +136,10 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     if (!row || row.length === 0 || !row[0]) continue;
 
     const nickname = String(row[0] || `Montura-${i + 1}`).trim();
-    let rawSpecies = String(row[1] || 'dragodinde').toLowerCase().trim();
-    let species: SpeciesType = 'dragodinde';
-    if (rawSpecies.includes('muldo')) species = 'muldo';
-    else if (rawSpecies.includes('volkorne') || rawSpecies.includes('vueloceronte')) species = 'volkorne';
+    let rawSpecies = String(row[1] || 'dragopavo').toLowerCase().trim();
+    let species: SpeciesType = 'dragopavo';
+    if (rawSpecies.includes('muldo') || rawSpecies.includes('muluaga')) species = 'muldo';
+    else if (rawSpecies.includes('volkorne') || rawSpecies.includes('vueloceronte')) species = 'vueloceronte';
 
     const breed = String(row[2] || 'Sin especificar').trim();
     const matchedDef = findMountByBreedAndSpecies(breed, species);
@@ -152,20 +151,20 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     const currentLevel = Math.min(200, Math.max(1, Number(row[5]) || 1));
     const currentXp = Math.min(867582, Math.max(0, Number(row[6]) || 0));
 
-    let rawFertility = String(row[7] || 'fertile').toLowerCase().trim();
-    let fertility: FertilityStatus = 'fertile';
-    if (rawFertility.includes('fecond') || rawFertility.includes('fecund')) fertility = 'feconde';
-    else if (rawFertility.includes('steril') || rawFertility.includes('estéril')) fertility = 'sterile';
-    else if (rawFertility.includes('senil')) fertility = 'senile';
+    let rawFertility = String(row[7] || 'fertil').toLowerCase().trim();
+    let fertility: FertilityStatus = 'fertil';
+    if (rawFertility.includes('fecond') || rawFertility.includes('fecund')) fertility = 'fecunda';
+    else if (rawFertility.includes('steril') || rawFertility.includes('esteril') || rawFertility.includes('estéril')) fertility = 'esteril';
+    else if (rawFertility.includes('senil')) fertility = 'senil';
 
-    let rawCapacity = String(row[8] || 'none').toLowerCase().trim();
-    let capacity: SpecialCapacity = 'none';
-    if (rawCapacity.includes('sage') || rawCapacity.includes('sabia')) capacity = 'sage';
-    else if (rawCapacity.includes('amour') || rawCapacity.includes('amor')) capacity = 'amoureuse';
-    else if (rawCapacity.includes('endur') || rawCapacity.includes('resisten')) capacity = 'endurante';
-    else if (rawCapacity.includes('prec') || rawCapacity.includes('precoz')) capacity = 'precoce';
-    else if (rawCapacity.includes('reprod')) capacity = 'reproducteur';
-    else if (rawCapacity.includes('camele') || rawCapacity.includes('camale')) capacity = 'cameleone';
+    let rawCapacity = String(row[8] || 'ninguna').toLowerCase().trim();
+    let capacity: SpecialCapacity = 'ninguna';
+    if (rawCapacity.includes('sage') || rawCapacity.includes('sabia') || rawCapacity.includes('sabio')) capacity = 'sabia';
+    else if (rawCapacity.includes('amour') || rawCapacity.includes('enamoradiza') || rawCapacity.includes('amorosa')) capacity = 'enamoradiza';
+    else if (rawCapacity.includes('endur') || rawCapacity.includes('resistent')) capacity = 'resistente';
+    else if (rawCapacity.includes('prec') || rawCapacity.includes('precoz')) capacity = 'precoz';
+    else if (rawCapacity.includes('reprod')) capacity = 'reproductora';
+    else if (rawCapacity.includes('camele') || rawCapacity.includes('camale')) capacity = 'camaleon';
 
     const serenity = Number(row[9]) || 0;
     const love = Math.min(20000, Math.max(0, Number(row[10]) || 0));

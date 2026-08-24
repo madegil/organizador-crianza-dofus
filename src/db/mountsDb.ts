@@ -14,7 +14,7 @@ export class BreedingDatabase extends Dexie {
 
 export const db = new BreedingDatabase();
 
-// Semilla inicial basada en los ejemplos reales del usuario
+// Semilla inicial basada en los ejemplos de monturas
 export async function initSeedDataIfEmpty() {
   const count = await db.mounts.count();
   if (count === 0) {
@@ -22,20 +22,20 @@ export async function initSeedDataIfEmpty() {
       {
         id: 'sample-vueloceronte-made',
         nickname: 'Made',
-        definitionId: 'volkorne_ivoire',
-        species: 'volkorne',
-        breed: 'Marfil (Ivoire)',
+        definitionId: 'vueloceronte_ivoire',
+        species: 'vueloceronte',
+        breed: 'Marfil',
         generation: 3,
         gender: 'F',
         currentLevel: 96,
         currentXp: 157620,
-        fertility: 'sterile',
-        capacity: 'none',
+        fertility: 'esteril',
+        capacity: 'ninguna',
         serenity: 1918,
         love: 20000,
         maturity: 20000,
         stamina: 20000,
-        notes: 'Montura de prueba basada en captura de pantalla',
+        notes: 'Vueloceronte hembra nivel 96',
         createdAt: Date.now(),
         updatedAt: Date.now(),
       },
@@ -43,19 +43,19 @@ export async function initSeedDataIfEmpty() {
         id: 'sample-dragopavo-sinnombre',
         nickname: 'SinNombre',
         definitionId: 'dd_amande_doree',
-        species: 'dragodinde',
+        species: 'dragopavo',
         breed: 'Almendrada y Dorada',
         generation: 2,
         gender: 'M',
         currentLevel: 1,
         currentXp: 0,
-        fertility: 'fertile',
-        capacity: 'none',
+        fertility: 'fertil',
+        capacity: 'sabia',
         serenity: 1918,
         love: 0,
         maturity: 0,
         stamina: 0,
-        notes: 'Ejemplo de dragopavo recién capturado / nivel 1',
+        notes: 'Dragopavo nivel 1 con capacidad Sabia',
         createdAt: Date.now(),
         updatedAt: Date.now(),
       }
