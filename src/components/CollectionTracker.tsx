@@ -54,75 +54,75 @@ export const CollectionTracker: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-5 sm:space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="bg-dofus-card rounded-2xl border border-dofus-border p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-4 sm:p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-3">
-            <Layers className="w-7 h-7 text-amber-400" />
-            Progreso de Colección y Metas a Nivel 200
+          <h1 className="text-base sm:text-2xl font-black text-white flex items-center gap-2.5 sm:gap-3">
+            <Layers className="w-6 h-6 sm:w-7 sm:h-7 text-amber-400 flex-shrink-0" />
+            <span>Progreso de Colección & Metas 200</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-[11px] sm:text-xs text-slate-400 mt-1">
             Rastrea con sus imágenes estándar qué razas ya posees en el establo y cuáles te faltan por subir a nivel 200.
           </p>
         </div>
 
-        {/* Selector de Especies */}
-        <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-dofus-border">
+        {/* Selector de Especies Responsive */}
+        <div className="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-dofus-border">
           <button
             onClick={() => setActiveSpecies('dragopavo')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
               activeSpecies === 'dragopavo'
                 ? 'bg-amber-500 text-slate-950 shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
             <span>Dragopavos</span>
-            <span className="text-[10px] opacity-75 font-normal">• {DRAGODINDES_DATA.length} razas</span>
+            <span className="text-[10px] opacity-75 font-normal">({DRAGODINDES_DATA.length})</span>
           </button>
           <button
             onClick={() => setActiveSpecies('muluaga')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
               activeSpecies === 'muluaga'
                 ? 'bg-sky-500 text-slate-950 shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
             <span>Muluagas</span>
-            <span className="text-[10px] opacity-75 font-normal">• {MULDOS_DATA.length} razas</span>
+            <span className="text-[10px] opacity-75 font-normal">({MULDOS_DATA.length})</span>
           </button>
           <button
             onClick={() => setActiveSpecies('vueloceronte')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
               activeSpecies === 'vueloceronte'
                 ? 'bg-purple-500 text-white shadow-md'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
             <span>Vuelocerontes</span>
-            <span className="text-[10px] opacity-75 font-normal">• {VOLKORNES_DATA.length} razas</span>
+            <span className="text-[10px] opacity-75 font-normal">({VOLKORNES_DATA.length})</span>
           </button>
         </div>
       </div>
 
       {/* Barra de progreso global de la especie */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-dofus-card p-5 rounded-2xl border border-dofus-border shadow-lg">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-semibold text-slate-300">Colección de Razas Poseídas</span>
-            <span className="text-xs font-bold text-amber-400">{ownedBreedsCount} de {totalSpeciesBreeds} • {Math.round((ownedBreedsCount/totalSpeciesBreeds)*100)}%</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="bg-dofus-card p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-dofus-border shadow-lg">
+          <div className="flex justify-between items-center mb-2 text-xs">
+            <span className="font-semibold text-slate-300">Colección de Razas Poseídas</span>
+            <span className="font-bold text-amber-400">{ownedBreedsCount} de {totalSpeciesBreeds} ({Math.round((ownedBreedsCount/totalSpeciesBreeds)*100)}%)</span>
           </div>
-          <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
             <div className="h-full bg-amber-500 transition-all" style={{ width: `${(ownedBreedsCount/totalSpeciesBreeds)*100}%` }} />
           </div>
         </div>
 
-        <div className="bg-dofus-card p-5 rounded-2xl border border-dofus-border shadow-lg">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-semibold text-slate-300">Completadas a Nivel 200</span>
-            <span className="text-xs font-bold text-emerald-400">{level200BreedsCount} de {totalSpeciesBreeds} • {Math.round((level200BreedsCount/totalSpeciesBreeds)*100)}%</span>
+        <div className="bg-dofus-card p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-dofus-border shadow-lg">
+          <div className="flex justify-between items-center mb-2 text-xs">
+            <span className="font-semibold text-slate-300">Completadas a Nivel 200</span>
+            <span className="font-bold text-emerald-400">{level200BreedsCount} de {totalSpeciesBreeds} ({Math.round((level200BreedsCount/totalSpeciesBreeds)*100)}%)</span>
           </div>
-          <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
             <div className="h-full bg-emerald-500 transition-all" style={{ width: `${(level200BreedsCount/totalSpeciesBreeds)*100}%` }} />
           </div>
         </div>
@@ -130,19 +130,19 @@ export const CollectionTracker: React.FC = () => {
 
       {/* Filtro Solo Faltantes */}
       <div className="flex justify-end">
-        <label className="flex items-center gap-2 cursor-pointer bg-slate-900/80 px-4 py-2 rounded-xl border border-dofus-border text-xs text-slate-300 font-medium">
+        <label className="flex items-center gap-2 cursor-pointer bg-slate-900/80 px-3.5 py-2 rounded-xl border border-dofus-border text-xs text-slate-300 font-medium">
           <input
             type="checkbox"
             checked={onlyMissing200}
             onChange={(e) => setOnlyMissing200(e.target.checked)}
-            className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500"
+            className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500 w-4 h-4"
           />
-          <span>Mostrar solo las que faltan por subir a Nivel 200</span>
+          <span>Solo las que faltan por subir a 200</span>
         </label>
       </div>
 
       {/* Cuadrícula por Generaciones con Imágenes de Montura */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {generations.map((gen) => {
           const genBreeds = catalog.filter((b) => b.generation === gen);
           if (genBreeds.length === 0) return null;
@@ -157,16 +157,16 @@ export const CollectionTracker: React.FC = () => {
           if (onlyMissing200 && filteredGenBreeds.length === 0) return null;
 
           return (
-            <div key={gen} className="bg-dofus-card rounded-2xl border border-dofus-border p-6 shadow-lg space-y-4">
-              <h3 className="text-base font-bold text-white flex items-center justify-between border-b border-dofus-border pb-2">
+            <div key={gen} className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-4 sm:p-6 shadow-lg space-y-3 sm:space-y-4">
+              <h3 className="text-sm sm:text-base font-bold text-white flex items-center justify-between border-b border-dofus-border pb-2">
                 <span className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-amber-400"></span>
                   Generación {gen}
                 </span>
-                <span className="text-xs text-slate-400 font-normal">{filteredGenBreeds.length} razas</span>
+                <span className="text-[11px] sm:text-xs text-slate-400 font-normal">{filteredGenBreeds.length} razas</span>
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
                 {filteredGenBreeds.map((def) => {
                   const match = userMounts.find((m) => m.species === activeSpecies && m.breed.toLowerCase().includes(def.name.toLowerCase().split(' ')[0]));
                   const isOwned = !!match;
@@ -175,7 +175,7 @@ export const CollectionTracker: React.FC = () => {
                   return (
                     <div
                       key={def.id}
-                      className={`p-4 rounded-2xl border transition flex flex-col justify-between space-y-3 ${
+                      className={`p-3.5 rounded-xl sm:rounded-2xl border transition flex flex-col justify-between space-y-2.5 ${
                         is200
                           ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-100 shadow-md shadow-emerald-500/5'
                           : isOwned
@@ -183,7 +183,7 @@ export const CollectionTracker: React.FC = () => {
                           : 'bg-slate-900/60 border-dofus-border opacity-75 text-slate-400'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
                         <MountAvatar
                           species={activeSpecies}
                           breed={def.name}
@@ -195,12 +195,12 @@ export const CollectionTracker: React.FC = () => {
                           <p className="font-bold text-xs text-white truncate">{def.name}</p>
                           <div className="mt-1">
                             {is200 ? (
-                              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
                                 Nivel 200 ✓
                               </span>
                             ) : isOwned ? (
-                              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
-                                Nivel {match.currentLevel} ({Math.max(0, 867582 - match.currentXp).toLocaleString()} XP falta)
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                                Nvl {match.currentLevel} ({Math.max(0, 867582 - match.currentXp).toLocaleString()} XP)
                               </span>
                             ) : (
                               <button

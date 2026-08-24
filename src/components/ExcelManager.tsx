@@ -41,22 +41,22 @@ export const ExcelManager: React.FC<ExcelManagerProps> = ({ mounts, onDataChange
   };
 
   return (
-    <div className="bg-dofus-card rounded-2xl border border-dofus-border p-6 shadow-xl space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-dofus-border pb-4">
+    <div className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-dofus-border pb-3 sm:pb-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
-            Gestor de Excel y Respaldos
+          <h2 className="text-base sm:text-xl font-bold text-white flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            <span>Gestor de Excel y Respaldos</span>
           </h2>
-          <p className="text-sm text-slate-400">
+          <p className="text-xs text-slate-400 mt-0.5">
             Importa tus monturas masivamente desde Excel o descarga tu inventario actual.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div>
           <button
             onClick={downloadExcelTemplate}
-            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg text-xs font-semibold border border-slate-700 transition"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition"
           >
             <Download className="w-4 h-4 text-emerald-400" />
             Descargar Plantilla Excel
@@ -64,9 +64,9 @@ export const ExcelManager: React.FC<ExcelManagerProps> = ({ mounts, onDataChange
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Subida de Excel */}
-        <div className="border-2 border-dashed border-dofus-border hover:border-emerald-500/50 rounded-xl p-6 flex flex-col items-center justify-center text-center bg-slate-900/40 transition">
+        <div className="border-2 border-dashed border-dofus-border hover:border-emerald-500/50 rounded-xl p-4 sm:p-6 flex flex-col items-center justify-center text-center bg-slate-900/40 transition">
           <input
             type="file"
             ref={fileInputRef}
@@ -75,43 +75,43 @@ export const ExcelManager: React.FC<ExcelManagerProps> = ({ mounts, onDataChange
             className="hidden"
             id="excel-upload-input"
           />
-          <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3 text-emerald-400">
-            {isProcessing ? <RefreshCw className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-2.5 text-emerald-400">
+            {isProcessing ? <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" /> : <Upload className="w-5 h-5 sm:w-6 sm:h-6" />}
           </div>
           <label
             htmlFor="excel-upload-input"
-            className="cursor-pointer px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm rounded-lg shadow-md hover:shadow-emerald-500/20 transition mb-2"
+            className="cursor-pointer px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-emerald-500/20 transition mb-1.5"
           >
             Seleccionar archivo Excel
           </label>
-          <p className="text-xs text-slate-400">O arrastra el archivo directamente aquí</p>
+          <p className="text-[11px] text-slate-400">O arrastra el archivo directamente aquí</p>
         </div>
 
         {/* Exportación */}
-        <div className="bg-slate-900/60 rounded-xl p-6 border border-dofus-border flex flex-col justify-between space-y-4">
+        <div className="bg-slate-900/60 rounded-xl p-4 sm:p-6 border border-dofus-border flex flex-col justify-between space-y-3 sm:space-y-4">
           <div>
-            <h3 className="text-sm font-semibold text-white mb-1">Exportar Base de Datos Local</h3>
-            <p className="text-xs text-slate-400">
-              Actualmente tienes <strong className="text-amber-400">{mounts.length}</strong> monturas registradas en IndexedDB.
+            <h3 className="text-xs sm:text-sm font-semibold text-white mb-0.5">Exportar Base de Datos Local</h3>
+            <p className="text-[11px] sm:text-xs text-slate-400">
+              Actualmente tienes <strong className="text-amber-400 font-mono">{mounts.length}</strong> monturas registradas en IndexedDB.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             <button
               onClick={() => exportMountsToExcel(mounts)}
               disabled={mounts.length === 0}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-700/80 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition"
+              className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-emerald-700/80 hover:bg-emerald-600 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition"
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              Exportar a Excel
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Exportar Excel</span>
             </button>
             <button
               onClick={() => exportMountsToJson(mounts)}
               disabled={mounts.length === 0}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-sky-700/80 hover:bg-sky-600 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition"
+              className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-sky-700/80 hover:bg-sky-600 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition"
             >
-              <FileJson className="w-4 h-4" />
-              Backup JSON
+              <FileJson className="w-3.5 h-3.5" />
+              <span>Backup JSON</span>
             </button>
           </div>
         </div>
@@ -119,16 +119,16 @@ export const ExcelManager: React.FC<ExcelManagerProps> = ({ mounts, onDataChange
 
       {statusMessage && (
         <div
-          className={`p-4 rounded-xl flex items-center gap-3 text-sm ${
+          className={`p-3.5 sm:p-4 rounded-xl flex items-center gap-3 text-xs sm:text-sm ${
             statusMessage.type === 'success'
               ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
               : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
           }`}
         >
           {statusMessage.type === 'success' ? (
-            <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-emerald-400" />
           ) : (
-            <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-400" />
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-rose-400" />
           )}
           <span>{statusMessage.text}</span>
         </div>

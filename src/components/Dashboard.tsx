@@ -24,7 +24,6 @@ export const Dashboard: React.FC = () => {
   const totalMounts = mounts.length;
   const level200Mounts = mounts.filter((m) => m.currentLevel >= 200).length;
   const needXpMounts = mounts.filter((m) => m.currentLevel < 200);
-  const fecondeMounts = mounts.filter((m) => m.fertility === 'fecunda').length;
   const totalRemainingXp = needXpMounts.reduce((acc, m) => acc + Math.max(0, MAX_MOUNT_XP - m.currentXp), 0);
 
   if (loading) {
@@ -36,60 +35,68 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Tarjetas de Métricas Principales */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-dofus-card rounded-2xl border border-dofus-border p-5 shadow-lg relative overflow-hidden">
+    <div className="space-y-5 sm:space-y-8">
+      {/* Tarjetas de Métricas Principales (2x2 en Móvil, 4 en Desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-3.5 sm:p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Monturas</span>
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
-              <Layers className="w-5 h-5" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Total Monturas</span>
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+              <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <p className="text-3xl font-black text-white mt-2">{totalMounts}</p>
-          <p className="text-xs text-slate-400 mt-1">Registradas en tu establo</p>
+          <div className="mt-2">
+            <p className="text-xl sm:text-3xl font-black text-white">{totalMounts}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">En tu establo</p>
+          </div>
         </div>
 
-        <div className="bg-dofus-card rounded-2xl border border-dofus-border p-5 shadow-lg relative overflow-hidden">
+        <div className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-3.5 sm:p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nivel 200 Alcanzado</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-              <CheckCircle2 className="w-5 h-5" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Nivel 200</span>
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <p className="text-3xl font-black text-emerald-400 mt-2">{level200Mounts}</p>
-          <p className="text-xs text-slate-400 mt-1">
-            {totalMounts > 0 ? `${Math.round((level200Mounts / totalMounts) * 100)}% de tu inventario` : '0%'}
-          </p>
+          <div className="mt-2">
+            <p className="text-xl sm:text-3xl font-black text-emerald-400">{level200Mounts}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">
+              {totalMounts > 0 ? `${Math.round((level200Mounts / totalMounts) * 100)}% del total` : '0%'}
+            </p>
+          </div>
         </div>
 
-        <div className="bg-dofus-card rounded-2xl border border-dofus-border p-5 shadow-lg relative overflow-hidden">
+        <div className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-3.5 sm:p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Faltan por subir a 200</span>
-            <div className="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400">
-              <TrendingUp className="w-5 h-5" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Faltan a 200</span>
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <p className="text-3xl font-black text-sky-400 mt-2">{needXpMounts.length}</p>
-          <p className="text-xs text-slate-400 mt-1">Requieren pesebre y entrenamiento</p>
+          <div className="mt-2">
+            <p className="text-xl sm:text-3xl font-black text-sky-400">{needXpMounts.length}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">Requieren XP</p>
+          </div>
         </div>
 
-        <div className="bg-dofus-card rounded-2xl border border-dofus-border p-5 shadow-lg relative overflow-hidden">
+        <div className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-3.5 sm:p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">XP Total Faltante</span>
-            <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
-              <Calculator className="w-5 h-5" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">XP Faltante</span>
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+              <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <p className="text-2xl font-black text-purple-300 mt-2 font-mono">{totalRemainingXp.toLocaleString()}</p>
-          <p className="text-xs text-slate-400 mt-1">Para completar todo el establo</p>
+          <div className="mt-2">
+            <p className="text-base sm:text-2xl font-black text-purple-300 font-mono truncate">{totalRemainingXp.toLocaleString()}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">Total restante</p>
+          </div>
         </div>
       </div>
 
       {/* Módulo de Excel & Importación */}
       <ExcelManager mounts={mounts} onDataChanged={fetchMounts} />
 
-      {/* Tabla de Inventario de Monturas */}
+      {/* Tabla e Inventario de Monturas */}
       <MountTable mounts={mounts} onDataChanged={fetchMounts} />
     </div>
   );

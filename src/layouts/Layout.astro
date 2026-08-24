@@ -15,20 +15,20 @@ const currentPath = Astro.url.pathname;
 <html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title} | Dofus 3.5 Criador</title>
     <meta name="description" content={description} />
   </head>
-  <body class="bg-[#0b0d11] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
+  <body class="bg-[#0b0d11] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950 antialiased">
     <Navbar client:load currentPath={currentPath} />
     
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 md:pb-12">
       <slot />
     </main>
 
-    <footer class="bg-dofus-card/80 border-t border-dofus-border mt-12 py-6 text-center text-xs text-slate-500">
+    <footer class="bg-dofus-card/80 border-t border-dofus-border mt-auto py-6 text-center text-xs text-slate-500 hidden md:block">
       <p>
         Dofus 3.5 Organizador de Crianza • Basado en las reglas oficiales de crianza de Dofus 3.5 • Creado con Astro y Local-First
       </p>

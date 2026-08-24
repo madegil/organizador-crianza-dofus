@@ -144,38 +144,38 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
   const getSpeciesBadge = (species: SpeciesType) => {
     switch (species) {
       case 'dragopavo':
-        return <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold">Dragopavo</span>;
+        return <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">Dragopavo</span>;
       case 'muluaga':
-        return <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-semibold">Muluaga</span>;
+        return <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-bold">Muluaga</span>;
       case 'vueloceronte':
-        return <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold">Vueloceronte</span>;
+        return <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold">Vueloceronte</span>;
     }
   };
 
   const availableBreedsForModal = editingMount?.species ? getMountsBySpecies(editingMount.species) : [];
 
   return (
-    <div className="bg-dofus-card rounded-2xl border border-dofus-border p-6 shadow-xl space-y-6">
-      {/* Barra superior de búsqueda y filtros */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="relative flex-1">
+    <div className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-6">
+      {/* Barra superior de búsqueda y filtros (Totalmente responsive) */}
+      <div className="flex flex-col gap-3">
+        <div className="relative w-full">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Buscar por apodo, raza o color..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-900/80 border border-dofus-border rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-dofus-border rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
           <select
             value={speciesFilter}
             onChange={(e) => setSpeciesFilter(e.target.value as any)}
-            className="px-3 py-2 bg-slate-900/80 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+            className="px-2.5 py-2 bg-slate-900/90 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
           >
-            <option value="all">Todas las Especies</option>
+            <option value="all">Especies (Todas)</option>
             <option value="dragopavo">Dragopavos</option>
             <option value="muluaga">Muluagas</option>
             <option value="vueloceronte">Vuelocerontes</option>
@@ -184,9 +184,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
           <select
             value={generationFilter}
             onChange={(e) => setGenerationFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-900/80 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+            className="px-2.5 py-2 bg-slate-900/90 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
           >
-            <option value="all">Generación (Todas)</option>
+            <option value="all">Gen. (Todas)</option>
             {[1,2,3,4,5,6,7,8,9,10].map(g => (
               <option key={g} value={g}>Gen. {g}</option>
             ))}
@@ -195,7 +195,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
           <select
             value={fertilityFilter}
             onChange={(e) => setFertilityFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-900/80 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+            className="px-2.5 py-2 bg-slate-900/90 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
           >
             <option value="all">Fertilidad (Todas)</option>
             <option value="fertil">Fértil</option>
@@ -207,11 +207,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
           <select
             value={level200Filter}
             onChange={(e) => setLevel200Filter(e.target.value as any)}
-            className="px-3 py-2 bg-slate-900/80 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+            className="px-2.5 py-2 bg-slate-900/90 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
           >
-            <option value="all">Estado Nivel 200</option>
-            <option value="need200">Faltan por subir a 200</option>
-            <option value="is200">Nivel 200 alcanzado</option>
+            <option value="all">Nivel (Todos)</option>
+            <option value="need200">Faltan a 200</option>
+            <option value="is200">Nivel 200 ✓</option>
           </select>
 
           <button
@@ -235,32 +235,33 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
               });
               setIsEditModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 transition"
+            className="col-span-2 sm:col-span-1 sm:ml-auto flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 transition"
           >
             <Plus className="w-4 h-4" />
-            Nueva Montura
+            <span>Nueva Montura</span>
           </button>
         </div>
       </div>
 
       {/* Barra de lote para Cercado */}
       {selectedMountIds.size > 0 && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-amber-300 font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-amber-300 font-medium">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
             <span>{selectedMountIds.size} de 10 monturas seleccionadas para el cercado</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <a
               href={`/calculadora?batch=${Array.from(selectedMountIds).join(',')}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold transition"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold transition"
             >
               <Calculator className="w-3.5 h-3.5" />
               Calcular Lote en Pesebre
             </a>
             <button
               onClick={clearSelection}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg"
+              className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800/80"
+              title="Limpiar selección"
             >
               <X className="w-4 h-4" />
             </button>
@@ -268,8 +269,116 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
         </div>
       )}
 
-      {/* Tabla de monturas */}
-      <div className="overflow-x-auto rounded-xl border border-dofus-border">
+      {/* VISTA MÓVIL: Tarjetas de Montura (Visible en pantallas < md) */}
+      <div className="block md:hidden space-y-3">
+        {filteredMounts.length === 0 ? (
+          <div className="text-center py-8 text-slate-500 text-sm bg-slate-900/40 rounded-xl border border-dofus-border">
+            No se encontraron monturas con los filtros aplicados.
+          </div>
+        ) : (
+          filteredMounts.map((m) => {
+            const xpRemaining = Math.max(0, MAX_MOUNT_XP - m.currentXp);
+            const progressPercent = Math.min(100, Math.round((m.currentXp / MAX_MOUNT_XP) * 100));
+            const isSelected = selectedMountIds.has(m.id);
+            const capacityLabel = getCapacityLabel(m.capacity);
+
+            return (
+              <div
+                key={m.id}
+                className={`p-3.5 rounded-xl border transition space-y-3 ${
+                  isSelected ? 'bg-amber-500/10 border-amber-500/50' : 'bg-slate-900/70 border-dofus-border'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelectMount(m.id)}
+                      className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500 w-4 h-4"
+                    />
+                    <MountAvatar
+                      species={m.species}
+                      breed={m.breed}
+                      imageUrl={m.imageUrl}
+                      size="sm"
+                      generation={m.generation}
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-bold text-slate-100 text-xs truncate">{m.nickname}</p>
+                        <span className={`text-xs ${m.gender === 'F' ? 'text-rose-400' : 'text-sky-400'}`}>
+                          {m.gender === 'F' ? '♀' : '♂'}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 truncate">{m.breed}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => {
+                        setEditingMount(m);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteMount(m.id)}
+                      className="p-1.5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Barra de nivel y progreso */}
+                <div className="space-y-1 bg-slate-950/40 p-2 rounded-lg border border-slate-800/80">
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span className="font-bold text-white">Nivel {m.currentLevel} ({progressPercent}%)</span>
+                    <span className="text-amber-300 font-mono font-semibold">
+                      {xpRemaining === 0 ? 'Max 200 ✓' : `${xpRemaining.toLocaleString()} XP falta`}
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all ${
+                        m.currentLevel >= 200 ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-500 to-amber-300'
+                      }`}
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Badges y Medidores */}
+                <div className="flex items-center justify-between gap-2 text-[10px] pt-1 border-t border-slate-800/60">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`px-1.5 py-0.5 rounded font-bold uppercase ${getFertilityBadgeClasses(m.fertility)}`}>
+                      {getFertilityLabel(m.fertility)}
+                    </span>
+                    {capacityLabel && (
+                      <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                        {capacityLabel}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-400">
+                    <span className="text-purple-300 font-mono">S:{m.serenity}</span>
+                    <span>♥{Math.round(m.love/200)}%</span>
+                    <span>💧{Math.round(m.maturity/200)}%</span>
+                    <span>⚡{Math.round(m.stamina/200)}%</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* VISTA ESCRITORIO: Tabla Completa (Visible en md+) */}
+      <div className="hidden md:block overflow-x-auto rounded-xl border border-dofus-border">
         <table className="w-full text-left text-xs text-slate-300">
           <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[10px] border-b border-dofus-border">
             <tr>
@@ -422,8 +531,8 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
       {/* Modal de Creación / Edición con Selector de Razas e Imagen */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-dofus-card border border-dofus-border rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-dofus-card border border-dofus-border rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl max-h-[92vh] overflow-y-auto space-y-4 sm:space-y-6">
             <div className="flex items-center justify-between border-b border-dofus-border pb-3">
               <div className="flex items-center gap-3">
                 <MountAvatar
@@ -434,31 +543,31 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   generation={editingMount?.generation}
                 />
                 <div>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-base sm:text-lg font-bold text-white">
                     {editingMount?.id ? 'Editar Montura' : 'Nueva Montura'}
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-[11px] text-slate-400 hidden sm:block">
                     Selecciona la especie y raza oficial para configurar automáticamente su icono y generación.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg"
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveMount} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                 {/* Especie */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Especie</label>
                   <select
                     value={editingMount?.species || 'dragopavo'}
                     onChange={(e) => handleSpeciesChangeInModal(e.target.value as SpeciesType)}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500 font-semibold"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-semibold"
                   >
                     <option value="dragopavo">Dragopavo (66 Razas)</option>
                     <option value="muluaga">Muluaga (120 Razas)</option>
@@ -474,7 +583,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   <select
                     value={editingMount?.definitionId || ''}
                     onChange={(e) => handleBreedChangeInModal(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
                   >
                     {availableBreedsForModal.map((b) => (
                       <option key={b.id} value={b.id}>
@@ -486,14 +595,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
                 {/* Apodo / Nombre */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Apodo / Nombre de la Montura</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Apodo / Nombre</label>
                   <input
                     type="text"
                     required
-                    placeholder="Ej. Made, Trueno, MiMontura..."
+                    placeholder="Ej. Made, Trueno..."
                     value={editingMount?.nickname || ''}
                     onChange={(e) => setEditingMount({ ...editingMount, nickname: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
@@ -503,7 +612,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   <select
                     value={editingMount?.gender || 'M'}
                     onChange={(e) => setEditingMount({ ...editingMount, gender: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
                   >
                     <option value="M">Macho (♂)</option>
                     <option value="F">Hembra (♀)</option>
@@ -519,7 +628,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     max={200}
                     value={editingMount?.currentLevel || 1}
                     onChange={(e) => setEditingMount({ ...editingMount, currentLevel: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
                   />
                 </div>
 
@@ -532,7 +641,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     max={867582}
                     value={editingMount?.currentXp || 0}
                     onChange={(e) => setEditingMount({ ...editingMount, currentXp: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
                   />
                 </div>
 
@@ -542,7 +651,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   <select
                     value={editingMount?.fertility || 'fertil'}
                     onChange={(e) => setEditingMount({ ...editingMount, fertility: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
                   >
                     <option value="fertil">Fértil</option>
                     <option value="fecunda">Fecunda</option>
@@ -557,7 +666,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   <select
                     value={editingMount?.capacity || 'ninguna'}
                     onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
                   >
                     <option value="ninguna">Ninguna</option>
                     <option value="sabia">Sabia • Duplica ganancia de XP</option>
@@ -580,7 +689,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     placeholder="https://ejemplo.com/mi-montura.png (dejar vacío para usar imagen estándar)"
                     value={editingMount?.imageUrl || ''}
                     onChange={(e) => setEditingMount({ ...editingMount, imageUrl: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-sm text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
