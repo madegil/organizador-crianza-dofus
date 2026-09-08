@@ -11,7 +11,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33166-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/177.png"
     },
     {
       "id": "volkorne_indigo",
@@ -23,7 +23,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33176-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/176.png"
     },
     {
       "id": "volkorne_pourpre",
@@ -35,7 +35,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33202-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/178.png"
     },
     {
       "id": "volkorne_orchidee",
@@ -47,7 +47,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33199-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/179.png"
     },
     {
       "id": "volkorne_ebene_indigo",
@@ -62,7 +62,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_ebene",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33177-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/196.png"
     },
     {
       "id": "volkorne_ebene_pourpre",
@@ -77,7 +77,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_ebene",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33203-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/193.png"
     },
     {
       "id": "volkorne_ebene_orchidee",
@@ -92,7 +92,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_ebene",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33200-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/195.png"
     },
     {
       "id": "volkorne_indigo_pourpre",
@@ -107,7 +107,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_indigo",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33204-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/192.png"
     },
     {
       "id": "volkorne_indigo_orchidee",
@@ -122,7 +122,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_indigo",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33201-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/194.png"
     },
     {
       "id": "volkorne_pourpre_orchidee",
@@ -137,7 +137,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_pourpre",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33205-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/191.png"
     },
     {
       "id": "volkorne_roux",
@@ -149,7 +149,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus especial Gen 3"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33216-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/180.png"
     },
     {
       "id": "volkorne_amande",
@@ -161,7 +161,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus especial Gen 3"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33135-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/181.png"
     },
     {
       "id": "volkorne_ivoire",
@@ -173,7 +173,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus especial Gen 3"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33178-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/182.png"
     },
     {
       "id": "volkorne_turquoise",
@@ -185,7 +185,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus especial Gen 3"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33250-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/183.png"
     },
     {
       "id": "volkorne_roux_ebene",
@@ -200,7 +200,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_roux",
         "volkorne_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33217-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/207.png"
     },
     {
       "id": "volkorne_roux_indigo",
@@ -215,7 +215,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_roux",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33218-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/206.png"
     },
     {
       "id": "volkorne_roux_pourpre",
@@ -230,7 +230,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_roux",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33221-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/204.png"
     },
     {
       "id": "volkorne_roux_orchidee",
@@ -245,7 +245,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_roux",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33220-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/205.png"
     },
     {
       "id": "volkorne_amande_ebene",
@@ -260,7 +260,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_amande",
         "volkorne_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33136-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/200.png"
     },
     {
       "id": "volkorne_amande_indigo",
@@ -275,7 +275,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_amande",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33137-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/199.png"
     },
     {
       "id": "volkorne_amande_pourpre",
@@ -290,7 +290,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_amande",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33140-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/197.png"
     },
     {
       "id": "volkorne_amande_orchidee",
@@ -305,7 +305,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_amande",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33139-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/198.png"
     },
     {
       "id": "volkorne_ivoire_ebene",
@@ -320,7 +320,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_ivoire",
         "volkorne_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33179-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/213.png"
     },
     {
       "id": "volkorne_ivoire_indigo",
@@ -335,7 +335,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_ivoire",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33180-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/212.png"
     },
     {
       "id": "volkorne_ivoire_pourpre",
@@ -350,7 +350,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_ivoire",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33182-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/210.png"
     },
     {
       "id": "volkorne_ivoire_orchidee",
@@ -365,7 +365,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_ivoire",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33181-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/211.png"
     },
     {
       "id": "volkorne_turquoise_ebene",
@@ -380,7 +380,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_turquoise",
         "volkorne_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33251-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/218.png"
     },
     {
       "id": "volkorne_turquoise_indigo",
@@ -395,7 +395,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_turquoise",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33252-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/217.png"
     },
     {
       "id": "volkorne_turquoise_pourpre",
@@ -410,7 +410,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_turquoise",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33254-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/215.png"
     },
     {
       "id": "volkorne_turquoise_orchidee",
@@ -425,7 +425,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_turquoise",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33253-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/216.png"
     },
     {
       "id": "volkorne_prune",
@@ -437,7 +437,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus especial Gen 5"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33206-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/184.png"
     },
     {
       "id": "volkorne_emeraude",
@@ -449,7 +449,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus especial Gen 5"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33167-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/185.png"
     },
     {
       "id": "volkorne_prune_ebene",
@@ -464,7 +464,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_prune",
         "volkorne_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33208-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/222.png"
     },
     {
       "id": "volkorne_prune_indigo",
@@ -479,7 +479,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_prune",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33210-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/221.png"
     },
     {
       "id": "volkorne_prune_pourpre",
@@ -494,7 +494,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_prune",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33213-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/219.png"
     },
     {
       "id": "volkorne_prune_orchidee",
@@ -509,7 +509,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_prune",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33212-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/220.png"
     },
     {
       "id": "volkorne_emeraude_ebene",
@@ -524,7 +524,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_emeraude",
         "volkorne_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33169-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/229.png"
     },
     {
       "id": "volkorne_emeraude_indigo",
@@ -539,7 +539,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_emeraude",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33170-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/228.png"
     },
     {
       "id": "volkorne_emeraude_pourpre",
@@ -554,7 +554,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_emeraude",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33173-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/226.png"
     },
     {
       "id": "volkorne_emeraude_orchidee",
@@ -569,7 +569,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_emeraude",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33172-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/227.png"
     },
     {
       "id": "volkorne_prune_roux",
@@ -584,7 +584,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_prune",
         "volkorne_roux"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33214-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/287.png"
     },
     {
       "id": "volkorne_prune_amande",
@@ -599,7 +599,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_prune",
         "volkorne_amande"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33207-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/223.png"
     },
     {
       "id": "volkorne_prune_ivoire",
@@ -614,7 +614,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_prune",
         "volkorne_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33211-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/288.png"
     },
     {
       "id": "volkorne_prune_turquoise",
@@ -629,7 +629,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_prune",
         "volkorne_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33215-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/224.png"
     },
     {
       "id": "volkorne_emeraude_roux",
@@ -644,7 +644,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_emeraude",
         "volkorne_roux"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33174-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/231.png"
     },
     {
       "id": "volkorne_emeraude_amande",
@@ -659,7 +659,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_emeraude",
         "volkorne_amande"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33168-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/230.png"
     },
     {
       "id": "volkorne_emeraude_ivoire",
@@ -674,7 +674,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_emeraude",
         "volkorne_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33171-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/233.png"
     },
     {
       "id": "volkorne_emeraude_turquoise",
@@ -689,7 +689,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_emeraude",
         "volkorne_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33175-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/234.png"
     },
     {
       "id": "volkorne_dore_ebene",
@@ -702,7 +702,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33157-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/238.png"
     },
     {
       "id": "volkorne_dore_indigo",
@@ -715,7 +715,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33159-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/237.png"
     },
     {
       "id": "volkorne_dore_pourpre",
@@ -728,7 +728,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33162-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/235.png"
     },
     {
       "id": "volkorne_dore_orchidee",
@@ -741,7 +741,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33161-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/236.png"
     },
     {
       "id": "volkorne_dore_roux",
@@ -754,7 +754,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33164-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/291.png"
     },
     {
       "id": "volkorne_dore_amande",
@@ -767,7 +767,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33156-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/292.png"
     },
     {
       "id": "volkorne_dore_ivoire",
@@ -780,7 +780,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33160-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/293.png"
     },
     {
       "id": "volkorne_dore_turquoise",
@@ -793,7 +793,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33165-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/294.png"
     },
     {
       "id": "volkorne_dore_prune",
@@ -806,7 +806,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33163-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/295.png"
     },
     {
       "id": "volkorne_dore_emeraude",
@@ -819,7 +819,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33158-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/296.png"
     },
     {
       "id": "volkorne_jade",
@@ -831,7 +831,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus defensivo/ofensivo Gen 9"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33184-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/187.png"
     },
     {
       "id": "volkorne_rubis",
@@ -843,7 +843,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "Bonus defensivo/ofensivo Gen 9"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33223-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/188.png"
     },
     {
       "id": "volkorne_jade_ebene",
@@ -858,7 +858,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_jade",
         "volkorne_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33188-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/242.png"
     },
     {
       "id": "volkorne_jade_indigo",
@@ -873,7 +873,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_jade",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33190-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/241.png"
     },
     {
       "id": "volkorne_jade_pourpre",
@@ -888,7 +888,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_jade",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33193-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/239.png"
     },
     {
       "id": "volkorne_jade_orchidee",
@@ -903,7 +903,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_jade",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33192-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/240.png"
     },
     {
       "id": "volkorne_jade_prune",
@@ -918,7 +918,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_jade",
         "volkorne_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33194-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/247.png"
     },
     {
       "id": "volkorne_jade_emeraude",
@@ -933,7 +933,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_jade",
         "volkorne_emeraude"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33189-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/248.png"
     },
     {
       "id": "volkorne_rubis_ebene",
@@ -948,7 +948,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_rubis",
         "volkorne_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33227-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/256.png"
     },
     {
       "id": "volkorne_rubis_indigo",
@@ -963,7 +963,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_rubis",
         "volkorne_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33229-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/255.png"
     },
     {
       "id": "volkorne_rubis_pourpre",
@@ -978,7 +978,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_rubis",
         "volkorne_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33232-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/253.png"
     },
     {
       "id": "volkorne_rubis_orchidee",
@@ -993,7 +993,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_rubis",
         "volkorne_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33231-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/254.png"
     },
     {
       "id": "volkorne_rubis_prune",
@@ -1008,7 +1008,7 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_rubis",
         "volkorne_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33233-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/261.png"
     },
     {
       "id": "volkorne_rubis_emeraude",
@@ -1023,6 +1023,6 @@ export const VOLKORNES_DATA: MountDefinition[] = [
         "volkorne_rubis",
         "volkorne_emeraude"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33228-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/262.png"
     }
   ];

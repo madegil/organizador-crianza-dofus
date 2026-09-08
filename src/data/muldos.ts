@@ -11,7 +11,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33080-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/91.png"
     },
     {
       "id": "muldo_indigo",
@@ -23,7 +23,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33088-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/92.png"
     },
     {
       "id": "muldo_pourpre",
@@ -35,7 +35,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33101-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/93.png"
     },
     {
       "id": "muldo_orchidee",
@@ -47,7 +47,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33096-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/90.png"
     },
     {
       "id": "muldo_dore",
@@ -59,7 +59,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Estadísticas base Gen 1"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33072-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/94.png"
     },
     {
       "id": "muldo_ebene_indigo",
@@ -74,7 +74,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_ebene",
         "muldo_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33083-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/109.png"
     },
     {
       "id": "muldo_ebene_pourpre",
@@ -89,7 +89,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_ebene",
         "muldo_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33086-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/103.png"
     },
     {
       "id": "muldo_ebene_orchidee",
@@ -104,7 +104,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_ebene",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33085-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/107.png"
     },
     {
       "id": "muldo_ebene_dore",
@@ -119,7 +119,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_ebene",
         "muldo_dore"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33074-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/110.png"
     },
     {
       "id": "muldo_indigo_pourpre",
@@ -134,7 +134,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_indigo",
         "muldo_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33093-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/102.png"
     },
     {
       "id": "muldo_indigo_orchidee",
@@ -149,7 +149,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_indigo",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33092-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/106.png"
     },
     {
       "id": "muldo_indigo_dore",
@@ -164,7 +164,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_indigo",
         "muldo_dore"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33076-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/108.png"
     },
     {
       "id": "muldo_pourpre_orchidee",
@@ -179,7 +179,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_pourpre",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33100-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/104.png"
     },
     {
       "id": "muldo_pourpre_dore",
@@ -194,7 +194,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_pourpre",
         "muldo_dore"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33079-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/101.png"
     },
     {
       "id": "muldo_orchidee_dore",
@@ -209,7 +209,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_orchidee",
         "muldo_dore"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33078-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/105.png"
     },
     {
       "id": "muldo_roux",
@@ -221,7 +221,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus especial Gen 3"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33116-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/95.png"
     },
     {
       "id": "muldo_amande",
@@ -233,7 +233,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus especial Gen 3"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33069-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/96.png"
     },
     {
       "id": "muldo_ivoire",
@@ -245,7 +245,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus especial Gen 3"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33094-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/97.png"
     },
     {
       "id": "muldo_turquoise",
@@ -257,7 +257,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus especial Gen 3"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33125-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/98.png"
     },
     {
       "id": "muldo_roux_ebene",
@@ -272,7 +272,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_roux",
         "muldo_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33119-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/114.png"
     },
     {
       "id": "muldo_roux_indigo",
@@ -287,7 +287,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_roux",
         "muldo_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33121-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/113.png"
     },
     {
       "id": "muldo_roux_pourpre",
@@ -302,7 +302,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_roux",
         "muldo_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33124-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/111.png"
     },
     {
       "id": "muldo_roux_orchidee",
@@ -317,7 +317,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_roux",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33123-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/112.png"
     },
     {
       "id": "muldo_amande_ebene",
@@ -332,7 +332,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_amande",
         "muldo_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33081-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/120.png"
     },
     {
       "id": "muldo_amande_indigo",
@@ -347,7 +347,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_amande",
         "muldo_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33089-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/119.png"
     },
     {
       "id": "muldo_amande_pourpre",
@@ -362,7 +362,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_amande",
         "muldo_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33102-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/117.png"
     },
     {
       "id": "muldo_amande_orchidee",
@@ -377,7 +377,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_amande",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33097-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/118.png"
     },
     {
       "id": "muldo_ivoire_ebene",
@@ -392,7 +392,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_ivoire",
         "muldo_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33084-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/125.png"
     },
     {
       "id": "muldo_ivoire_indigo",
@@ -407,7 +407,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_ivoire",
         "muldo_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33091-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/124.png"
     },
     {
       "id": "muldo_ivoire_pourpre",
@@ -422,7 +422,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_ivoire",
         "muldo_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33104-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/122.png"
     },
     {
       "id": "muldo_ivoire_orchidee",
@@ -437,7 +437,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_ivoire",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33099-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/123.png"
     },
     {
       "id": "muldo_turquoise_ebene",
@@ -452,7 +452,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_turquoise",
         "muldo_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33128-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/142.png"
     },
     {
       "id": "muldo_turquoise_indigo",
@@ -467,7 +467,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_turquoise",
         "muldo_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33130-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/141.png"
     },
     {
       "id": "muldo_turquoise_pourpre",
@@ -482,7 +482,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_turquoise",
         "muldo_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33133-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/140.png"
     },
     {
       "id": "muldo_turquoise_orchidee",
@@ -497,7 +497,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_turquoise",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33132-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/165.png"
     },
     {
       "id": "muldo_prune",
@@ -509,7 +509,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus especial Gen 5"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33105-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/99.png"
     },
     {
       "id": "muldo_emeraude",
@@ -521,7 +521,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus especial Gen 5"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33087-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/100.png"
     },
     {
       "id": "muldo_prune_ebene",
@@ -536,7 +536,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_prune",
         "muldo_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33108-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/149.png"
     },
     {
       "id": "muldo_prune_indigo",
@@ -551,7 +551,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_prune",
         "muldo_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33110-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/148.png"
     },
     {
       "id": "muldo_prune_pourpre",
@@ -566,7 +566,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_prune",
         "muldo_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33113-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/146.png"
     },
     {
       "id": "muldo_prune_orchidee",
@@ -581,7 +581,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_prune",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33112-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/147.png"
     },
     {
       "id": "muldo_emeraude_ebene",
@@ -596,7 +596,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_emeraude",
         "muldo_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33082-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/159.png"
     },
     {
       "id": "muldo_emeraude_indigo",
@@ -611,7 +611,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_emeraude",
         "muldo_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33090-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/158.png"
     },
     {
       "id": "muldo_emeraude_pourpre",
@@ -626,7 +626,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_emeraude",
         "muldo_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33103-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/156.png"
     },
     {
       "id": "muldo_emeraude_orchidee",
@@ -641,7 +641,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_emeraude",
         "muldo_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33098-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/157.png"
     },
     {
       "id": "muldo_prune_roux",
@@ -656,7 +656,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_prune",
         "muldo_roux"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33114-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/151.png"
     },
     {
       "id": "muldo_prune_amande",
@@ -671,7 +671,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_prune",
         "muldo_amande"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33106-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/152.png"
     },
     {
       "id": "muldo_prune_ivoire",
@@ -686,7 +686,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_prune",
         "muldo_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33111-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/153.png"
     },
     {
       "id": "muldo_prune_turquoise",
@@ -701,7 +701,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_prune",
         "muldo_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33115-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/154.png"
     },
     {
       "id": "muldo_emeraude_roux",
@@ -716,7 +716,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_emeraude",
         "muldo_roux"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33120-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/161.png"
     },
     {
       "id": "muldo_emeraude_amande",
@@ -731,7 +731,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_emeraude",
         "muldo_amande"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33070-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/162.png"
     },
     {
       "id": "muldo_emeraude_ivoire",
@@ -746,7 +746,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_emeraude",
         "muldo_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33095-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/163.png"
     },
     {
       "id": "muldo_emeraude_turquoise",
@@ -761,7 +761,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "muldo_emeraude",
         "muldo_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33129-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/164.png"
     },
     {
       "id": "muldo_dore_ebene",
@@ -774,7 +774,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33074-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/110.png"
     },
     {
       "id": "muldo_dore_indigo",
@@ -787,7 +787,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33076-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/108.png"
     },
     {
       "id": "muldo_dore_pourpre",
@@ -800,7 +800,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33079-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/101.png"
     },
     {
       "id": "muldo_dore_orchidee",
@@ -813,7 +813,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33078-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/105.png"
     },
     {
       "id": "muldo_dore_roux",
@@ -826,7 +826,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33118-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/115.png"
     },
     {
       "id": "muldo_dore_amande",
@@ -839,7 +839,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33073-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/121.png"
     },
     {
       "id": "muldo_dore_ivoire",
@@ -852,7 +852,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33077-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/126.png"
     },
     {
       "id": "muldo_dore_turquoise",
@@ -865,7 +865,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33127-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/145.png"
     },
     {
       "id": "muldo_dore_prune",
@@ -878,7 +878,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33107-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/150.png"
     },
     {
       "id": "muldo_dore_emeraude",
@@ -891,7 +891,7 @@ export const MULDOS_DATA: MountDefinition[] = [
         "Bonus Gen 8"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33075-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/160.png"
     },
     {
       "id": "muldo_jade",
