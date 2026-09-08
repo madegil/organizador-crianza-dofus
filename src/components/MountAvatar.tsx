@@ -45,7 +45,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
     switch (species) {
       case 'dragopavo':
         return (
-          <svg viewBox="0 0 64 64" fill="none" className={`${iconSizes} drop-shadow-md`}>
+          <svg viewBox="0 0 64 64" fill="none" className={`${iconSizes} drop-shadow-md z-10`}>
             {/* Cuerpo principal del Dragopavo */}
             <path
               d="M32 12C24 12 18 18 18 26C18 34 22 42 32 46C42 42 46 34 46 26C46 18 40 12 32 12Z"
@@ -78,7 +78,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
 
       case 'muluaga':
         return (
-          <svg viewBox="0 0 64 64" fill="none" className={`${iconSizes} drop-shadow-md`}>
+          <svg viewBox="0 0 64 64" fill="none" className={`${iconSizes} drop-shadow-md z-10`}>
             {/* Cuerpo acuático de Muluaga */}
             <path
               d="M32 8C22 8 16 16 18 28C20 40 26 50 32 58C38 50 44 40 46 28C48 16 42 8 32 8Z"
@@ -110,7 +110,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
 
       case 'vueloceronte':
         return (
-          <svg viewBox="0 0 64 64" fill="none" className={`${iconSizes} drop-shadow-md`}>
+          <svg viewBox="0 0 64 64" fill="none" className={`${iconSizes} drop-shadow-md z-10`}>
             {/* Cabeza acorazada de Vueloceronte */}
             <path
               d="M20 18L32 10L44 18L48 36L32 54L16 36L20 18Z"
@@ -126,8 +126,8 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
             {/* Placas de armadura */}
             <path d="M22 28H42M26 38H38" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
             {/* Ojos furiosos */}
-            <polygon points="24,24 28,26 24,28" fill="#facc15" stroke="#0f172a" strokeWidth="1.5" />
-            <polygon points="40,24 36,26 40,28" fill="#facc15" stroke="#0f172a" strokeWidth="1.5" />
+            <polygon points="24,24 28,26 24,28" fill="#facc15" stroke="#0f172a" strokeWidth="1" />
+            <polygon points="40,24 36,26 40,28" fill="#facc15" stroke="#0f172a" strokeWidth="1" />
           </svg>
         );
     }
@@ -154,7 +154,9 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
           <img
             src={imageUrl}
             alt={breed}
-            className="w-full h-full object-contain drop-shadow"
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            className="w-full h-full object-contain drop-shadow z-10"
             onError={() => {
               setImgError(true);
             }}
@@ -167,7 +169,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
       {/* Indicador de Generación si está disponible */}
       {generation && (
         <span
-          className="absolute -bottom-1 -right-1 bg-slate-900 text-amber-300 font-bold border border-slate-700 rounded-md px-1 py-0.2 text-[9px] shadow-sm leading-tight"
+          className="absolute -bottom-1 -right-1 bg-slate-900 text-amber-300 font-bold border border-slate-700 rounded-md px-1 py-0.2 text-[9px] shadow-sm leading-tight z-20"
           title={`Generación ${generation}`}
         >
           G{generation}

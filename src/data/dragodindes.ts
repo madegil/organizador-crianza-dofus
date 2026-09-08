@@ -11,7 +11,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "1700 Iniciativa"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33001-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/20.png"
     },
     {
       "id": "dd_doree",
@@ -23,7 +23,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "2 Invocaciones"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33011-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/18.png"
     },
     {
       "id": "dd_rousse",
@@ -35,7 +35,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "60 Curas"
       ],
       "parents": null,
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33063-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/10.png"
     },
     {
       "id": "dd_amande_rousse",
@@ -51,7 +51,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33009-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/38.png"
     },
     {
       "id": "dd_doree_rousse",
@@ -67,7 +67,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33018-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/46.png"
     },
     {
       "id": "dd_amande_doree",
@@ -83,7 +83,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_doree"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33002-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/33.png"
     },
     {
       "id": "dd_ebene",
@@ -98,7 +98,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande_rousse",
         "dd_amande_doree"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33020-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/3.png"
     },
     {
       "id": "dd_indigo",
@@ -113,7 +113,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree_rousse",
         "dd_amande_doree"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33036-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/17.png"
     },
     {
       "id": "dd_amande_ebene",
@@ -129,7 +129,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33003-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/34.png"
     },
     {
       "id": "dd_amande_indigo",
@@ -145,7 +145,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33005-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/36.png"
     },
     {
       "id": "dd_doree_ebene",
@@ -161,7 +161,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33012-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/42.png"
     },
     {
       "id": "dd_doree_indigo",
@@ -177,7 +177,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33014-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/44.png"
     },
     {
       "id": "dd_ebene_indigo",
@@ -193,7 +193,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene",
         "dd_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33022-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/51.png"
     },
     {
       "id": "dd_rousse_ebene",
@@ -209,7 +209,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_rousse",
         "dd_ebene"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33026-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/12.png"
     },
     {
       "id": "dd_rousse_indigo",
@@ -225,7 +225,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_rousse",
         "dd_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33040-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/62.png"
     },
     {
       "id": "dd_pourpre",
@@ -240,7 +240,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene_indigo",
         "dd_amande_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33050-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/19.png"
     },
     {
       "id": "dd_orchidee",
@@ -255,7 +255,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene_indigo",
         "dd_doree_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33047-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/22.png"
     },
     {
       "id": "dd_amande_pourpre",
@@ -271,7 +271,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33008-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/41.png"
     },
     {
       "id": "dd_amande_orchidee",
@@ -287,7 +287,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33007-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/40.png"
     },
     {
       "id": "dd_doree_pourpre",
@@ -303,7 +303,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33017-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/49.png"
     },
     {
       "id": "dd_doree_orchidee",
@@ -319,7 +319,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33016-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/48.png"
     },
     {
       "id": "dd_ebene_pourpre",
@@ -335,7 +335,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene",
         "dd_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33025-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/54.png"
     },
     {
       "id": "dd_ebene_orchidee",
@@ -351,7 +351,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene",
         "dd_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33024-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/53.png"
     },
     {
       "id": "dd_indigo_pourpre",
@@ -367,7 +367,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_indigo",
         "dd_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33039-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/65.png"
     },
     {
       "id": "dd_indigo_orchidee",
@@ -383,7 +383,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_indigo",
         "dd_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33038-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/64.png"
     },
     {
       "id": "dd_orchidee_pourpre",
@@ -399,7 +399,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_orchidee",
         "dd_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33048-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/76.png"
     },
     {
       "id": "dd_pourpre_rousse",
@@ -415,7 +415,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_rousse",
         "dd_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33051-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/71.png"
     },
     {
       "id": "dd_orchidee_rousse",
@@ -431,7 +431,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_rousse",
         "dd_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33049-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/70.png"
     },
     {
       "id": "dd_ivoire",
@@ -446,7 +446,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_orchidee_pourpre",
         "dd_amande_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33042-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/16.png"
     },
     {
       "id": "dd_turquoise",
@@ -461,7 +461,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_orchidee_pourpre",
         "dd_doree_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33065-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/15.png"
     },
     {
       "id": "dd_amande_ivoire",
@@ -477,7 +477,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33006-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/37.png"
     },
     {
       "id": "dd_amande_turquoise",
@@ -493,7 +493,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33010-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/39.png"
     },
     {
       "id": "dd_doree_ivoire",
@@ -509,7 +509,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33015-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/45.png"
     },
     {
       "id": "dd_doree_turquoise",
@@ -525,7 +525,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33019-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/47.png"
     },
     {
       "id": "dd_ebene_ivoire",
@@ -541,7 +541,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene",
         "dd_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33023-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/9.png"
     },
     {
       "id": "dd_ebene_turquoise",
@@ -557,7 +557,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33027-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/52.png"
     },
     {
       "id": "dd_indigo_ivoire",
@@ -573,7 +573,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_indigo",
         "dd_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33037-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/61.png"
     },
     {
       "id": "dd_indigo_turquoise",
@@ -589,7 +589,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_indigo",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33041-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/63.png"
     },
     {
       "id": "dd_ivoire_pourpre",
@@ -605,7 +605,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ivoire",
         "dd_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33044-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/68.png"
     },
     {
       "id": "dd_ivoire_orchidee",
@@ -621,7 +621,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ivoire",
         "dd_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33043-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/67.png"
     },
     {
       "id": "dd_ivoire_rousse",
@@ -637,7 +637,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ivoire",
         "dd_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33045-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/11.png"
     },
     {
       "id": "dd_ivoire_turquoise",
@@ -653,7 +653,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ivoire",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33046-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/66.png"
     },
     {
       "id": "dd_pourpre_turquoise",
@@ -669,7 +669,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_pourpre",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33067-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/73.png"
     },
     {
       "id": "dd_orchidee_turquoise",
@@ -685,7 +685,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_orchidee",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33066-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/72.png"
     },
     {
       "id": "dd_turquoise_rousse",
@@ -701,7 +701,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_turquoise",
         "dd_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33068-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/69.png"
     },
     {
       "id": "dd_emeraude",
@@ -716,7 +716,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ivoire_turquoise",
         "dd_amande_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33028-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/21.png"
     },
     {
       "id": "dd_prune",
@@ -731,7 +731,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ivoire_turquoise",
         "dd_doree_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33052-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/23.png"
     },
     {
       "id": "dd_amande_emeraude",
@@ -747,7 +747,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_emeraude"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33004-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/35.png"
     },
     {
       "id": "dd_amande_prune",
@@ -763,7 +763,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_amande",
         "dd_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33053-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/77.png"
     },
     {
       "id": "dd_doree_emeraude",
@@ -779,7 +779,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_emeraude"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33013-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/43.png"
     },
     {
       "id": "dd_doree_prune",
@@ -795,7 +795,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_doree",
         "dd_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33054-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/78.png"
     },
     {
       "id": "dd_ebene_emeraude",
@@ -811,7 +811,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene",
         "dd_emeraude"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33021-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/50.png"
     },
     {
       "id": "dd_ebene_prune",
@@ -827,7 +827,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ebene",
         "dd_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33055-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/79.png"
     },
     {
       "id": "dd_emeraude_pourpre",
@@ -843,7 +843,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_emeraude",
         "dd_pourpre"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33032-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/60.png"
     },
     {
       "id": "dd_emeraude_orchidee",
@@ -859,7 +859,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_emeraude",
         "dd_orchidee"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33031-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/59.png"
     },
     {
       "id": "dd_emeraude_indigo",
@@ -875,7 +875,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_emeraude",
         "dd_indigo"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33029-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/55.png"
     },
     {
       "id": "dd_emeraude_ivoire",
@@ -891,7 +891,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_emeraude",
         "dd_ivoire"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33030-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/56.png"
     },
     {
       "id": "dd_emeraude_turquoise",
@@ -907,7 +907,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_emeraude",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33034-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/58.png"
     },
     {
       "id": "dd_emeraude_rousse",
@@ -923,7 +923,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_emeraude",
         "dd_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33033-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/57.png"
     },
     {
       "id": "dd_indigo_prune",
@@ -939,7 +939,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_indigo",
         "dd_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33057-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/82.png"
     },
     {
       "id": "dd_ivoire_prune",
@@ -955,7 +955,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_ivoire",
         "dd_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33058-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/83.png"
     },
     {
       "id": "dd_pourpre_prune",
@@ -971,7 +971,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_pourpre",
         "dd_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33060-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/87.png"
     },
     {
       "id": "dd_orchidee_prune",
@@ -987,7 +987,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_orchidee",
         "dd_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33059-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/86.png"
     },
     {
       "id": "dd_prune_rousse",
@@ -1003,7 +1003,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_prune",
         "dd_rousse"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33061-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/84.png"
     },
     {
       "id": "dd_prune_turquoise",
@@ -1019,7 +1019,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_prune",
         "dd_turquoise"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33062-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/85.png"
     },
     {
       "id": "dd_emeraude_prune",
@@ -1035,6 +1035,6 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
         "dd_emeraude",
         "dd_prune"
       ],
-      "imageUrl": "https://api.dofusdu.de/dofus3/v1/img/mount/33056-64.png"
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/80.png"
     }
   ];
