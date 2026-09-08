@@ -29,6 +29,10 @@ Permite organizar y gestionar el inventario de **Dragopavos**, **Muluagas** y **
 5. **Árbol de Cruces y Guía de Medidores:**
    - Catálogo interactivo de fórmulas de hibridación y zonas de serenidad (-5.000 a +5.000) con objetos de cercado (*Pesebre, Abrevadero, Aporreador, Acariciador, Fulminador, Dragonalgas*).
 
+6. **Miniaturas e Iconografía Oficial de Dofus 3:**
+   - Integración estática de URLs de miniaturas desde la [API de Dofusdude](https://docs.dofusdu.de/dofus3/v1/#/mounts/get-all-mounts-list) para Dragopavos, Muldos y Vuelocerontes.
+   - Sistema híbrido de renderizado en `MountAvatar`: carga de miniaturas oficiales en alta definición/icono con transición suave a sprites vectoriales SVG estilizados como respaldo (*fallback*).
+
 ---
 
 ## 🛠️ Tecnologías Utilizadas
@@ -65,5 +69,5 @@ npm run build
 
 1. Entra a [Vercel Dashboard](https://vercel.com/dashboard).
 2. Haz clic en **Add New... -> Project**.
-3. Importa el repositorio `madegil/organizador-crianza-dofus`.
+3. Importa el repositorio `madegil/organizador-crianza-dofus``.
 4. El preset de Astro se detectará automáticamente. Haz clic en **Deploy**.

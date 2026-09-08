@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { SpeciesType } from '../types/mount';
 import { getColorsFromBreedName } from '../utils/mountColors';
 
@@ -19,7 +19,12 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
   className = '',
   generation,
 }) => {
+  const [imgError, setImgError] = useState(false);
   const { primary, secondary } = getColorsFromBreedName(breed);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [imageUrl]);
 
   const sizeClasses = {
     sm: 'w-8 h-8 text-[10px]',
@@ -121,8 +126,8 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
             {/* Placas de armadura */}
             <path d="M22 28H42M26 38H38" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
             {/* Ojos furiosos */}
-            <polygon points="24,24 28,26 24,28" fill="#facc15" stroke="#0f172a" strokeWidth="1" />
-            <polygon points="40,24 36,26 40,28" fill="#facc15" stroke="#0f172a" strokeWidth="1" />
+            <polygon points="24,24 28,26 24,28" fill="#facc15" stroke="#0f172a" strokeWidth="1.5" />
+            <polygon points="40,24 36,26 40,28" fill="#facc15" stroke="#0f172a" strokeWidth="1.5" />
           </svg>
         );
     }
@@ -145,13 +150,13 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
           }}
         />
 
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
           <img
             src={imageUrl}
             alt={breed}
             className="w-full h-full object-contain drop-shadow"
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
+            onError={() => {
+              setImgError(true);
             }}
           />
         ) : (
