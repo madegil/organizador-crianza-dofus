@@ -24,7 +24,7 @@ const currentPath = Astro.url.pathname;
   <body class="bg-[#0b0d11] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white antialiased">
     <Navbar client:load currentPath={currentPath} />
     
-    <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-2 pb-24 md:pb-12">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-2 pb-24 md:pb-12">
       <slot />
     </main>
 

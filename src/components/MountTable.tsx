@@ -227,7 +227,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
   const availableBreedsForModal = editingMount?.species ? getMountsBySpecies(editingMount.species) : [];
 
   return (
-    <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 max-w-2xl mx-auto relative">
+    <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
       {/* 1. SECCIÓN SUPERIOR SIMPLIFICADA: Botones Seleccionar Archivo y Descargar Plantilla */}
       <div className="space-y-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
@@ -419,10 +419,10 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
         </div>
       </div>
 
-      {/* 3. LISTADO DE MONTURAS CON EL DISEÑO DE TARJETA EXACTO AL MOCKUP */}
-      <div className="space-y-3 pt-1">
+      {/* 3. LISTADO DE MONTURAS CON EL DISEÑO DE TARJETA EN GRID RESPONSIVE (1 COLUMNA EN MÓVIL, 2 EN ESCRITORIO) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4 pt-1">
         {filteredMounts.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-sm bg-slate-50 rounded-2xl border border-slate-200">
+          <div className="col-span-full text-center py-12 text-slate-400 text-sm bg-slate-50 rounded-2xl border border-slate-200">
             No se encontraron monturas con los filtros aplicados.
           </div>
         ) : (
@@ -437,7 +437,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
             return (
               <div
                 key={m.id}
-                className={`bg-white rounded-2xl p-3 sm:p-4 border transition-all shadow-sm hover:shadow-md flex items-center gap-2 sm:gap-4 ${
+                className={`bg-white rounded-2xl p-3.5 sm:p-4 border transition-all shadow-sm hover:shadow-md flex items-center gap-2 sm:gap-4 ${
                   isSelected ? 'border-blue-500 ring-2 ring-blue-400/30' : 'border-slate-200'
                 }`}
               >
@@ -646,7 +646,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   >
                     <option value="dragopavo">Dragopavo</option>
-                    <option value="muluaga">Muluaga</option>
+                    <option value="muluaga">Muluagas</option>
                     <option value="vueloceronte">Vueloceronte</option>
                   </select>
                 </div>

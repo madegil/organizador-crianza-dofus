@@ -14,7 +14,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
   ];
 
   return (
-    <div className="w-full pt-4 pb-2 px-3 sm:px-6">
+    <div className="w-full max-w-7xl mx-auto pt-4 pb-2 px-3 sm:px-6">
       {/* Banner decorativo oficial 'Gestor de monturas' (Presente en todas las secciones) */}
       <div className="flex flex-col items-center justify-center select-none">
         <a href="/" className="relative inline-flex flex-col items-center group cursor-pointer hover:scale-[1.01] transition-transform">
