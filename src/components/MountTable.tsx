@@ -1,14 +1,33 @@
-import React, { useState } from 'react';
-import { 
-  Search, Filter, Plus, Trash2, Edit3, CheckCircle, Zap, Shield, Heart, 
-  Sparkles, ExternalLink, Calculator, ChevronRight, X, Image as ImageIcon 
+import React, { useState, useRef } from 'react';
+import {
+  Search,
+  FolderUp,
+  Download,
+  Trash2,
+  Edit3,
+  Plus,
+  X,
+  Calculator,
+  ChevronDown,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  FileSpreadsheet,
+  FileJson,
+  Check,
 } from 'lucide-react';
 import type { FertilityStatus, SpecialCapacity, SpeciesType, UserMount } from '../types/mount';
 import { MAX_MOUNT_XP } from '../data/fuelData';
 import { db } from '../db/mountsDb';
-import { ALL_MOUNTS_DATA, getMountsBySpecies } from '../data/allMounts';
+import { ALL_MOUNTS_DATA, getMountsBySpecies, findMountByBreedAndSpecies } from '../data/allMounts';
 import { MountAvatar } from './MountAvatar';
 import { getFertilityLabel, getFertilityBadgeClasses, getCapacityLabel } from '../utils/badgeHelpers';
+import {
+  downloadExcelTemplate,
+  exportMountsToExcel,
+  exportMountsToJson,
+  parseExcelFile,
+} from '../utils/excelHelper';
 
 interface MountTableProps {
   mounts: UserMount[];
@@ -27,10 +46,43 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingMount, setEditingMount] = useState<Partial<UserMount> | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  // Manejo de importación de Excel/CSV simplificada
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadMessage(null);
+
+    try {
+      const parsedMounts = await parseExcelFile(file);
+      await db.mounts.bulkPut(parsedMounts);
+      setUploadMessage({
+        type: 'success',
+        text: `¡Éxito! Se importaron ${parsedMounts.length} monturas a la base de datos.`,
+      });
+      onDataChanged();
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch (err: any) {
+      setUploadMessage({
+        type: 'error',
+        text: err.message || 'Error al procesar el archivo Excel.',
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Filtrado de monturas
   const filteredMounts = mounts.filter((m) => {
     if (speciesFilter !== 'all' && m.species !== speciesFilter) return false;
     if (generationFilter !== 'all' && m.generation !== Number(generationFilter)) return false;
-    
+
     if (fertilityFilter !== 'all') {
       const normFertility = getFertilityLabel(m.fertility).toLowerCase();
       if (fertilityFilter === 'fertil' && !normFertility.includes('fér') && !normFertility.includes('fer')) return false;
@@ -64,14 +116,6 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
     setSelectedMountIds(next);
   };
 
-  const selectAllFiltered = () => {
-    const next = new Set<string>();
-    for (const m of filteredMounts.slice(0, 10)) {
-      next.add(m.id);
-    }
-    setSelectedMountIds(next);
-  };
-
   const clearSelection = () => {
     setSelectedMountIds(new Set());
   };
@@ -79,6 +123,18 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
   const handleDeleteMount = async (id: string) => {
     if (confirm('¿Seguro que deseas eliminar esta montura del inventario?')) {
       await db.mounts.delete(id);
+      const next = new Set(selectedMountIds);
+      next.delete(id);
+      setSelectedMountIds(next);
+      onDataChanged();
+    }
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedMountIds.size === 0) return;
+    if (confirm(`¿Seguro que deseas eliminar las ${selectedMountIds.size} monturas seleccionadas?`)) {
+      await db.mounts.bulkDelete(Array.from(selectedMountIds));
+      setSelectedMountIds(new Set());
       onDataChanged();
     }
   };
@@ -113,13 +169,18 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
     e.preventDefault();
     if (!editingMount) return;
 
+    const matchedDef = findMountByBreedAndSpecies(
+      editingMount.breed || '',
+      editingMount.species || 'dragopavo'
+    );
+
     const toSave: UserMount = {
       id: editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       nickname: editingMount.nickname || 'Sin Nombre',
-      definitionId: editingMount.definitionId || 'custom',
+      definitionId: editingMount.definitionId || matchedDef?.id || 'custom',
       species: editingMount.species || 'dragopavo',
       breed: editingMount.breed || 'Almendrada',
-      generation: Number(editingMount.generation) || 1,
+      generation: Number(editingMount.generation) || matchedDef?.generation || 1,
       gender: (editingMount.gender as 'M' | 'F') || 'M',
       currentLevel: Number(editingMount.currentLevel) || 1,
       currentXp: Number(editingMount.currentXp) || 0,
@@ -129,7 +190,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
       love: Number(editingMount.love) || 0,
       maturity: Number(editingMount.maturity) || 0,
       stamina: Number(editingMount.stamina) || 0,
-      imageUrl: editingMount.imageUrl || '',
+      imageUrl: editingMount.imageUrl || matchedDef?.imageUrl || '',
       notes: editingMount.notes || '',
       createdAt: editingMount.createdAt || Date.now(),
       updatedAt: Date.now(),
@@ -141,234 +202,351 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
     onDataChanged();
   };
 
-  const getSpeciesBadge = (species: SpeciesType) => {
-    switch (species) {
-      case 'dragopavo':
-        return <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">Dragopavo</span>;
-      case 'muluaga':
-        return <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[10px] font-bold">Muluaga</span>;
-      case 'vueloceronte':
-        return <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold">Vueloceronte</span>;
-    }
+  const openNewMountModal = () => {
+    const defaultBreeds = getMountsBySpecies('dragopavo');
+    const first = defaultBreeds[0];
+    setEditingMount({
+      species: 'dragopavo',
+      breed: first ? first.name : 'Almendrada',
+      definitionId: first ? first.id : 'dd_amande',
+      generation: first ? first.generation : 1,
+      gender: 'M',
+      currentLevel: 1,
+      currentXp: 0,
+      fertility: 'fertil',
+      capacity: 'ninguna',
+      serenity: 2000,
+      love: 20000,
+      maturity: 20000,
+      stamina: 20000,
+      imageUrl: first?.imageUrl || '',
+    });
+    setIsEditModalOpen(true);
   };
 
   const availableBreedsForModal = editingMount?.species ? getMountsBySpecies(editingMount.species) : [];
 
   return (
-    <div className="bg-dofus-card rounded-xl sm:rounded-2xl border border-dofus-border p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-6">
-      {/* Barra superior de búsqueda y filtros (Totalmente responsive) */}
-      <div className="flex flex-col gap-3">
+    <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 max-w-2xl mx-auto relative">
+      {/* 1. SECCIÓN SUPERIOR SIMPLIFICADA: Botones Seleccionar Archivo y Descargar Plantilla */}
+      <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+          {/* Botón Seleccionar Archivo (con borde punteado como en la referencia) */}
+          <label className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".xlsx, .xls, .csv"
+              className="hidden"
+            />
+            {isUploading ? (
+              <RefreshCw className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />
+            ) : (
+              <FolderUp className="w-5 h-5 text-blue-600 flex-shrink-0" />
+            )}
+            <span>Seleccionar archivo</span>
+          </label>
+
+          {/* Botón Descargar Plantilla (fondo azul sólido como en la referencia) */}
+          <button
+            onClick={downloadExcelTemplate}
+            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
+          >
+            <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />
+            <span>Descargar plantilla</span>
+          </button>
+        </div>
+
+        {/* Acciones de respaldo y exportación discretas */}
+        <div className="flex items-center justify-between px-1 text-xs text-slate-500">
+          <span className="truncate">
+            Base de datos local: <strong className="text-slate-800 font-mono">{mounts.length}</strong> monturas
+          </span>
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="font-semibold text-blue-700 hover:text-blue-900 flex items-center gap-1 hover:underline cursor-pointer"
+            >
+              <span>Exportar datos</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-xl z-30 py-1 text-xs text-slate-700 animate-in fade-in zoom-in-95">
+                <button
+                  onClick={() => {
+                    exportMountsToExcel(mounts);
+                    setShowExportMenu(false);
+                  }}
+                  disabled={mounts.length === 0}
+                  className="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2 disabled:opacity-50"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                  <span>Descargar Excel</span>
+                </button>
+                <button
+                  onClick={() => {
+                    exportMountsToJson(mounts);
+                    setShowExportMenu(false);
+                  }}
+                  disabled={mounts.length === 0}
+                  className="w-full text-left px-3 py-2 hover:bg-slate-100 flex items-center gap-2 disabled:opacity-50"
+                >
+                  <FileJson className="w-4 h-4 text-sky-600" />
+                  <span>Backup JSON</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mensaje de estado de subida */}
+        {uploadMessage && (
+          <div
+            className={`p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium ${
+              uploadMessage.type === 'success'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                : 'bg-rose-50 text-rose-800 border border-rose-200'
+            }`}
+          >
+            {uploadMessage.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+            )}
+            <span className="flex-1">{uploadMessage.text}</span>
+            <button onClick={() => setUploadMessage(null)} className="text-slate-400 hover:text-slate-600">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 2. BUSCADOR Y FILTROS DE BÚSQUEDA MEJORADOS */}
+      <div className="space-y-2.5">
+        {/* Input Buscador estilo mockup */}
         <div className="relative w-full">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Buscar por apodo, raza o color..."
+            placeholder="Buscar montura..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-900/90 border border-dofus-border rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 hover:border-slate-400 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition shadow-inner font-medium"
           />
         </div>
 
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
-          <select
-            value={speciesFilter}
-            onChange={(e) => setSpeciesFilter(e.target.value as any)}
-            className="px-2.5 py-2 bg-slate-900/90 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            <option value="all">Especies (Todas)</option>
-            <option value="dragopavo">Dragopavos</option>
-            <option value="muluaga">Muluagas</option>
-            <option value="vueloceronte">Vuelocerontes</option>
-          </select>
+        {/* Fila de Filtros (Pills con iconos y select nativo estéticamente integrado) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {/* Tipo de montura */}
+          <div className="relative">
+            <select
+              value={speciesFilter}
+              onChange={(e) => setSpeciesFilter(e.target.value as any)}
+              className="w-full appearance-none pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 focus:outline-none focus:border-blue-500 transition cursor-pointer shadow-sm truncate"
+            >
+              <option value="all">Tipo de montura</option>
+              <option value="dragopavo">Dragopavos</option>
+              <option value="muluaga">Muluagas</option>
+              <option value="vueloceronte">Vuelocerontes</option>
+            </select>
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs">🐴</span>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
 
-          <select
-            value={generationFilter}
-            onChange={(e) => setGenerationFilter(e.target.value)}
-            className="px-2.5 py-2 bg-slate-900/90 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            <option value="all">Gen. (Todas)</option>
-            {[1,2,3,4,5,6,7,8,9,10].map(g => (
-              <option key={g} value={g}>Gen. {g}</option>
-            ))}
-          </select>
+          {/* Generación */}
+          <div className="relative">
+            <select
+              value={generationFilter}
+              onChange={(e) => setGenerationFilter(e.target.value)}
+              className="w-full appearance-none pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 focus:outline-none focus:border-blue-500 transition cursor-pointer shadow-sm truncate"
+            >
+              <option value="all">Generación</option>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((g) => (
+                <option key={g} value={g}>Gen. {g}</option>
+              ))}
+            </select>
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs">⭐</span>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
 
-          <select
-            value={fertilityFilter}
-            onChange={(e) => setFertilityFilter(e.target.value)}
-            className="px-2.5 py-2 bg-slate-900/90 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            <option value="all">Fertilidad (Todas)</option>
-            <option value="fertil">Fértil</option>
-            <option value="fecunda">Fecunda</option>
-            <option value="esteril">Estéril</option>
-            <option value="senil">Senil</option>
-          </select>
+          {/* Fertilidad */}
+          <div className="relative">
+            <select
+              value={fertilityFilter}
+              onChange={(e) => setFertilityFilter(e.target.value)}
+              className="w-full appearance-none pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 focus:outline-none focus:border-blue-500 transition cursor-pointer shadow-sm truncate"
+            >
+              <option value="all">Fertilidad</option>
+              <option value="fertil">Fértil</option>
+              <option value="fecunda">Fecunda</option>
+              <option value="esteril">Estéril</option>
+              <option value="senil">Senil</option>
+            </select>
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs">❤️</span>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
 
-          <select
-            value={level200Filter}
-            onChange={(e) => setLevel200Filter(e.target.value as any)}
-            className="px-2.5 py-2 bg-slate-900/90 border border-dofus-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            <option value="all">Nivel (Todos)</option>
-            <option value="need200">Faltan a 200</option>
-            <option value="is200">Nivel 200 ✓</option>
-          </select>
+          {/* Nivel */}
+          <div className="relative">
+            <select
+              value={level200Filter}
+              onChange={(e) => setLevel200Filter(e.target.value as any)}
+              className="w-full appearance-none pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 focus:outline-none focus:border-blue-500 transition cursor-pointer shadow-sm truncate"
+            >
+              <option value="all">Nivel</option>
+              <option value="need200">Faltan a 200</option>
+              <option value="is200">Nivel 200 ✓</option>
+            </select>
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs">📊</span>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
 
+        {/* Barra de conteo y botón Nueva Montura */}
+        <div className="flex items-center justify-between pt-1 px-1 text-xs text-slate-500">
+          <span>
+            Mostrando <strong>{filteredMounts.length}</strong> de {mounts.length} monturas
+          </span>
           <button
-            onClick={() => {
-              const defaultBreeds = getMountsBySpecies('dragopavo');
-              const first = defaultBreeds[0];
-              setEditingMount({
-                species: 'dragopavo',
-                breed: first ? first.name : 'Almendrada',
-                definitionId: first ? first.id : 'dd_amande',
-                generation: first ? first.generation : 1,
-                gender: 'M',
-                currentLevel: 1,
-                currentXp: 0,
-                fertility: 'fertil',
-                capacity: 'ninguna',
-                serenity: 0,
-                love: 0,
-                maturity: 0,
-                stamina: 0,
-              });
-              setIsEditModalOpen(true);
-            }}
-            className="col-span-2 sm:col-span-1 sm:ml-auto flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 transition"
+            onClick={openNewMountModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm"
           >
-            <Plus className="w-4 h-4" />
-            <span>Nueva Montura</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Nueva montura</span>
           </button>
         </div>
       </div>
 
-      {/* Barra de lote para Cercado */}
-      {selectedMountIds.size > 0 && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-amber-300 font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
-            <span>{selectedMountIds.size} de 10 monturas seleccionadas para el cercado</span>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <a
-              href={`/calculadora?batch=${Array.from(selectedMountIds).join(',')}`}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold transition"
-            >
-              <Calculator className="w-3.5 h-3.5" />
-              Calcular Lote en Pesebre
-            </a>
-            <button
-              onClick={clearSelection}
-              className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800/80"
-              title="Limpiar selección"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* VISTA MÓVIL: Tarjetas de Montura (Visible en pantallas < md) */}
-      <div className="block md:hidden space-y-3">
+      {/* 3. LISTADO DE MONTURAS CON EL DISEÑO DE TARJETA EXACTO AL MOCKUP */}
+      <div className="space-y-3 pt-1">
         {filteredMounts.length === 0 ? (
-          <div className="text-center py-8 text-slate-500 text-sm bg-slate-900/40 rounded-xl border border-dofus-border">
+          <div className="text-center py-12 text-slate-400 text-sm bg-slate-50 rounded-2xl border border-slate-200">
             No se encontraron monturas con los filtros aplicados.
           </div>
         ) : (
           filteredMounts.map((m) => {
-            const xpRemaining = Math.max(0, MAX_MOUNT_XP - m.currentXp);
-            const progressPercent = Math.min(100, Math.round((m.currentXp / MAX_MOUNT_XP) * 100));
             const isSelected = selectedMountIds.has(m.id);
-            const capacityLabel = getCapacityLabel(m.capacity);
+            const progressPercent = Math.min(100, Math.max(0, Math.round((m.currentXp / MAX_MOUNT_XP) * 100)));
+            const matchedDef = ALL_MOUNTS_DATA.find(
+              (def) => def.id === m.definitionId || def.name.toLowerCase() === m.breed.toLowerCase()
+            );
+            const imageUrl = m.imageUrl || matchedDef?.imageUrl;
 
             return (
               <div
                 key={m.id}
-                className={`p-3.5 rounded-xl border transition space-y-3 ${
-                  isSelected ? 'bg-amber-500/10 border-amber-500/50' : 'bg-slate-900/70 border-dofus-border'
+                className={`bg-white rounded-2xl p-3 sm:p-4 border transition-all shadow-sm hover:shadow-md flex items-center gap-2 sm:gap-4 ${
+                  isSelected ? 'border-blue-500 ring-2 ring-blue-400/30' : 'border-slate-200'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => toggleSelectMount(m.id)}
-                      className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500 w-4 h-4"
-                    />
-                    <MountAvatar
-                      species={m.species}
-                      breed={m.breed}
-                      imageUrl={m.imageUrl}
-                      size="sm"
-                      generation={m.generation}
-                    />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <p className="font-bold text-slate-100 text-xs truncate">{m.nickname}</p>
-                        <span className={`text-xs ${m.gender === 'F' ? 'text-rose-400' : 'text-sky-400'}`}>
-                          {m.gender === 'F' ? '♀' : '♂'}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 truncate">{m.breed}</p>
+                {/* Columna Izquierda: Checkbox de selección + Botón de Eliminar (cuadrado rojo) */}
+                <div className="flex flex-col items-center justify-between gap-3 flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleSelectMount(m.id)}
+                    className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    title="Seleccionar para lote de cercado"
+                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteMount(m.id);
+                    }}
+                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-sm cursor-pointer"
+                    title="Eliminar montura"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Columna Imagen / Avatar de Montura */}
+                <div
+                  className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 cursor-pointer flex items-center justify-center"
+                  onClick={() => {
+                    setEditingMount(m);
+                    setIsEditModalOpen(true);
+                  }}
+                  title="Clic para ver o editar detalles"
+                >
+                  <MountAvatar
+                    species={m.species}
+                    breed={m.breed}
+                    imageUrl={imageUrl}
+                    size="card"
+                    generation={m.generation}
+                  />
+                </div>
+
+                {/* Columna Central: Apodo, Sexo, Raza y Badges */}
+                <div
+                  className="flex-1 min-w-0 cursor-pointer space-y-1 sm:space-y-1.5"
+                  onClick={() => {
+                    setEditingMount(m);
+                    setIsEditModalOpen(true);
+                  }}
+                >
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3 className="font-extrabold text-slate-800 text-sm sm:text-base leading-tight truncate">
+                      {m.nickname || m.breed}
+                    </h3>
+                    <span className={`text-base font-bold ${m.gender === 'F' ? 'text-pink-500' : 'text-blue-600'}`}>
+                      {m.gender === 'F' ? '♀' : '♂'}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 truncate font-medium">{m.breed}</p>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 pt-0.5">
+                    {/* Badge de Fertilidad (ej. 🍃 Fértil) */}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 w-fit border border-emerald-200/60">
+                      <span>🍃</span>
+                      <span>{getFertilityLabel(m.fertility)}</span>
+                    </span>
+
+                    {/* Badge Nivel Actual */}
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 w-fit border border-blue-100">
+                      Nivel actual: {m.currentLevel}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Columna Derecha: XP, Barra de Progreso y Medidores (Amor, Madurez, Energía) */}
+                <div
+                  className="w-32 sm:w-48 flex-shrink-0 text-right space-y-1.5 cursor-pointer"
+                  onClick={() => {
+                    setEditingMount(m);
+                    setIsEditModalOpen(true);
+                  }}
+                >
+                  <div>
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-700 font-mono">
+                      XP: {m.currentXp.toLocaleString()}
+                    </span>
+                    <div className="w-full bg-slate-200 h-2 sm:h-2.5 rounded-full overflow-hidden mt-1 border border-slate-300/60">
+                      <div
+                        className="h-full bg-lime-500 rounded-full transition-all"
+                        style={{ width: `${progressPercent}%` }}
+                      />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button
-                      onClick={() => {
-                        setEditingMount(m);
-                        setIsEditModalOpen(true);
-                      }}
-                      className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteMount(m.id)}
-                      className="p-1.5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Barra de nivel y progreso */}
-                <div className="space-y-1 bg-slate-950/40 p-2 rounded-lg border border-slate-800/80">
-                  <div className="flex justify-between items-center text-[10px]">
-                    <span className="font-bold text-white">Nivel {m.currentLevel} ({progressPercent}%)</span>
-                    <span className="text-amber-300 font-mono font-semibold">
-                      {xpRemaining === 0 ? 'Max 200 ✓' : `${xpRemaining.toLocaleString()} XP falta`}
-                    </span>
-                  </div>
-                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all ${
-                        m.currentLevel >= 200 ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-500 to-amber-300'
-                      }`}
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Badges y Medidores */}
-                <div className="flex items-center justify-between gap-2 text-[10px] pt-1 border-t border-slate-800/60">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`px-1.5 py-0.5 rounded font-bold uppercase ${getFertilityBadgeClasses(m.fertility)}`}>
-                      {getFertilityLabel(m.fertility)}
-                    </span>
-                    {capacityLabel && (
-                      <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                        {capacityLabel}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-slate-400">
-                    <span className="text-purple-300 font-mono">S:{m.serenity}</span>
-                    <span>♥{Math.round(m.love/200)}%</span>
-                    <span>💧{Math.round(m.maturity/200)}%</span>
-                    <span>⚡{Math.round(m.stamina/200)}%</span>
+                  {/* Medidores con iconos (Amor, Madurez, Energía) */}
+                  <div className="text-[10px] sm:text-[11px] text-slate-600 space-y-0.5 font-semibold">
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-rose-500 text-xs">❤️</span>
+                      <span>Amor: {m.love}</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-blue-500 text-xs">💧</span>
+                      <span>Madurez: {m.maturity}</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-1">
+                      <span className="text-amber-500 text-xs">⚡</span>
+                      <span>Energía: {m.stamina}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -377,281 +555,151 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
         )}
       </div>
 
-      {/* VISTA ESCRITORIO: Tabla Completa (Visible en md+) */}
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-dofus-border">
-        <table className="w-full text-left text-xs text-slate-300">
-          <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[10px] border-b border-dofus-border">
-            <tr>
-              <th className="p-3 w-10 text-center">
-                <input
-                  type="checkbox"
-                  checked={selectedMountIds.size > 0 && selectedMountIds.size === Math.min(10, filteredMounts.length)}
-                  onChange={(e) => e.target.checked ? selectAllFiltered() : clearSelection()}
-                  className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500"
-                />
-              </th>
-              <th className="p-3">Montura & Apodo</th>
-              <th className="p-3">Especie / Gen</th>
-              <th className="p-3">Nivel & Progreso XP</th>
-              <th className="p-3">XP Faltante para Nivel 200</th>
-              <th className="p-3">Fertilidad & Capacidad</th>
-              <th className="p-3">Medidores de Cría</th>
-              <th className="p-3 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-dofus-border/60 bg-dofus-card">
-            {filteredMounts.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="text-center py-10 text-slate-500 text-sm">
-                  No se encontraron monturas con los filtros aplicados.
-                </td>
-              </tr>
-            ) : (
-              filteredMounts.map((m) => {
-                const xpRemaining = Math.max(0, MAX_MOUNT_XP - m.currentXp);
-                const progressPercent = Math.min(100, Math.round((m.currentXp / MAX_MOUNT_XP) * 100));
-                const isSelected = selectedMountIds.has(m.id);
-                const capacityLabel = getCapacityLabel(m.capacity);
+      {/* 4. BARRA FLOTANTE DE LOTE PARA CERCADO CUANDO HAY SELECCIONADAS */}
+      {selectedMountIds.size > 0 && (
+        <div className="sticky bottom-20 md:bottom-4 z-40 bg-[#1e293b] text-white rounded-2xl p-3 sm:p-4 shadow-2xl border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-2">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-amber-300 font-bold">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
+            <span>{selectedMountIds.size} de 10 monturas seleccionadas</span>
+          </div>
 
-                return (
-                  <tr
-                    key={m.id}
-                    className={`hover:bg-slate-800/40 transition ${
-                      isSelected ? 'bg-amber-500/5' : ''
-                    }`}
-                  >
-                    <td className="p-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelectMount(m.id)}
-                        className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500"
-                      />
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-3">
-                        <MountAvatar
-                          species={m.species}
-                          breed={m.breed}
-                          imageUrl={m.imageUrl}
-                          size="md"
-                          generation={m.generation}
-                        />
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <p className="font-bold text-slate-100 text-sm">{m.nickname}</p>
-                            <span className={`text-xs ${m.gender === 'F' ? 'text-rose-400' : 'text-sky-400'}`}>
-                              {m.gender === 'F' ? '♀' : '♂'}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-400">{m.breed}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <div className="flex flex-col gap-1 items-start">
-                        {getSpeciesBadge(m.species)}
-                        <span className="text-[11px] text-slate-400">Gen. {m.generation}</span>
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <div className="w-36 space-y-1">
-                        <div className="flex justify-between text-[11px]">
-                          <span className="font-bold text-white">Nivel {m.currentLevel}</span>
-                          <span className="text-slate-400 font-mono">{progressPercent}%</span>
-                        </div>
-                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full transition-all ${
-                              m.currentLevel >= 200 ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-500 to-amber-300'
-                            }`}
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-3 font-mono font-medium">
-                      {xpRemaining === 0 ? (
-                        <span className="text-emerald-400 flex items-center gap-1">
-                          <CheckCircle className="w-3.5 h-3.5" /> Max Nivel 200
-                        </span>
-                      ) : (
-                        <span className="text-amber-300">{xpRemaining.toLocaleString()} XP</span>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex flex-col gap-1 items-start">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${getFertilityBadgeClasses(m.fertility)}`}>
-                          {getFertilityLabel(m.fertility)}
-                        </span>
-                        {capacityLabel && (
-                          <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-medium">
-                            {capacityLabel}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-2 text-[11px]">
-                        <span title="Serenidad" className="text-purple-300 font-mono">{m.serenity}</span>
-                        <span className="text-slate-600">|</span>
-                        <span title="Amor" className="text-rose-400">♥ {Math.round(m.love/200)}%</span>
-                        <span title="Madurez" className="text-sky-400">💧 {Math.round(m.maturity/200)}%</span>
-                        <span title="Resistencia" className="text-amber-400">⚡ {Math.round(m.stamina/200)}%</span>
-                      </div>
-                    </td>
-                    <td className="p-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => {
-                            setEditingMount(m);
-                            setIsEditModalOpen(true);
-                          }}
-                          className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition"
-                          title="Editar"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteMount(m.id)}
-                          className="p-1.5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg transition"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <a
+              href={`/calculadora?batch=${Array.from(selectedMountIds).join(',')}`}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition shadow-sm"
+            >
+              <Calculator className="w-4 h-4" />
+              <span>Calcular Lote</span>
+            </a>
+            <button
+              onClick={handleBatchDelete}
+              className="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+              title="Eliminar seleccionadas"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Eliminar</span>
+            </button>
+            <button
+              onClick={clearSelection}
+              className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800"
+              title="Limpiar selección"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
-      {/* Modal de Creación / Edición con Selector de Razas e Imagen */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-dofus-card border border-dofus-border rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl max-h-[92vh] overflow-y-auto space-y-4 sm:space-y-6">
-            <div className="flex items-center justify-between border-b border-dofus-border pb-3">
-              <div className="flex items-center gap-3">
-                <MountAvatar
-                  species={editingMount?.species || 'dragopavo'}
-                  breed={editingMount?.breed || 'Almendrada'}
-                  imageUrl={editingMount?.imageUrl}
-                  size="md"
-                  generation={editingMount?.generation}
-                />
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-white">
-                    {editingMount?.id ? 'Editar Montura' : 'Nueva Montura'}
-                  </h3>
-                  <p className="text-[11px] text-slate-400 hidden sm:block">
-                    Selecciona la especie y raza oficial para configurar automáticamente su icono y generación.
-                  </p>
-                </div>
-              </div>
+      {/* 5. MODAL PARA CREAR O EDITAR MONTURA */}
+      {isEditModalOpen && editingMount && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white text-slate-900 border border-slate-200 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
+                <span>{editingMount.id ? 'Editar Montura' : 'Nueva Montura'}</span>
+              </h3>
               <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1.5 rounded-lg"
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setEditingMount(null);
+                }}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveMount} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
-                {/* Especie */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Apodo */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Especie</label>
-                  <select
-                    value={editingMount?.species || 'dragopavo'}
-                    onChange={(e) => handleSpeciesChangeInModal(e.target.value as SpeciesType)}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-semibold"
-                  >
-                    <option value="dragopavo">Dragopavo (66 Razas)</option>
-                    <option value="muluaga">Muluaga (120 Razas)</option>
-                    <option value="vueloceronte">Vueloceronte (120 Razas)</option>
-                  </select>
-                </div>
-
-                {/* Lista desplegable de Razas Oficiales */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Raza Oficial / Color ({availableBreedsForModal.length} disponibles)
-                  </label>
-                  <select
-                    value={editingMount?.definitionId || ''}
-                    onChange={(e) => handleBreedChangeInModal(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
-                  >
-                    {availableBreedsForModal.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        Gen. {b.generation} • {b.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Apodo / Nombre */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Apodo / Nombre</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Apodo / Nombre</label>
                   <input
                     type="text"
                     required
-                    placeholder="Ej. Made, Trueno..."
-                    value={editingMount?.nickname || ''}
+                    value={editingMount.nickname || ''}
                     onChange={(e) => setEditingMount({ ...editingMount, nickname: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                    placeholder="Ej. AquaDrak"
                   />
                 </div>
 
                 {/* Sexo */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Sexo</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Sexo</label>
                   <select
-                    value={editingMount?.gender || 'M'}
-                    onChange={(e) => setEditingMount({ ...editingMount, gender: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
+                    value={editingMount.gender || 'M'}
+                    onChange={(e) => setEditingMount({ ...editingMount, gender: e.target.value as 'M' | 'F' })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   >
                     <option value="M">Macho (♂)</option>
                     <option value="F">Hembra (♀)</option>
                   </select>
                 </div>
 
+                {/* Especie */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Especie</label>
+                  <select
+                    value={editingMount.species || 'dragopavo'}
+                    onChange={(e) => handleSpeciesChangeInModal(e.target.value as SpeciesType)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="dragopavo">Dragopavo</option>
+                    <option value="muluaga">Muluaga</option>
+                    <option value="vueloceronte">Vueloceronte</option>
+                  </select>
+                </div>
+
+                {/* Raza / Color */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Raza / Color</label>
+                  <select
+                    value={editingMount.definitionId || ''}
+                    onChange={(e) => handleBreedChangeInModal(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                  >
+                    {availableBreedsForModal.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} (Gen {b.generation})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Nivel Actual */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Nivel Actual (1 a 200)</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nivel Actual (1-200)</label>
                   <input
                     type="number"
                     min={1}
                     max={200}
-                    value={editingMount?.currentLevel || 1}
+                    value={editingMount.currentLevel || 1}
                     onChange={(e) => setEditingMount({ ...editingMount, currentLevel: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 {/* XP Actual */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">XP Actual (Máx. 867.582)</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">XP Actual (Max 867.582)</label>
                   <input
                     type="number"
                     min={0}
-                    max={867582}
-                    value={editingMount?.currentXp || 0}
+                    max={MAX_MOUNT_XP}
+                    value={editingMount.currentXp || 0}
                     onChange={(e) => setEditingMount({ ...editingMount, currentXp: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 {/* Fertilidad */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Estado de Fertilidad</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Fertilidad</label>
                   <select
-                    value={editingMount?.fertility || 'fertil'}
-                    onChange={(e) => setEditingMount({ ...editingMount, fertility: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
+                    value={editingMount.fertility || 'fertil'}
+                    onChange={(e) => setEditingMount({ ...editingMount, fertility: e.target.value as FertilityStatus })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   >
                     <option value="fertil">Fértil</option>
                     <option value="fecunda">Fecunda</option>
@@ -662,49 +710,87 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
                 {/* Capacidad Especial */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Capacidad Especial</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Capacidad Especial</label>
                   <select
-                    value={editingMount?.capacity || 'ninguna'}
-                    onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as any })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
+                    value={editingMount.capacity || 'ninguna'}
+                    onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as SpecialCapacity })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   >
                     <option value="ninguna">Ninguna</option>
-                    <option value="sabia">Sabia • Duplica ganancia de XP</option>
-                    <option value="enamoradiza">Enamoradiza • Duplica ganancia de Amor</option>
-                    <option value="resistente">Resistente • Duplica ganancia de Resistencia</option>
-                    <option value="precoz">Precoz • Duplica ganancia de Madurez</option>
-                    <option value="reproductora">Reproductora • +1 Cría en parto</option>
+                    <option value="sabia">Sabia (x2 XP)</option>
+                    <option value="enamoradiza">Enamoradiza</option>
+                    <option value="resistente">Resistente</option>
+                    <option value="precoz">Precoz</option>
+                    <option value="reproductora">Reproductora</option>
                     <option value="camaleon">Camaleón</option>
                   </select>
                 </div>
 
-                {/* URL de Imagen Personalizada */}
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1.5">
-                    <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
-                    URL de Imagen Personalizada (Opcional)
-                  </label>
+                {/* Medidores (Amor, Madurez, Energía) */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Amor (0 - 20.000)</label>
                   <input
-                    type="url"
-                    placeholder="https://ejemplo.com/mi-montura.png (dejar vacío para usar imagen estándar)"
-                    value={editingMount?.imageUrl || ''}
-                    onChange={(e) => setEditingMount({ ...editingMount, imageUrl: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-dofus-border rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
+                    type="number"
+                    min={0}
+                    max={20000}
+                    value={editingMount.love ?? 20000}
+                    onChange={(e) => setEditingMount({ ...editingMount, love: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Madurez (0 - 20.000)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={20000}
+                    value={editingMount.maturity ?? 20000}
+                    onChange={(e) => setEditingMount({ ...editingMount, maturity: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Energía / Resistencia (0 - 20.000)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={20000}
+                    value={editingMount.stamina ?? 20000}
+                    onChange={(e) => setEditingMount({ ...editingMount, stamina: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Serenidad (-5000 a +5000)</label>
+                  <input
+                    type="number"
+                    min={-5000}
+                    max={5000}
+                    value={editingMount.serenity ?? 0}
+                    onChange={(e) => setEditingMount({ ...editingMount, serenity: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-dofus-border">
+              {/* Botones del Modal */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition"
+                  onClick={() => {
+                    setIsEditModalOpen(false);
+                    setEditingMount(null);
+                  }}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20 transition"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-md"
                 >
                   Guardar Montura
                 </button>
