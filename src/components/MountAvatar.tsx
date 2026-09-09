@@ -6,7 +6,7 @@ interface MountAvatarProps {
   species: SpeciesType;
   breed: string;
   imageUrl?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'card';
   className?: string;
   generation?: number;
 }
@@ -31,6 +31,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
     md: 'w-12 h-12 text-xs',
     lg: 'w-16 h-16 text-sm',
     xl: 'w-24 h-24 text-base',
+    card: 'w-20 h-20 sm:w-24 sm:h-24 text-sm',
   }[size];
 
   const iconSizes = {
@@ -38,6 +39,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
     md: 'w-8 h-8',
     lg: 'w-11 h-11',
     xl: 'w-16 h-16',
+    card: 'w-16 h-16 sm:w-20 sm:h-20',
   }[size];
 
   // SVG Stylized Sprites tailored for each Dofus Mount Species
@@ -135,16 +137,16 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
 
   return (
     <div className={`relative flex-shrink-0 ${sizeClasses} ${className}`}>
-      {/* Contenedor circular con degradado de los colores de la raza */}
+      {/* Contenedor circular con degradado suave de los colores de la raza */}
       <div
-        className="w-full h-full rounded-2xl p-1 flex items-center justify-center shadow-lg border border-slate-700/60 overflow-hidden relative"
+        className="w-full h-full rounded-2xl p-1 flex items-center justify-center shadow-sm border border-slate-200/90 bg-slate-50/80 overflow-hidden relative"
         style={{
-          background: `linear-gradient(135deg, ${primary}33 0%, ${secondary}44 100%)`,
+          background: `linear-gradient(135deg, ${primary}22 0%, ${secondary}33 100%)`,
         }}
       >
         {/* Glow ambiental */}
         <div
-          className="absolute inset-0 opacity-20 blur-sm pointer-events-none"
+          className="absolute inset-0 opacity-15 blur-sm pointer-events-none"
           style={{
             background: `radial-gradient(circle, ${primary} 0%, ${secondary} 80%)`,
           }}
@@ -156,7 +158,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
             alt={breed}
             referrerPolicy="no-referrer"
             loading="lazy"
-            className="w-full h-full object-contain drop-shadow z-10"
+            className="w-full h-full object-contain drop-shadow-md z-10"
             onError={() => {
               setImgError(true);
             }}

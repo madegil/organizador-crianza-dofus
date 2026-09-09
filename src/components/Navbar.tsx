@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Calculator, Layers, GitFork, Home } from 'lucide-react';
+import { Home, Calculator, BookOpen, GitFork } from 'lucide-react';
 
 interface NavbarProps {
   currentPath?: string;
@@ -9,37 +9,32 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
   const navItems = [
     { href: '/', label: 'Establo', icon: Home },
     { href: '/calculadora', label: 'Calculadora', icon: Calculator },
-    { href: '/coleccion', label: 'Colección', icon: Layers },
+    { href: '/coleccion', label: 'Colección', icon: BookOpen },
     { href: '/cruces', label: 'Cruces', icon: GitFork },
   ];
 
   return (
     <>
-      {/* Top Header - Desktop & Mobile */}
-      <header className="bg-dofus-card/95 backdrop-blur-md border-b border-dofus-border sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      {/* Barra de navegación superior (Desktop y Móvil) */}
+      <header className="bg-[#12151c]/95 backdrop-blur-md border-b border-dofus-border sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo y Nombre */}
             <a href="/" className="flex items-center gap-2.5 sm:gap-3 group min-w-0">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
-                <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
+                <span className="text-base sm:text-lg">🐴</span>
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="font-black text-sm sm:text-lg text-white tracking-wide truncate">
-                    Dofus 3.5
-                  </span>
-                  <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 flex-shrink-0">
-                    Criador
-                  </span>
-                </div>
+                <span className="font-extrabold text-sm sm:text-base text-white tracking-wide truncate block">
+                  Gestor de monturas
+                </span>
                 <p className="text-[10px] sm:text-xs text-slate-400 truncate hidden xs:block sm:block">
-                  Organizador de Crianza & XP
+                  Crianza & XP Dofus 3.5
                 </p>
               </div>
             </a>
 
-            {/* Desktop Navigation Links */}
+            {/* Enlaces de escritorio */}
             <nav className="hidden md:flex items-center gap-1.5">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -48,9 +43,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
                   <a
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                       isActive
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                        ? 'bg-[#1e3a8a] text-white shadow-sm border border-blue-600/40'
                         : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
                     }`}
                   >
@@ -64,8 +59,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
         </div>
       </header>
 
-      {/* Bottom Navigation Bar - Mobile Exclusive (fixed bottom) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#12151c]/95 backdrop-blur-lg border-t border-dofus-border px-2 py-1.5 shadow-2xl">
+      {/* Menú inferior persistente - Móvil (Fiel al diseño de la referencia) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#172554]/95 backdrop-blur-lg border-t border-blue-900/60 px-2 py-1.5 shadow-2xl">
         <div className="grid grid-cols-4 gap-1 max-w-md mx-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -74,13 +69,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
               <a
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-bold transition-all ${
+                className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-extrabold transition-all ${
                   isActive
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-blue-600/80 text-white shadow-sm border border-blue-400/30'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
-                <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
+                <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span className="truncate">{item.label}</span>
               </a>
             );

@@ -7,7 +7,7 @@ interface Props {
   description?: string;
 }
 
-const { title, description = 'Organizador Local-First de Crianza para Dofus 3.5' } = Astro.props;
+const { title, description = 'Gestor de monturas para Dofus 3.5' } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
 
@@ -18,19 +18,19 @@ const currentPath = Astro.url.pathname;
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title} | Dofus 3.5 Criador</title>
+    <title>{title} | Gestor de monturas</title>
     <meta name="description" content={description} />
   </head>
-  <body class="bg-[#0b0d11] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950 antialiased">
+  <body class="bg-[#0b0d11] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white antialiased">
     <Navbar client:load currentPath={currentPath} />
     
-    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 md:pb-12">
+    <main class="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-24 md:pb-12">
       <slot />
     </main>
 
     <footer class="bg-dofus-card/80 border-t border-dofus-border mt-auto py-6 text-center text-xs text-slate-500 hidden md:block">
       <p>
-        Dofus 3.5 Organizador de Crianza • Basado en las reglas oficiales de crianza de Dofus 3.5 • Creado con Astro y Local-First
+        Gestor de monturas • Basado en las reglas de crianza de Dofus 3.5 • Creado con Astro y Local-First
       </p>
     </footer>
   </body>
