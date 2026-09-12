@@ -1,241 +1,204 @@
 import React, { useState, useRef } from 'react';
 import {
-  Search,
   FolderUp,
   Download,
-  Trash2,
-  Edit3,
-  Plus,
-  X,
-  Calculator,
-  ChevronDown,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
   FileSpreadsheet,
   FileJson,
-  Check,
+  Trash2,
+  RefreshCw,
+  Search,
+  Filter,
+  Layers,
+  ChevronDown,
+  Sparkles,
+  Heart,
+  ShieldAlert,
+  Edit2,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  ArrowUpDown,
+  SlidersHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  Info,
 } from 'lucide-react';
-import type { FertilityStatus, SpecialCapacity, SpeciesType, UserMount } from '../types/mount';
-import { MAX_MOUNT_XP, calculateLevelFromXp, calculateXpForLevel } from '../data/fuelData';
-import { db, markSeedAsInitialized } from '../db/mountsDb';
-import { ALL_MOUNTS_DATA, getMountsBySpecies, findMountByBreedAndSpecies } from '../data/allMounts';
-import { MountAvatar } from './MountAvatar';
-import { getFertilityLabel, getFertilityBadgeClasses, getCapacityLabel } from '../utils/badgeHelpers';
+import type { UserMount, SpeciesType, SpecialCapacity, FertilityStatus } from '../types/mount';
 import {
   downloadExcelTemplate,
+  downloadCsvTemplate,
   exportMountsToExcel,
   exportMountsToJson,
   parseExcelFile,
 } from '../utils/excelHelper';
+import { db } from '../db/mountsDb';
+import { ALL_MOUNTS_DATA, getMountsBySpecies } from '../data/allMounts';
+import { calculateLevelFromXp, calculateXpForLevel, MAX_MOUNT_XP } from '../data/fuelData';
 
 interface MountTableProps {
   mounts: UserMount[];
   onDataChanged: () => void;
-  onSelectForEnclos?: (mount: UserMount) => void;
 }
 
-export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, onSelectForEnclos }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [speciesFilter, setSpeciesFilter] = useState<'all' | SpeciesType>('all');
-  const [generationFilter, setGenerationFilter] = useState<string>('all');
-  const [fertilityFilter, setFertilityFilter] = useState<string>('all');
-  const [level200Filter, setLevel200Filter] = useState<'all' | 'need200' | 'is200'>('all');
-
-  const [selectedMountIds, setSelectedMountIds] = useState<Set<string>>(new Set());
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingMount, setEditingMount] = useState<Partial<UserMount> | null>(null);
-
+export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Filtros y búsqueda
+  const [searchTerm, setSearchTerm] = useState('');
+  const [speciesFilter, setSpeciesFilter] = useState<string>('all');
+  const [fertilityFilter, setFertilityFilter] = useState<string>('all');
+  const [genderFilter, setGenderFilter] = useState<string>('all');
+  const [genFilter, setGenFilter] = useState<string>('all');
+  const [capacityFilter, setCapacityFilter] = useState<string>('all');
+
+  // Ordenamiento
+  const [sortField, setSortField] = useState<keyof UserMount | 'name'>('updatedAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  // Estado del modal de edición / creación manual
+  const [editingMount, setEditingMount] = useState<Partial<UserMount> | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
-  // Manejo de importación de Excel/CSV simplificada
+  // Manejo de carga de archivo
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
-    setUploadMessage(null);
+    setStatusMessage(null);
 
     try {
-      markSeedAsInitialized();
-      const parsedMounts = await parseExcelFile(file);
-      await db.mounts.bulkPut(parsedMounts);
-      setUploadMessage({
+      const parsed = await parseExcelFile(file);
+      await db.mounts.bulkPut(parsed);
+      setStatusMessage({
         type: 'success',
-        text: `¡Éxito! Se importaron ${parsedMounts.length} monturas a la base de datos.`,
+        text: `¡Éxito! Se importaron ${parsed.length} monturas correctamente al establo.`,
       });
       onDataChanged();
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err: any) {
-      setUploadMessage({
+      setStatusMessage({
         type: 'error',
-        text: err.message || 'Error al procesar el archivo Excel.',
+        text: err.message || 'Error al procesar el archivo Excel. Asegúrate de usar la plantilla oficial.',
       });
     } finally {
       setIsUploading(false);
     }
   };
 
-  // Filtrado de monturas con cálculo dinámico de nivel basado en XP
-  const filteredMounts = mounts.filter((m) => {
-    if (speciesFilter !== 'all' && m.species !== speciesFilter) return false;
-    if (generationFilter !== 'all' && m.generation !== Number(generationFilter)) return false;
-
-    if (fertilityFilter !== 'all') {
-      const normFertility = getFertilityLabel(m.fertility).toLowerCase();
-      if (fertilityFilter === 'fertil' && !normFertility.includes('fér') && !normFertility.includes('fer')) return false;
-      if (fertilityFilter === 'fecunda' && !normFertility.includes('fec')) return false;
-      if (fertilityFilter === 'esteril' && !normFertility.includes('est') && !normFertility.includes('ste')) return false;
-      if (fertilityFilter === 'senil' && !normFertility.includes('sen')) return false;
+  const handleClearAllMounts = async () => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar TODAS las monturas registradas? Esta acción no se puede deshacer.')) {
+      await db.mounts.clear();
+      onDataChanged();
     }
-
-    const mountLevel = m.currentXp >= MAX_MOUNT_XP ? 200 : (m.currentXp > 0 ? calculateLevelFromXp(m.currentXp) : (m.currentLevel || 1));
-    if (level200Filter === 'need200' && mountLevel >= 200) return false;
-    if (level200Filter === 'is200' && mountLevel < 200) return false;
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      const matchName = m.nickname.toLowerCase().includes(term);
-      const matchBreed = m.breed.toLowerCase().includes(term);
-      if (!matchName && !matchBreed) return false;
-    }
-    return true;
-  });
-
-  const toggleSelectMount = (id: string) => {
-    const next = new Set(selectedMountIds);
-    if (next.has(id)) next.delete(id);
-    else {
-      if (next.size >= 10) {
-        alert('Un cercado de Dofus tiene un límite máximo de 10 monturas simultáneas.');
-        return;
-      }
-      next.add(id);
-    }
-    setSelectedMountIds(next);
-  };
-
-  const clearSelection = () => {
-    setSelectedMountIds(new Set());
   };
 
   const handleDeleteMount = async (id: string) => {
-    if (confirm('¿Seguro que deseas eliminar esta montura del inventario?')) {
-      markSeedAsInitialized();
-      await db.mounts.delete(id);
-      const next = new Set(selectedMountIds);
-      next.delete(id);
-      setSelectedMountIds(next);
-      onDataChanged();
+    await db.mounts.delete(id);
+    onDataChanged();
+  };
+
+  // Filtrado
+  const filteredMounts = mounts.filter((m) => {
+    const matchesSearch =
+      m.nickname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.breed.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (m.notes && m.notes.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesSpecies = speciesFilter === 'all' || m.species === speciesFilter;
+    const matchesFertility = fertilityFilter === 'all' || m.fertility === fertilityFilter;
+    const matchesGender = genderFilter === 'all' || m.gender === genderFilter;
+    const matchesGen = genFilter === 'all' || m.generation.toString() === genFilter;
+    const matchesCapacity = capacityFilter === 'all' || m.capacity === capacityFilter;
+
+    return matchesSearch && matchesSpecies && matchesFertility && matchesGender && matchesGen && matchesCapacity;
+  });
+
+  // Ordenamiento
+  const sortedMounts = [...filteredMounts].sort((a, b) => {
+    let aVal: any = a[sortField as keyof UserMount];
+    let bVal: any = b[sortField as keyof UserMount];
+
+    if (typeof aVal === 'string') {
+      aVal = aVal.toLowerCase();
+      bVal = (bVal || '').toLowerCase();
+    }
+
+    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Paginación
+  const totalPages = Math.ceil(sortedMounts.length / itemsPerPage) || 1;
+  const paginatedMounts = sortedMounts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleSort = (field: keyof UserMount | 'name') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
     }
   };
 
-  const handleBatchDelete = async () => {
-    if (selectedMountIds.size === 0) return;
-    if (confirm(`¿Seguro que deseas eliminar las ${selectedMountIds.size} monturas seleccionadas?`)) {
-      markSeedAsInitialized();
-      await db.mounts.bulkDelete(Array.from(selectedMountIds));
-      setSelectedMountIds(new Set());
-      onDataChanged();
-    }
-  };
+  // Guardar edición o nueva montura
+  const handleSaveMount = async () => {
+    if (!editingMount || !editingMount.breed || !editingMount.species) return;
 
-  const handleClearAllMounts = async () => {
-    if (mounts.length === 0) return;
-    if (
-      confirm(
-        `¿Estás seguro de que deseas eliminar TODAS las ${mounts.length} monturas del establo?\n\nEsta acción dejará el inventario completamente vacío.`
-      )
-    ) {
-      markSeedAsInitialized();
-      await db.mounts.clear();
-      setSelectedMountIds(new Set());
-      onDataChanged();
-    }
-  };
-
-  const handleSpeciesChangeInModal = (newSpecies: SpeciesType) => {
-    const available = getMountsBySpecies(newSpecies);
-    const firstBreed = available[0];
-    setEditingMount({
-      ...editingMount,
-      species: newSpecies,
-      breed: firstBreed ? firstBreed.name : 'Personalizada',
-      definitionId: firstBreed ? firstBreed.id : 'custom',
-      generation: firstBreed ? firstBreed.generation : 1,
-      imageUrl: firstBreed?.imageUrl || '',
-    });
-  };
-
-  const handleBreedChangeInModal = (breedId: string) => {
-    const matched = ALL_MOUNTS_DATA.find((m) => m.id === breedId);
-    if (matched) {
-      setEditingMount({
-        ...editingMount,
-        breed: matched.name,
-        definitionId: matched.id,
-        generation: matched.generation,
-        imageUrl: matched.imageUrl || '',
-      });
-    }
-  };
-
-  const handleSaveMount = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingMount) return;
-
-    const matchedDef = findMountByBreedAndSpecies(
-      editingMount.breed || '',
-      editingMount.species || 'dragopavo'
+    const breedDef = ALL_MOUNTS_DATA.find(
+      (d) => d.name === editingMount.breed && d.species === editingMount.species
     );
 
-    const xp = Math.min(MAX_MOUNT_XP, Math.max(0, Number(editingMount.currentXp) || 0));
-    // Sincronización estricta: si XP es máxima, el nivel siempre es 200
-    const lvl = xp >= MAX_MOUNT_XP ? 200 : (xp > 0 ? calculateLevelFromXp(xp) : (Number(editingMount.currentLevel) || 1));
     const isEsterilOrSenil = editingMount.fertility === 'esteril' || editingMount.fertility === 'senil';
 
-    const toSave: UserMount = {
+    const currentXp = Math.min(MAX_MOUNT_XP, Math.max(0, editingMount.currentXp || 0));
+    const currentLevel = Math.min(200, Math.max(1, editingMount.currentLevel || calculateLevelFromXp(currentXp)));
+
+    const mountData: UserMount = {
       id: editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      nickname: editingMount.nickname || 'Sin Nombre',
-      definitionId: editingMount.definitionId || matchedDef?.id || 'custom',
-      species: editingMount.species || 'dragopavo',
-      breed: editingMount.breed || 'Almendrada',
-      generation: Number(editingMount.generation) || matchedDef?.generation || 1,
+      nickname: editingMount.nickname || editingMount.breed,
+      definitionId: breedDef ? breedDef.id : `${editingMount.species}_custom`,
+      species: editingMount.species as SpeciesType,
+      breed: editingMount.breed,
+      generation: editingMount.generation || (breedDef ? breedDef.generation : 1),
       gender: (editingMount.gender as 'M' | 'F') || 'M',
-      currentLevel: lvl,
-      currentXp: xp,
+      currentLevel,
+      currentXp,
       fertility: (editingMount.fertility as FertilityStatus) || 'fertil',
       capacity: (editingMount.capacity as SpecialCapacity) || 'ninguna',
-      // Si la montura es estéril o senil, se resetean las métricas reproductivas
-      serenity: isEsterilOrSenil ? 0 : (Number(editingMount.serenity) || 0),
-      love: isEsterilOrSenil ? 0 : (Number(editingMount.love) || 0),
-      maturity: isEsterilOrSenil ? 0 : (Number(editingMount.maturity) || 0),
-      stamina: isEsterilOrSenil ? 0 : (Number(editingMount.stamina) || 0),
-      imageUrl: editingMount.imageUrl || matchedDef?.imageUrl || '',
+      serenity: isEsterilOrSenil ? 0 : (editingMount.serenity ?? 2000),
+      love: isEsterilOrSenil ? 0 : (editingMount.love ?? 20000),
+      maturity: isEsterilOrSenil ? 0 : (editingMount.maturity ?? 20000),
+      stamina: isEsterilOrSenil ? 0 : (editingMount.stamina ?? 20000),
+      imageUrl: breedDef?.imageUrl || editingMount.imageUrl || '',
       notes: editingMount.notes || '',
       createdAt: editingMount.createdAt || Date.now(),
       updatedAt: Date.now(),
     };
 
-    markSeedAsInitialized();
-    await db.mounts.put(toSave);
+    await db.mounts.put(mountData);
     setIsEditModalOpen(false);
     setEditingMount(null);
     onDataChanged();
   };
 
-  const openNewMountModal = () => {
-    const defaultBreeds = getMountsBySpecies('dragopavo');
-    const first = defaultBreeds[0];
+  const handleOpenNewMountModal = () => {
+    const defaultSpecies: SpeciesType = 'dragopavo';
+    const first = ALL_MOUNTS_DATA.find((m) => m.species === defaultSpecies);
     setEditingMount({
-      species: 'dragopavo',
-      breed: first ? first.name : 'Almendrada',
-      definitionId: first ? first.id : 'dd_amande',
-      generation: first ? first.generation : 1,
+      species: defaultSpecies,
+      breed: first?.name || 'Pelirroja',
+      generation: first?.generation || 1,
       gender: 'M',
+      nickname: '',
       currentLevel: 1,
       currentXp: 0,
       fertility: 'fertil',
@@ -275,13 +238,24 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
           </label>
 
           {/* Botón Descargar Plantilla */}
-          <button
-            onClick={downloadExcelTemplate}
-            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
-          >
-            <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />
-            <span>Descargar plantilla</span>
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={downloadExcelTemplate}
+              className="flex-1 flex items-center justify-center gap-2 px-3.5 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
+              title="Descargar plantilla Excel (.xlsx) generada limpiamente en tu navegador"
+            >
+              <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />
+              <span>Plantilla Excel (.xlsx)</span>
+            </button>
+            <button
+              onClick={downloadCsvTemplate}
+              className="flex items-center justify-center gap-1.5 px-3.5 py-3 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition border border-slate-300 shadow-sm"
+              title="Descargar plantilla CSV (.csv) formato universal"
+            >
+              <Download className="w-4 h-4 text-slate-500 flex-shrink-0" />
+              <span>CSV (.csv)</span>
+            </button>
+          </div>
         </div>
 
         {/* Acciones de respaldo y exportación discretas */}
@@ -341,616 +315,633 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
             )}
           </div>
         </div>
-
-        {/* Mensaje de estado de subida */}
-        {uploadMessage && (
-          <div
-            className={`p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium ${
-              uploadMessage.type === 'success'
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                : 'bg-rose-50 text-rose-800 border border-rose-200'
-            }`}
-          >
-            {uploadMessage.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            ) : (
-              <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-            )}
-            <span className="flex-1">{uploadMessage.text}</span>
-            <button onClick={() => setUploadMessage(null)} className="text-slate-400 hover:text-slate-600">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* 2. BUSCADOR Y FILTROS DE BÚSQUEDA MEJORADOS */}
-      <div className="space-y-2.5">
-        {/* Input Buscador */}
-        <div className="relative w-full">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+      {/* Alerta de estado */}
+      {statusMessage && (
+        <div
+          className={`flex items-center gap-2 p-3.5 rounded-2xl text-xs sm:text-sm font-semibold border ${
+            statusMessage.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-rose-50 text-rose-800 border-rose-200'
+          }`}
+        >
+          {statusMessage.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+          )}
+          <span>{statusMessage.text}</span>
+        </div>
+      )}
+
+      {/* 2. BARRA DE HERRAMIENTAS: Búsqueda y Botón Nueva Montura */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-200">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Buscar montura..."
+            placeholder="Buscar por apodo, raza o notas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 hover:border-slate-400 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition shadow-inner font-medium"
+            className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           />
         </div>
 
-        {/* Fila de Filtros */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {/* Tipo de montura */}
-          <div className="relative">
-            <select
-              value={speciesFilter}
-              onChange={(e) => setSpeciesFilter(e.target.value as any)}
-              className="w-full appearance-none pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 focus:outline-none focus:border-blue-500 transition cursor-pointer shadow-sm truncate"
-            >
-              <option value="all">Tipo de montura</option>
-              <option value="dragopavo">Dragopavos</option>
-              <option value="muluaga">Muluagas</option>
-              <option value="vueloceronte">Vuelocerontes</option>
-            </select>
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs">🐴</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
+        <button
+          onClick={handleOpenNewMountModal}
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-sm shadow-emerald-700/20"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Añadir montura</span>
+        </button>
+      </div>
 
-          {/* Generación */}
-          <div className="relative">
-            <select
-              value={generationFilter}
-              onChange={(e) => setGenerationFilter(e.target.value)}
-              className="w-full appearance-none pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 focus:outline-none focus:border-blue-500 transition cursor-pointer shadow-sm truncate"
-            >
-              <option value="all">Generación</option>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((g) => (
-                <option key={g} value={g}>Gen. {g}</option>
-              ))}
-            </select>
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs">⭐</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-
-          {/* Fertilidad */}
-          <div className="relative">
-            <select
-              value={fertilityFilter}
-              onChange={(e) => setFertilityFilter(e.target.value)}
-              className="w-full appearance-none pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 focus:outline-none focus:border-blue-500 transition cursor-pointer shadow-sm truncate"
-            >
-              <option value="all">Fertilidad</option>
-              <option value="fertil">Fértil</option>
-              <option value="fecunda">Fecunda</option>
-              <option value="esteril">Estéril</option>
-              <option value="senil">Senil</option>
-            </select>
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs">❤️</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-
-          {/* Nivel */}
-          <div className="relative">
-            <select
-              value={level200Filter}
-              onChange={(e) => setLevel200Filter(e.target.value as any)}
-              className="w-full appearance-none pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 focus:outline-none focus:border-blue-500 transition cursor-pointer shadow-sm truncate"
-            >
-              <option value="all">Nivel</option>
-              <option value="need200">Faltan a 200</option>
-              <option value="is200">Nivel 200 ✓</option>
-            </select>
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs">📊</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* Barra de conteo y botón Nueva Montura */}
-        <div className="flex items-center justify-between pt-1 px-1 text-xs text-slate-500">
-          <span>
-            Mostrando <strong>{filteredMounts.length}</strong> de {mounts.length} monturas
-          </span>
-          <button
-            onClick={openNewMountModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm"
+      {/* 3. FILTROS RÁPIDOS */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 bg-white p-2.5 rounded-2xl border border-slate-200">
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Especie</label>
+          <select
+            value={speciesFilter}
+            onChange={(e) => {
+              setSpeciesFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Nueva montura</span>
-          </button>
+            <option value="all">Todas</option>
+            <option value="dragopavo">Dragopavos</option>
+            <option value="muluaga">Mulaguas</option>
+            <option value="vueloceronte">Vuelocerontes</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Fertilidad</label>
+          <select
+            value={fertilityFilter}
+            onChange={(e) => {
+              setFertilityFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="all">Todos</option>
+            <option value="fertil">Fértil</option>
+            <option value="fecunda">Fecunda</option>
+            <option value="esteril">Estéril</option>
+            <option value="senil">Senil</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Sexo</label>
+          <select
+            value={genderFilter}
+            onChange={(e) => {
+              setGenderFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="all">Ambos</option>
+            <option value="M">Macho</option>
+            <option value="F">Hembra</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Generación</label>
+          <select
+            value={genFilter}
+            onChange={(e) => {
+              setGenFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="all">Todas (1-10)</option>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((g) => (
+              <option key={g} value={g.toString()}>
+                Gen {g}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="col-span-2 sm:col-span-1">
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Capacidad</label>
+          <select
+            value={capacityFilter}
+            onChange={(e) => {
+              setCapacityFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="all">Cualquiera</option>
+            <option value="ninguna">Ninguna</option>
+            <option value="sabia">Sabia</option>
+            <option value="enamoradiza">Enamoradiza</option>
+            <option value="resistente">Resistente</option>
+            <option value="precoz">Precoz</option>
+            <option value="reproductora">Reproductora</option>
+            <option value="camaleon">Camaleón</option>
+          </select>
         </div>
       </div>
 
-      {/* 3. LISTADO DE MONTURAS CON EL DISEÑO DE TARJETA EN GRID RESPONSIVE */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4 pt-1">
-        {filteredMounts.length === 0 ? (
-          <div className="col-span-full text-center py-16 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300 space-y-2">
-            <span className="text-3xl block">🐴</span>
-            <p className="text-slate-700 font-bold text-sm">
-              {mounts.length === 0
-                ? 'Tu establo está completamente vacío'
-                : 'No se encontraron monturas con los filtros aplicados'}
-            </p>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              {mounts.length === 0
-                ? 'No hay ninguna montura registrada. Puedes añadir una nueva montura o cargar tu archivo de Excel.'
-                : 'Prueba a cambiar o limpiar los filtros seleccionados arriba.'}
-            </p>
-          </div>
-        ) : (
-          filteredMounts.map((m) => {
-            const isSelected = selectedMountIds.has(m.id);
-            const progressPercent = Math.min(100, Math.max(0, Math.round((m.currentXp / MAX_MOUNT_XP) * 100)));
-            const matchedDef = ALL_MOUNTS_DATA.find(
-              (def) => def.id === m.definitionId || def.name.toLowerCase() === m.breed.toLowerCase()
-            );
-            const imageUrl = m.imageUrl || matchedDef?.imageUrl;
-
-            // Sincronización lógica precisa: si XP es máxima (867.582) el nivel es 200
-            const displayLevel =
-              m.currentXp >= MAX_MOUNT_XP
-                ? 200
-                : m.currentXp > 0
-                ? calculateLevelFromXp(m.currentXp)
-                : m.currentLevel || 1;
-
-            // Comprobación de esterilidad o senilidad
-            const isEsterilOrSenil =
-              m.fertility === 'esteril' ||
-              m.fertility === 'senil' ||
-              getFertilityLabel(m.fertility) === 'Estéril' ||
-              getFertilityLabel(m.fertility) === 'Senil';
-
-            return (
-              <div
-                key={m.id}
-                className={`bg-white rounded-2xl p-3.5 sm:p-4 border transition-all shadow-sm hover:shadow-md flex items-center gap-2 sm:gap-4 ${
-                  isSelected ? 'border-blue-500 ring-2 ring-blue-400/30' : 'border-slate-200'
-                }`}
-              >
-                {/* Columna Izquierda: Checkbox de selección + Botón de Eliminar (cuadrado rojo) */}
-                <div className="flex flex-col items-center justify-between gap-3 flex-shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => toggleSelectMount(m.id)}
-                    className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                    title="Seleccionar para lote de cercado"
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteMount(m.id);
-                    }}
-                    className="w-7 h-7 rounded-lg bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition shadow-sm cursor-pointer"
-                    title="Eliminar montura"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+      {/* 4. TABLA DE MONTURAS */}
+      <div className="overflow-x-auto bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <table className="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider select-none">
+              <th className="py-3 px-3.5">Montura</th>
+              <th className="py-3 px-3 cursor-pointer hover:text-slate-900" onClick={() => handleSort('species')}>
+                <div className="flex items-center gap-1">
+                  <span>Especie</span>
+                  <ArrowUpDown className="w-3 h-3" />
                 </div>
-
-                {/* Columna Imagen / Avatar de Montura */}
-                <div
-                  className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 cursor-pointer flex items-center justify-center"
-                  onClick={() => {
-                    setEditingMount(m);
-                    setIsEditModalOpen(true);
-                  }}
-                  title="Clic para ver o editar detalles"
-                >
-                  <MountAvatar
-                    species={m.species}
-                    breed={m.breed}
-                    imageUrl={imageUrl}
-                    size="card"
-                    generation={m.generation}
-                  />
+              </th>
+              <th className="py-3 px-2 text-center cursor-pointer hover:text-slate-900" onClick={() => handleSort('gender')}>
+                <div className="flex items-center justify-center gap-1">
+                  <span>Sexo</span>
+                  <ArrowUpDown className="w-3 h-3" />
                 </div>
+              </th>
+              <th className="py-3 px-3 cursor-pointer hover:text-slate-900" onClick={() => handleSort('generation')}>
+                <div className="flex items-center gap-1">
+                  <span>Gen</span>
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
+              </th>
+              <th className="py-3 px-3 cursor-pointer hover:text-slate-900" onClick={() => handleSort('currentLevel')}>
+                <div className="flex items-center gap-1">
+                  <span>Nivel / XP</span>
+                  <ArrowUpDown className="w-3 h-3" />
+                </div>
+              </th>
+              <th className="py-3 px-3">Estado Reproducción</th>
+              <th className="py-3 px-3">Medidores</th>
+              <th className="py-3 px-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+            {paginatedMounts.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <p className="font-medium text-sm">No se encontraron monturas en el establo.</p>
+                  <p className="text-xs mt-1">Sube un archivo Excel con la plantilla oficial o añade una manualmente.</p>
+                </td>
+              </tr>
+            ) : (
+              paginatedMounts.map((mount) => {
+                const isReady =
+                  mount.fertility !== 'esteril' &&
+                  mount.fertility !== 'senil' &&
+                  mount.love >= 7500 &&
+                  mount.maturity >= 10000 &&
+                  mount.stamina >= 7500;
 
-                {/* Columna Central: Apodo, Sexo, Raza y Badges */}
-                <div
-                  className="flex-1 min-w-0 cursor-pointer space-y-1 sm:space-y-1.5"
-                  onClick={() => {
-                    setEditingMount(m);
-                    setIsEditModalOpen(true);
-                  }}
-                >
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <h3 className="font-extrabold text-slate-800 text-sm sm:text-base leading-tight truncate">
-                      {m.nickname || m.breed}
-                    </h3>
-                    <span className={`text-base font-bold ${m.gender === 'F' ? 'text-pink-500' : 'text-blue-600'}`}>
-                      {m.gender === 'F' ? '♀' : '♂'}
-                    </span>
-                  </div>
+                return (
+                  <tr key={mount.id} className="hover:bg-slate-50/80 transition-colors">
+                    {/* Nombre y Miniatura */}
+                    <td className="py-2.5 px-3.5">
+                      <div className="flex items-center gap-2.5">
+                        {mount.imageUrl ? (
+                          <img
+                            src={mount.imageUrl}
+                            alt={mount.breed}
+                            className="w-9 h-9 rounded-lg object-contain bg-slate-100 p-0.5 border border-slate-200 flex-shrink-0"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 font-bold text-xs flex-shrink-0">
+                            ?
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 truncate">{mount.nickname}</p>
+                          <p className="text-[11px] text-slate-500 truncate">{mount.breed}</p>
+                        </div>
+                      </div>
+                    </td>
 
-                  <p className="text-[11px] text-slate-500 truncate font-medium">{m.breed}</p>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 pt-0.5 flex-wrap">
-                    {/* Badge de Fertilidad */}
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold w-fit border ${
-                        m.fertility === 'esteril'
-                          ? 'bg-rose-100 text-rose-800 border-rose-200/60'
-                          : m.fertility === 'senil'
-                          ? 'bg-slate-200 text-slate-700 border-slate-300'
-                          : m.fertility === 'fecunda'
-                          ? 'bg-pink-100 text-pink-800 border-pink-200/60'
-                          : 'bg-emerald-100 text-emerald-800 border-emerald-200/60'
-                      }`}
-                    >
-                      <span>
-                        {m.fertility === 'esteril'
-                          ? '🚫'
-                          : m.fertility === 'senil'
-                          ? '⏳'
-                          : m.fertility === 'fecunda'
-                          ? '💖'
-                          : '🍃'}
+                    {/* Especie */}
+                    <td className="py-2.5 px-3">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 capitalize">
+                        {mount.species === 'muluaga' ? 'Mulagua' : mount.species}
                       </span>
-                      <span>{getFertilityLabel(m.fertility)}</span>
-                    </span>
+                    </td>
 
-                    {/* Badge Nivel Actual (Calculado exactamente desde la XP o nivel 200) */}
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold w-fit border ${
-                        displayLevel >= 200
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                          : 'bg-blue-50 text-blue-700 border-blue-100'
-                      }`}
-                    >
-                      Nivel actual: {displayLevel}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Columna Derecha: XP, Barra de Progreso y Medidores */}
-                <div
-                  className="w-32 sm:w-48 flex-shrink-0 text-right space-y-1.5 cursor-pointer"
-                  onClick={() => {
-                    setEditingMount(m);
-                    setIsEditModalOpen(true);
-                  }}
-                >
-                  <div>
-                    <span className="text-[11px] sm:text-xs font-bold text-slate-700 font-mono">
-                      XP: {m.currentXp.toLocaleString()}
-                    </span>
-                    <div className="w-full bg-slate-200 h-2 sm:h-2.5 rounded-full overflow-hidden mt-1 border border-slate-300/60">
-                      <div
-                        className="h-full bg-lime-500 rounded-full transition-all"
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Medidores con iconos (Amor, Madurez, Energía): OCULTOS si es Estéril o Senil */}
-                  {!isEsterilOrSenil ? (
-                    <div className="text-[10px] sm:text-[11px] text-slate-600 space-y-0.5 font-semibold">
-                      <div className="flex items-center justify-end gap-1">
-                        <span className="text-rose-500 text-xs">❤️</span>
-                        <span>Amor: {m.love}</span>
-                      </div>
-                      <div className="flex items-center justify-end gap-1">
-                        <span className="text-blue-500 text-xs">💧</span>
-                        <span>Madurez: {m.maturity}</span>
-                      </div>
-                      <div className="flex items-center justify-end gap-1">
-                        <span className="text-amber-500 text-xs">⚡</span>
-                        <span>Energía: {m.stamina}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-[10px] sm:text-[11px] text-slate-400 italic font-medium py-1">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold border border-slate-200">
-                        {m.fertility === 'senil' ? 'Montura Senil' : 'Montura Estéril'}
+                    {/* Sexo */}
+                    <td className="py-2.5 px-2 text-center">
+                      <span
+                        className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs ${
+                          mount.gender === 'M'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-rose-100 text-rose-700'
+                        }`}
+                        title={mount.gender === 'M' ? 'Macho' : 'Hembra'}
+                      >
+                        {mount.gender === 'M' ? '♂' : '♀'}
                       </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
+                    </td>
+
+                    {/* Generación */}
+                    <td className="py-2.5 px-3 font-semibold text-slate-600">
+                      G{mount.generation}
+                    </td>
+
+                    {/* Nivel y XP */}
+                    <td className="py-2.5 px-3">
+                      <div className="font-semibold text-slate-900">
+                        Nivel {mount.currentLevel}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono">
+                        {mount.currentXp.toLocaleString()} XP
+                      </div>
+                    </td>
+
+                    {/* Fertilidad y Capacidad */}
+                    <td className="py-2.5 px-3">
+                      <div className="flex flex-col gap-1 items-start">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            mount.fertility === 'fecunda'
+                              ? 'bg-amber-100 text-amber-800'
+                              : mount.fertility === 'fertil'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {mount.fertility}
+                        </span>
+                        {mount.capacity !== 'ninguna' && (
+                          <span className="text-[10px] text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200 capitalize font-medium">
+                            {mount.capacity}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Medidores (Serenidad, Amor, Madurez, Resistencia) */}
+                    <td className="py-2.5 px-3">
+                      {mount.fertility === 'esteril' || mount.fertility === 'senil' ? (
+                        <span className="text-[11px] text-slate-400 italic">No aplicable</span>
+                      ) : (
+                        <div className="space-y-1 w-28">
+                          {/* Serenidad */}
+                          <div className="flex items-center justify-between text-[9px] text-slate-500 font-mono">
+                            <span>Ser:</span>
+                            <span className={mount.serenity > 0 ? 'text-rose-600 font-bold' : mount.serenity < 0 ? 'text-blue-600 font-bold' : ''}>
+                              {mount.serenity}
+                            </span>
+                          </div>
+                          {/* Barras miniatura */}
+                          <div className="grid grid-cols-3 gap-1">
+                            <div className="bg-slate-100 rounded h-1.5 overflow-hidden" title={`Amor: ${mount.love}`}>
+                              <div
+                                className="bg-rose-500 h-full rounded"
+                                style={{ width: `${Math.min(100, (mount.love / 20000) * 100)}%` }}
+                              />
+                            </div>
+                            <div className="bg-slate-100 rounded h-1.5 overflow-hidden" title={`Madurez: ${mount.maturity}`}>
+                              <div
+                                className="bg-amber-500 h-full rounded"
+                                style={{ width: `${Math.min(100, (mount.maturity / 20000) * 100)}%` }}
+                              />
+                            </div>
+                            <div className="bg-slate-100 rounded h-1.5 overflow-hidden" title={`Resistencia: ${mount.stamina}`}>
+                              <div
+                                className="bg-blue-500 h-full rounded"
+                                style={{ width: `${Math.min(100, (mount.stamina / 20000) * 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                          {isReady && (
+                            <span className="text-[9px] text-emerald-700 font-bold flex items-center gap-0.5">
+                              <Sparkles className="w-2.5 h-2.5" /> Lista p/ cruce
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Acciones */}
+                    <td className="py-2.5 px-3 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => {
+                            setEditingMount({ ...mount });
+                            setIsEditModalOpen(true);
+                          }}
+                          className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Editar montura"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMount(mount.id)}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                          title="Eliminar montura"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
-      {/* 4. BARRA FLOTANTE DE LOTE PARA CERCADO CUANDO HAY SELECCIONADAS */}
-      {selectedMountIds.size > 0 && (
-        <div className="sticky bottom-20 md:bottom-4 z-40 bg-[#1e293b] text-white rounded-2xl p-3 sm:p-4 shadow-2xl border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-amber-300 font-bold">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0"></span>
-            <span>{selectedMountIds.size} de 10 monturas seleccionadas</span>
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <a
-              href={`/calculadora?batch=${Array.from(selectedMountIds).join(',')}`}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition shadow-sm"
-            >
-              <Calculator className="w-4 h-4" />
-              <span>Calcular Lote</span>
-            </a>
+      {/* 5. PAGINACIÓN */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2 text-xs text-slate-500">
+          <span>
+            Mostrando {paginatedMounts.length} de {filteredMounts.length} monturas
+          </span>
+          <div className="flex items-center gap-1">
             <button
-              onClick={handleBatchDelete}
-              className="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
-              title="Eliminar seleccionadas"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40 transition"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Eliminar</span>
+              <ChevronLeft className="w-4 h-4" />
             </button>
+            <span className="px-2 font-semibold text-slate-700">
+              Página {currentPage} de {totalPages}
+            </span>
             <button
-              onClick={clearSelection}
-              className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800"
-              title="Limpiar selección"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40 transition"
             >
-              <X className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* 5. MODAL PARA CREAR O EDITAR MONTURA */}
+      {/* 6. MODAL DE EDICIÓN / CREACIÓN MANUAL */}
       {isEditModalOpen && editingMount && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white text-slate-900 border border-slate-200 rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 my-8">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
-                <span>{editingMount.id ? 'Editar Montura' : 'Nueva Montura'}</span>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-base sm:text-lg text-slate-900">
+                {editingMount.id ? 'Editar Montura' : 'Añadir Nueva Montura'}
               </h3>
               <button
-                onClick={() => {
-                  setIsEditModalOpen(false);
-                  setEditingMount(null);
-                }}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 text-lg font-bold"
               >
-                <X className="w-5 h-5" />
+                ✕
               </button>
             </div>
 
-            <form onSubmit={handleSaveMount} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Apodo */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Apodo / Nombre</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingMount.nickname || ''}
-                    onChange={(e) => setEditingMount({ ...editingMount, nickname: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
-                    placeholder="Ej. AquaDrak"
-                  />
-                </div>
-
-                {/* Sexo */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Sexo</label>
-                  <select
-                    value={editingMount.gender || 'M'}
-                    onChange={(e) => setEditingMount({ ...editingMount, gender: e.target.value as 'M' | 'F' })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
-                  >
-                    <option value="M">Macho (♂)</option>
-                    <option value="F">Hembra (♀)</option>
-                  </select>
-                </div>
-
-                {/* Especie */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Especie</label>
-                  <select
-                    value={editingMount.species || 'dragopavo'}
-                    onChange={(e) => handleSpeciesChangeInModal(e.target.value as SpeciesType)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
-                  >
-                    <option value="dragopavo">Dragopavo</option>
-                    <option value="muluaga">Muluagas</option>
-                    <option value="vueloceronte">Vueloceronte</option>
-                  </select>
-                </div>
-
-                {/* Raza / Color */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Raza / Color</label>
-                  <select
-                    value={editingMount.definitionId || ''}
-                    onChange={(e) => handleBreedChangeInModal(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
-                  >
-                    {availableBreedsForModal.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} (Gen {b.generation})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Nivel Actual */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Nivel Actual (1-200)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={200}
-                    value={editingMount.currentLevel ?? 1}
-                    onChange={(e) => {
-                      const lvl = Math.min(200, Math.max(1, Number(e.target.value) || 1));
-                      const autoXp = calculateXpForLevel(lvl);
-                      setEditingMount({
-                        ...editingMount,
-                        currentLevel: lvl,
-                        currentXp: autoXp,
-                      });
-                    }}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500 font-mono"
-                  />
-                </div>
-
-                {/* XP Actual */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">XP Actual (Max 867.582)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={MAX_MOUNT_XP}
-                    value={editingMount.currentXp ?? 0}
-                    onChange={(e) => {
-                      const xp = Math.min(MAX_MOUNT_XP, Math.max(0, Number(e.target.value) || 0));
-                      const autoLvl = calculateLevelFromXp(xp);
-                      setEditingMount({
-                        ...editingMount,
-                        currentXp: xp,
-                        currentLevel: autoLvl,
-                      });
-                    }}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500 font-mono"
-                  />
-                </div>
-
-                {/* Fertilidad */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Fertilidad</label>
-                  <select
-                    value={editingMount.fertility || 'fertil'}
-                    onChange={(e) => {
-                      const newFert = e.target.value as FertilityStatus;
-                      const isNowBlocked = newFert === 'esteril' || newFert === 'senil';
-                      setEditingMount({
-                        ...editingMount,
-                        fertility: newFert,
-                        love: isNowBlocked ? 0 : (editingMount.love || 20000),
-                        maturity: isNowBlocked ? 0 : (editingMount.maturity || 20000),
-                        stamina: isNowBlocked ? 0 : (editingMount.stamina || 20000),
-                        serenity: isNowBlocked ? 0 : (editingMount.serenity || 0),
-                      });
-                    }}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
-                  >
-                    <option value="fertil">Fértil</option>
-                    <option value="fecunda">Fecunda</option>
-                    <option value="esteril">Estéril</option>
-                    <option value="senil">Senil</option>
-                  </select>
-                </div>
-
-                {/* Capacidad Especial */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Capacidad Especial</label>
-                  <select
-                    value={editingMount.capacity || 'ninguna'}
-                    onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as SpecialCapacity })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
-                  >
-                    <option value="ninguna">Ninguna</option>
-                    <option value="sabia">Sabia (x2 XP)</option>
-                    <option value="enamoradiza">Enamoradiza</option>
-                    <option value="resistente">Resistente</option>
-                    <option value="precoz">Precoz</option>
-                    <option value="reproductora">Reproductora</option>
-                    <option value="camaleon">Camaleón</option>
-                  </select>
-                </div>
-
-                {/* Aviso si la montura es estéril o senil */}
-                {isEditingEsterilOrSenil && (
-                  <div className="col-span-1 sm:col-span-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                    <span>
-                      Al tener fertilidad <strong>«{editingMount.fertility === 'senil' ? 'Senil' : 'Estéril'}»</strong>, las casillas de serenidad, amor, madurez y energía quedan bloqueadas.
-                    </span>
-                  </div>
-                )}
-
-                {/* Medidores (Amor, Madurez, Energía, Serenidad) - Bloqueados si es Estéril o Senil */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Amor (0 - 20.000)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={20000}
-                    disabled={isEditingEsterilOrSenil}
-                    value={isEditingEsterilOrSenil ? 0 : (editingMount.love ?? 20000)}
-                    onChange={(e) => setEditingMount({ ...editingMount, love: Number(e.target.value) })}
-                    className={`w-full px-3 py-2 border rounded-xl text-xs font-medium transition ${
-                      isEditingEsterilOrSenil
-                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed select-none opacity-60'
-                        : 'bg-slate-50 border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Madurez (0 - 20.000)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={20000}
-                    disabled={isEditingEsterilOrSenil}
-                    value={isEditingEsterilOrSenil ? 0 : (editingMount.maturity ?? 20000)}
-                    onChange={(e) => setEditingMount({ ...editingMount, maturity: Number(e.target.value) })}
-                    className={`w-full px-3 py-2 border rounded-xl text-xs font-medium transition ${
-                      isEditingEsterilOrSenil
-                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed select-none opacity-60'
-                        : 'bg-slate-50 border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Energía / Resistencia (0 - 20.000)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={20000}
-                    disabled={isEditingEsterilOrSenil}
-                    value={isEditingEsterilOrSenil ? 0 : (editingMount.stamina ?? 20000)}
-                    onChange={(e) => setEditingMount({ ...editingMount, stamina: Number(e.target.value) })}
-                    className={`w-full px-3 py-2 border rounded-xl text-xs font-medium transition ${
-                      isEditingEsterilOrSenil
-                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed select-none opacity-60'
-                        : 'bg-slate-50 border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Serenidad (-5000 a +5000)</label>
-                  <input
-                    type="number"
-                    min={-5000}
-                    max={5000}
-                    disabled={isEditingEsterilOrSenil}
-                    value={isEditingEsterilOrSenil ? 0 : (editingMount.serenity ?? 0)}
-                    onChange={(e) => setEditingMount({ ...editingMount, serenity: Number(e.target.value) })}
-                    className={`w-full px-3 py-2 border rounded-xl text-xs font-medium transition ${
-                      isEditingEsterilOrSenil
-                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed select-none opacity-60'
-                        : 'bg-slate-50 border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500'
-                    }`}
-                  />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+              {/* Apodo */}
+              <div className="col-span-2">
+                <label className="block font-semibold text-slate-700 mb-1">Apodo / Nombre</label>
+                <input
+                  type="text"
+                  value={editingMount.nickname || ''}
+                  onChange={(e) => setEditingMount({ ...editingMount, nickname: e.target.value })}
+                  placeholder="Ej. AquaDrak"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
               </div>
 
-              {/* Botones del Modal */}
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditModalOpen(false);
-                    setEditingMount(null);
+              {/* Especie */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Especie</label>
+                <select
+                  value={editingMount.species}
+                  onChange={(e) => {
+                    const sp = e.target.value as SpeciesType;
+                    const defaultForSp = ALL_MOUNTS_DATA.find((m) => m.species === sp);
+                    setEditingMount({
+                      ...editingMount,
+                      species: sp,
+                      breed: defaultForSp?.name || '',
+                      generation: defaultForSp?.generation || 1,
+                      imageUrl: defaultForSp?.imageUrl || '',
+                    });
                   }}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
                 >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-md"
-                >
-                  Guardar Montura
-                </button>
+                  <option value="dragopavo">Dragopavo</option>
+                  <option value="muluaga">Mulagua</option>
+                  <option value="vueloceronte">Vueloceronte</option>
+                </select>
               </div>
-            </form>
+
+              {/* Color / Raza */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Color / Raza</label>
+                <select
+                  value={editingMount.breed}
+                  onChange={(e) => {
+                    const bName = e.target.value;
+                    const def = ALL_MOUNTS_DATA.find((m) => m.name === bName && m.species === editingMount.species);
+                    setEditingMount({
+                      ...editingMount,
+                      breed: bName,
+                      generation: def?.generation || editingMount.generation || 1,
+                      imageUrl: def?.imageUrl || '',
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
+                >
+                  {availableBreedsForModal.map((b) => (
+                    <option key={b.id} value={b.name}>
+                      {b.name} (G{b.generation})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sexo */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Sexo</label>
+                <select
+                  value={editingMount.gender}
+                  onChange={(e) => setEditingMount({ ...editingMount, gender: e.target.value as 'M' | 'F' })}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
+                >
+                  <option value="M">Macho (♂)</option>
+                  <option value="F">Hembra (♀)</option>
+                </select>
+              </div>
+
+              {/* Fertilidad */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Fertilidad</label>
+                <select
+                  value={editingMount.fertility}
+                  onChange={(e) => {
+                    const f = e.target.value as FertilityStatus;
+                    setEditingMount({
+                      ...editingMount,
+                      fertility: f,
+                      serenity: f === 'esteril' || f === 'senil' ? 0 : editingMount.serenity,
+                      love: f === 'esteril' || f === 'senil' ? 0 : editingMount.love,
+                      maturity: f === 'esteril' || f === 'senil' ? 0 : editingMount.maturity,
+                      stamina: f === 'esteril' || f === 'senil' ? 0 : editingMount.stamina,
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
+                >
+                  <option value="fertil">Fértil</option>
+                  <option value="fecunda">Fecunda</option>
+                  <option value="esteril">Estéril</option>
+                  <option value="senil">Senil</option>
+                </select>
+              </div>
+
+              {/* Nivel de la montura */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Nivel (1-200)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={200}
+                  value={editingMount.currentLevel || 1}
+                  onChange={(e) => {
+                    const lvl = Math.min(200, Math.max(1, parseInt(e.target.value) || 1));
+                    setEditingMount({
+                      ...editingMount,
+                      currentLevel: lvl,
+                      currentXp: calculateXpForLevel(lvl),
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+
+              {/* XP */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">XP (0 - 867,582)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={MAX_MOUNT_XP}
+                  value={editingMount.currentXp || 0}
+                  onChange={(e) => {
+                    const xp = Math.min(MAX_MOUNT_XP, Math.max(0, parseInt(e.target.value) || 0));
+                    setEditingMount({
+                      ...editingMount,
+                      currentXp: xp,
+                      currentLevel: calculateLevelFromXp(xp),
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                />
+              </div>
+
+              {/* Capacidad */}
+              <div className="col-span-2">
+                <label className="block font-semibold text-slate-700 mb-1">Capacidad Especial</label>
+                <select
+                  value={editingMount.capacity}
+                  onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as SpecialCapacity })}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
+                >
+                  <option value="ninguna">Ninguna</option>
+                  <option value="sabia">Sabia (+20% XP)</option>
+                  <option value="enamoradiza">Enamoradiza (+Amor)</option>
+                  <option value="resistente">Resistente (+Resistencia)</option>
+                  <option value="precoz">Precoz (+Madurez)</option>
+                  <option value="reproductora">Reproductora (+1 cría máx)</option>
+                  <option value="camaleon">Camaleón</option>
+                </select>
+              </div>
+
+              {/* Medidores (ocultos si estéril o senil) */}
+              {!isEditingEsterilOrSenil && (
+                <>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Serenidad (-10k a +10k)</label>
+                    <input
+                      type="number"
+                      min={-10000}
+                      max={10000}
+                      value={editingMount.serenity ?? 0}
+                      onChange={(e) => setEditingMount({ ...editingMount, serenity: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Amor (0 a 20,000)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={20000}
+                      value={editingMount.love ?? 0}
+                      onChange={(e) => setEditingMount({ ...editingMount, love: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Madurez (0 a 20,000)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={20000}
+                      value={editingMount.maturity ?? 0}
+                      onChange={(e) => setEditingMount({ ...editingMount, maturity: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Resistencia (0 a 20,000)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={20000}
+                      value={editingMount.stamina ?? 0}
+                      onChange={(e) => setEditingMount({ ...editingMount, stamina: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Notas */}
+              <div className="col-span-2">
+                <label className="block font-semibold text-slate-700 mb-1">Notas / Observaciones</label>
+                <textarea
+                  rows={2}
+                  value={editingMount.notes || ''}
+                  onChange={(e) => setEditingMount({ ...editingMount, notes: e.target.value })}
+                  placeholder="Árbol genealógico, camada, recordatorios..."
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-4 py-2 text-slate-600 hover:bg-slate-100 font-semibold rounded-xl text-xs transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveMount}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-blue-600/20"
+              >
+                Guardar Montura
+              </button>
+            </div>
           </div>
         </div>
       )}

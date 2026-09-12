@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Download, Upload, FileSpreadsheet, FileJson, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import type { UserMount } from '../types/mount';
-import { downloadExcelTemplate, exportMountsToExcel, exportMountsToJson, parseExcelFile } from '../utils/excelHelper';
+import { downloadExcelTemplate, downloadCsvTemplate, exportMountsToExcel, exportMountsToJson, parseExcelFile } from '../utils/excelHelper';
 import { db } from '../db/mountsDb';
 
 interface ExcelManagerProps {
@@ -53,13 +53,22 @@ export const ExcelManager: React.FC<ExcelManagerProps> = ({ mounts, onDataChange
           </p>
         </div>
 
-        <div>
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={downloadExcelTemplate}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition"
+            className="flex items-center justify-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition"
+            title="Descarga la plantilla en formato Excel (.xlsx)"
           >
-            <Download className="w-4 h-4 text-emerald-400" />
-            Descargar Plantilla Excel
+            <Download className="w-4 h-4 text-emerald-100" />
+            Descargar Plantilla (.xlsx)
+          </button>
+          <button
+            onClick={downloadCsvTemplate}
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition"
+            title="Descarga la plantilla en formato CSV universal (.csv)"
+          >
+            <Download className="w-4 h-4 text-sky-400" />
+            Plantilla CSV (.csv)
           </button>
         </div>
       </div>
@@ -119,16 +128,16 @@ export const ExcelManager: React.FC<ExcelManagerProps> = ({ mounts, onDataChange
 
       {statusMessage && (
         <div
-          className={`p-3.5 sm:p-4 rounded-xl flex items-center gap-3 text-xs sm:text-sm ${
+          className={`flex items-center gap-2 p-3 rounded-xl text-xs font-medium ${
             statusMessage.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
-              : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
+              ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300'
+              : 'bg-rose-950/40 border border-rose-500/40 text-rose-300'
           }`}
         >
           {statusMessage.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-400" />
           ) : (
-            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-rose-400" />
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
           )}
           <span>{statusMessage.text}</span>
         </div>
