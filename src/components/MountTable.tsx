@@ -17,8 +17,8 @@ import {
   Check,
 } from 'lucide-react';
 import type { FertilityStatus, SpecialCapacity, SpeciesType, UserMount } from '../types/mount';
-import { MAX_MOUNT_XP } from '../data/fuelData';
-import { db } from '../db/mountsDb';
+import { MAX_MOUNT_XP, calculateLevelFromXp, calculateXpForLevel } from '../data/fuelData';
+import { db, markSeedAsInitialized } from '../db/mountsDb';
 import { ALL_MOUNTS_DATA, getMountsBySpecies, findMountByBreedAndSpecies } from '../data/allMounts';
 import { MountAvatar } from './MountAvatar';
 import { getFertilityLabel, getFertilityBadgeClasses, getCapacityLabel } from '../utils/badgeHelpers';
@@ -60,6 +60,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
     setUploadMessage(null);
 
     try {
+      markSeedAsInitialized();
       const parsedMounts = await parseExcelFile(file);
       await db.mounts.bulkPut(parsedMounts);
       setUploadMessage({
@@ -78,7 +79,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
     }
   };
 
-  // Filtrado de monturas
+  // Filtrado de monturas con cálculo dinámico de nivel basado en XP
   const filteredMounts = mounts.filter((m) => {
     if (speciesFilter !== 'all' && m.species !== speciesFilter) return false;
     if (generationFilter !== 'all' && m.generation !== Number(generationFilter)) return false;
@@ -91,8 +92,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
       if (fertilityFilter === 'senil' && !normFertility.includes('sen')) return false;
     }
 
-    if (level200Filter === 'need200' && m.currentLevel >= 200) return false;
-    if (level200Filter === 'is200' && m.currentLevel < 200) return false;
+    const mountLevel = m.currentXp >= MAX_MOUNT_XP ? 200 : (m.currentXp > 0 ? calculateLevelFromXp(m.currentXp) : (m.currentLevel || 1));
+    if (level200Filter === 'need200' && mountLevel >= 200) return false;
+    if (level200Filter === 'is200' && mountLevel < 200) return false;
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -108,7 +110,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
     if (next.has(id)) next.delete(id);
     else {
       if (next.size >= 10) {
-        alert('Un cercado de Dofus tiene un límite máximo de 10 monturas.');
+        alert('Un cercado de Dofus tiene un límite máximo de 10 monturas simultáneas.');
         return;
       }
       next.add(id);
@@ -122,6 +124,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
   const handleDeleteMount = async (id: string) => {
     if (confirm('¿Seguro que deseas eliminar esta montura del inventario?')) {
+      markSeedAsInitialized();
       await db.mounts.delete(id);
       const next = new Set(selectedMountIds);
       next.delete(id);
@@ -133,7 +136,22 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
   const handleBatchDelete = async () => {
     if (selectedMountIds.size === 0) return;
     if (confirm(`¿Seguro que deseas eliminar las ${selectedMountIds.size} monturas seleccionadas?`)) {
+      markSeedAsInitialized();
       await db.mounts.bulkDelete(Array.from(selectedMountIds));
+      setSelectedMountIds(new Set());
+      onDataChanged();
+    }
+  };
+
+  const handleClearAllMounts = async () => {
+    if (mounts.length === 0) return;
+    if (
+      confirm(
+        `¿Estás seguro de que deseas eliminar TODAS las ${mounts.length} monturas del establo?\n\nEsta acción dejará el inventario completamente vacío.`
+      )
+    ) {
+      markSeedAsInitialized();
+      await db.mounts.clear();
       setSelectedMountIds(new Set());
       onDataChanged();
     }
@@ -174,6 +192,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
       editingMount.species || 'dragopavo'
     );
 
+    const xp = Math.min(MAX_MOUNT_XP, Math.max(0, Number(editingMount.currentXp) || 0));
+    // Sincronización estricta: si XP es máxima, el nivel siempre es 200
+    const lvl = xp >= MAX_MOUNT_XP ? 200 : (xp > 0 ? calculateLevelFromXp(xp) : (Number(editingMount.currentLevel) || 1));
+    const isEsterilOrSenil = editingMount.fertility === 'esteril' || editingMount.fertility === 'senil';
+
     const toSave: UserMount = {
       id: editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       nickname: editingMount.nickname || 'Sin Nombre',
@@ -182,20 +205,22 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
       breed: editingMount.breed || 'Almendrada',
       generation: Number(editingMount.generation) || matchedDef?.generation || 1,
       gender: (editingMount.gender as 'M' | 'F') || 'M',
-      currentLevel: Number(editingMount.currentLevel) || 1,
-      currentXp: Number(editingMount.currentXp) || 0,
+      currentLevel: lvl,
+      currentXp: xp,
       fertility: (editingMount.fertility as FertilityStatus) || 'fertil',
       capacity: (editingMount.capacity as SpecialCapacity) || 'ninguna',
-      serenity: Number(editingMount.serenity) || 0,
-      love: Number(editingMount.love) || 0,
-      maturity: Number(editingMount.maturity) || 0,
-      stamina: Number(editingMount.stamina) || 0,
+      // Si la montura es estéril o senil, se resetean las métricas reproductivas
+      serenity: isEsterilOrSenil ? 0 : (Number(editingMount.serenity) || 0),
+      love: isEsterilOrSenil ? 0 : (Number(editingMount.love) || 0),
+      maturity: isEsterilOrSenil ? 0 : (Number(editingMount.maturity) || 0),
+      stamina: isEsterilOrSenil ? 0 : (Number(editingMount.stamina) || 0),
       imageUrl: editingMount.imageUrl || matchedDef?.imageUrl || '',
       notes: editingMount.notes || '',
       createdAt: editingMount.createdAt || Date.now(),
       updatedAt: Date.now(),
     };
 
+    markSeedAsInitialized();
     await db.mounts.put(toSave);
     setIsEditModalOpen(false);
     setEditingMount(null);
@@ -225,13 +250,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
   };
 
   const availableBreedsForModal = editingMount?.species ? getMountsBySpecies(editingMount.species) : [];
+  const isEditingEsterilOrSenil = editingMount?.fertility === 'esteril' || editingMount?.fertility === 'senil';
 
   return (
     <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
       {/* 1. SECCIÓN SUPERIOR SIMPLIFICADA: Botones Seleccionar Archivo y Descargar Plantilla */}
       <div className="space-y-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-          {/* Botón Seleccionar Archivo (con borde punteado como en la referencia) */}
+          {/* Botón Seleccionar Archivo */}
           <label className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm">
             <input
               type="file"
@@ -248,7 +274,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
             <span>Seleccionar archivo</span>
           </label>
 
-          {/* Botón Descargar Plantilla (fondo azul sólido como en la referencia) */}
+          {/* Botón Descargar Plantilla */}
           <button
             onClick={downloadExcelTemplate}
             className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
@@ -268,12 +294,12 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
               onClick={() => setShowExportMenu(!showExportMenu)}
               className="font-semibold text-blue-700 hover:text-blue-900 flex items-center gap-1 hover:underline cursor-pointer"
             >
-              <span>Exportar datos</span>
+              <span>Opciones / Exportar</span>
               <ChevronDown className="w-3 h-3" />
             </button>
 
             {showExportMenu && (
-              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-xl z-30 py-1 text-xs text-slate-700 animate-in fade-in zoom-in-95">
+              <div className="absolute right-0 top-full mt-1 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-30 py-1 text-xs text-slate-700 animate-in fade-in zoom-in-95">
                 <button
                   onClick={() => {
                     exportMountsToExcel(mounts);
@@ -296,6 +322,21 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   <FileJson className="w-4 h-4 text-sky-600" />
                   <span>Backup JSON</span>
                 </button>
+                {mounts.length > 0 && (
+                  <>
+                    <div className="border-t border-slate-100 my-1" />
+                    <button
+                      onClick={() => {
+                        setShowExportMenu(false);
+                        handleClearAllMounts();
+                      }}
+                      className="w-full text-left px-3 py-2 text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-semibold"
+                    >
+                      <Trash2 className="w-4 h-4 text-rose-600" />
+                      <span>Vaciar todo el establo</span>
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -325,7 +366,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
       {/* 2. BUSCADOR Y FILTROS DE BÚSQUEDA MEJORADOS */}
       <div className="space-y-2.5">
-        {/* Input Buscador estilo mockup */}
+        {/* Input Buscador */}
         <div className="relative w-full">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -337,7 +378,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
           />
         </div>
 
-        {/* Fila de Filtros (Pills con iconos y select nativo estéticamente integrado) */}
+        {/* Fila de Filtros */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {/* Tipo de montura */}
           <div className="relative">
@@ -419,11 +460,21 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
         </div>
       </div>
 
-      {/* 3. LISTADO DE MONTURAS CON EL DISEÑO DE TARJETA EN GRID RESPONSIVE (1 COLUMNA EN MÓVIL, 2 EN ESCRITORIO) */}
+      {/* 3. LISTADO DE MONTURAS CON EL DISEÑO DE TARJETA EN GRID RESPONSIVE */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4 pt-1">
         {filteredMounts.length === 0 ? (
-          <div className="col-span-full text-center py-12 text-slate-400 text-sm bg-slate-50 rounded-2xl border border-slate-200">
-            No se encontraron monturas con los filtros aplicados.
+          <div className="col-span-full text-center py-16 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300 space-y-2">
+            <span className="text-3xl block">🐴</span>
+            <p className="text-slate-700 font-bold text-sm">
+              {mounts.length === 0
+                ? 'Tu establo está completamente vacío'
+                : 'No se encontraron monturas con los filtros aplicados'}
+            </p>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              {mounts.length === 0
+                ? 'No hay ninguna montura registrada. Puedes añadir una nueva montura o cargar tu archivo de Excel.'
+                : 'Prueba a cambiar o limpiar los filtros seleccionados arriba.'}
+            </p>
           </div>
         ) : (
           filteredMounts.map((m) => {
@@ -433,6 +484,21 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
               (def) => def.id === m.definitionId || def.name.toLowerCase() === m.breed.toLowerCase()
             );
             const imageUrl = m.imageUrl || matchedDef?.imageUrl;
+
+            // Sincronización lógica precisa: si XP es máxima (867.582) el nivel es 200
+            const displayLevel =
+              m.currentXp >= MAX_MOUNT_XP
+                ? 200
+                : m.currentXp > 0
+                ? calculateLevelFromXp(m.currentXp)
+                : m.currentLevel || 1;
+
+            // Comprobación de esterilidad o senilidad
+            const isEsterilOrSenil =
+              m.fertility === 'esteril' ||
+              m.fertility === 'senil' ||
+              getFertilityLabel(m.fertility) === 'Estéril' ||
+              getFertilityLabel(m.fertility) === 'Senil';
 
             return (
               <div
@@ -499,21 +565,45 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
 
                   <p className="text-[11px] text-slate-500 truncate font-medium">{m.breed}</p>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 pt-0.5">
-                    {/* Badge de Fertilidad (ej. 🍃 Fértil) */}
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 w-fit border border-emerald-200/60">
-                      <span>🍃</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5 pt-0.5 flex-wrap">
+                    {/* Badge de Fertilidad */}
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold w-fit border ${
+                        m.fertility === 'esteril'
+                          ? 'bg-rose-100 text-rose-800 border-rose-200/60'
+                          : m.fertility === 'senil'
+                          ? 'bg-slate-200 text-slate-700 border-slate-300'
+                          : m.fertility === 'fecunda'
+                          ? 'bg-pink-100 text-pink-800 border-pink-200/60'
+                          : 'bg-emerald-100 text-emerald-800 border-emerald-200/60'
+                      }`}
+                    >
+                      <span>
+                        {m.fertility === 'esteril'
+                          ? '🚫'
+                          : m.fertility === 'senil'
+                          ? '⏳'
+                          : m.fertility === 'fecunda'
+                          ? '💖'
+                          : '🍃'}
+                      </span>
                       <span>{getFertilityLabel(m.fertility)}</span>
                     </span>
 
-                    {/* Badge Nivel Actual */}
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 w-fit border border-blue-100">
-                      Nivel actual: {m.currentLevel}
+                    {/* Badge Nivel Actual (Calculado exactamente desde la XP o nivel 200) */}
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold w-fit border ${
+                        displayLevel >= 200
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : 'bg-blue-50 text-blue-700 border-blue-100'
+                      }`}
+                    >
+                      Nivel actual: {displayLevel}
                     </span>
                   </div>
                 </div>
 
-                {/* Columna Derecha: XP, Barra de Progreso y Medidores (Amor, Madurez, Energía) */}
+                {/* Columna Derecha: XP, Barra de Progreso y Medidores */}
                 <div
                   className="w-32 sm:w-48 flex-shrink-0 text-right space-y-1.5 cursor-pointer"
                   onClick={() => {
@@ -533,21 +623,29 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     </div>
                   </div>
 
-                  {/* Medidores con iconos (Amor, Madurez, Energía) */}
-                  <div className="text-[10px] sm:text-[11px] text-slate-600 space-y-0.5 font-semibold">
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-rose-500 text-xs">❤️</span>
-                      <span>Amor: {m.love}</span>
+                  {/* Medidores con iconos (Amor, Madurez, Energía): OCULTOS si es Estéril o Senil */}
+                  {!isEsterilOrSenil ? (
+                    <div className="text-[10px] sm:text-[11px] text-slate-600 space-y-0.5 font-semibold">
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-rose-500 text-xs">❤️</span>
+                        <span>Amor: {m.love}</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-blue-500 text-xs">💧</span>
+                        <span>Madurez: {m.maturity}</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-1">
+                        <span className="text-amber-500 text-xs">⚡</span>
+                        <span>Energía: {m.stamina}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-blue-500 text-xs">💧</span>
-                      <span>Madurez: {m.maturity}</span>
+                  ) : (
+                    <div className="text-[10px] sm:text-[11px] text-slate-400 italic font-medium py-1">
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold border border-slate-200">
+                        {m.fertility === 'senil' ? 'Montura Senil' : 'Montura Estéril'}
+                      </span>
                     </div>
-                    <div className="flex items-center justify-end gap-1">
-                      <span className="text-amber-500 text-xs">⚡</span>
-                      <span>Energía: {m.stamina}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             );
@@ -674,9 +772,17 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     type="number"
                     min={1}
                     max={200}
-                    value={editingMount.currentLevel || 1}
-                    onChange={(e) => setEditingMount({ ...editingMount, currentLevel: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                    value={editingMount.currentLevel ?? 1}
+                    onChange={(e) => {
+                      const lvl = Math.min(200, Math.max(1, Number(e.target.value) || 1));
+                      const autoXp = calculateXpForLevel(lvl);
+                      setEditingMount({
+                        ...editingMount,
+                        currentLevel: lvl,
+                        currentXp: autoXp,
+                      });
+                    }}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500 font-mono"
                   />
                 </div>
 
@@ -687,9 +793,17 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     type="number"
                     min={0}
                     max={MAX_MOUNT_XP}
-                    value={editingMount.currentXp || 0}
-                    onChange={(e) => setEditingMount({ ...editingMount, currentXp: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                    value={editingMount.currentXp ?? 0}
+                    onChange={(e) => {
+                      const xp = Math.min(MAX_MOUNT_XP, Math.max(0, Number(e.target.value) || 0));
+                      const autoLvl = calculateLevelFromXp(xp);
+                      setEditingMount({
+                        ...editingMount,
+                        currentXp: xp,
+                        currentLevel: autoLvl,
+                      });
+                    }}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500 font-mono"
                   />
                 </div>
 
@@ -698,7 +812,18 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   <label className="block text-xs font-bold text-slate-700 mb-1">Fertilidad</label>
                   <select
                     value={editingMount.fertility || 'fertil'}
-                    onChange={(e) => setEditingMount({ ...editingMount, fertility: e.target.value as FertilityStatus })}
+                    onChange={(e) => {
+                      const newFert = e.target.value as FertilityStatus;
+                      const isNowBlocked = newFert === 'esteril' || newFert === 'senil';
+                      setEditingMount({
+                        ...editingMount,
+                        fertility: newFert,
+                        love: isNowBlocked ? 0 : (editingMount.love || 20000),
+                        maturity: isNowBlocked ? 0 : (editingMount.maturity || 20000),
+                        stamina: isNowBlocked ? 0 : (editingMount.stamina || 20000),
+                        serenity: isNowBlocked ? 0 : (editingMount.serenity || 0),
+                      });
+                    }}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   >
                     <option value="fertil">Fértil</option>
@@ -726,16 +851,31 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                   </select>
                 </div>
 
-                {/* Medidores (Amor, Madurez, Energía) */}
+                {/* Aviso si la montura es estéril o senil */}
+                {isEditingEsterilOrSenil && (
+                  <div className="col-span-1 sm:col-span-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span>
+                      Al tener fertilidad <strong>«{editingMount.fertility === 'senil' ? 'Senil' : 'Estéril'}»</strong>, las casillas de serenidad, amor, madurez y energía quedan bloqueadas.
+                    </span>
+                  </div>
+                )}
+
+                {/* Medidores (Amor, Madurez, Energía, Serenidad) - Bloqueados si es Estéril o Senil */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Amor (0 - 20.000)</label>
                   <input
                     type="number"
                     min={0}
                     max={20000}
-                    value={editingMount.love ?? 20000}
+                    disabled={isEditingEsterilOrSenil}
+                    value={isEditingEsterilOrSenil ? 0 : (editingMount.love ?? 20000)}
                     onChange={(e) => setEditingMount({ ...editingMount, love: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                    className={`w-full px-3 py-2 border rounded-xl text-xs font-medium transition ${
+                      isEditingEsterilOrSenil
+                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed select-none opacity-60'
+                        : 'bg-slate-50 border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500'
+                    }`}
                   />
                 </div>
 
@@ -745,9 +885,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     type="number"
                     min={0}
                     max={20000}
-                    value={editingMount.maturity ?? 20000}
+                    disabled={isEditingEsterilOrSenil}
+                    value={isEditingEsterilOrSenil ? 0 : (editingMount.maturity ?? 20000)}
                     onChange={(e) => setEditingMount({ ...editingMount, maturity: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                    className={`w-full px-3 py-2 border rounded-xl text-xs font-medium transition ${
+                      isEditingEsterilOrSenil
+                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed select-none opacity-60'
+                        : 'bg-slate-50 border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500'
+                    }`}
                   />
                 </div>
 
@@ -757,9 +902,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     type="number"
                     min={0}
                     max={20000}
-                    value={editingMount.stamina ?? 20000}
+                    disabled={isEditingEsterilOrSenil}
+                    value={isEditingEsterilOrSenil ? 0 : (editingMount.stamina ?? 20000)}
                     onChange={(e) => setEditingMount({ ...editingMount, stamina: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                    className={`w-full px-3 py-2 border rounded-xl text-xs font-medium transition ${
+                      isEditingEsterilOrSenil
+                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed select-none opacity-60'
+                        : 'bg-slate-50 border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500'
+                    }`}
                   />
                 </div>
 
@@ -769,9 +919,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged, o
                     type="number"
                     min={-5000}
                     max={5000}
-                    value={editingMount.serenity ?? 0}
+                    disabled={isEditingEsterilOrSenil}
+                    value={isEditingEsterilOrSenil ? 0 : (editingMount.serenity ?? 0)}
                     onChange={(e) => setEditingMount({ ...editingMount, serenity: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                    className={`w-full px-3 py-2 border rounded-xl text-xs font-medium transition ${
+                      isEditingEsterilOrSenil
+                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed select-none opacity-60'
+                        : 'bg-slate-50 border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500'
+                    }`}
                   />
                 </div>
               </div>

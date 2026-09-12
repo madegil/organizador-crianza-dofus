@@ -1,6 +1,6 @@
 import type { FuelInfo, FuelTier, FuelVariant } from '../types/mount';
 
-export const MAX_MOUNT_XP = 867582;
+export { MAX_MOUNT_XP, MOUNT_LEVEL_XP_THRESHOLDS, calculateLevelFromXp, calculateXpForLevel } from './mountXpTable';
 export const LEVEL_100_XP = 172668;
 export const MAX_ENCLOS_GAUGE = 100000;
 export const MAX_MOUNT_BREEDING_STAT = 20000;
