@@ -3,7 +3,7 @@ import type { UserMount, SpeciesType, FertilityStatus, SpecialCapacity } from '.
 import { ALL_MOUNTS_DATA, findMountByBreedAndSpecies } from '../data/allMounts';
 import { calculateLevelFromXp, calculateXpForLevel } from '../data/fuelData';
 
-export const EXCEL_TEMPLATE_COLUMNS = [
+export const CSV_TEMPLATE_COLUMNS = [
   'Nombre de la montura',
   'Especie',
   'Color / Raza',
@@ -17,91 +17,64 @@ export const EXCEL_TEMPLATE_COLUMNS = [
   'Amor',
   'Madurez',
   'Resistencia',
-  'Notas / Observaciones',
 ];
 
+export const EXCEL_TEMPLATE_COLUMNS = CSV_TEMPLATE_COLUMNS;
+
 /**
- * Descarga la plantilla oficial en Excel (.xlsx) generada en tiempo real por SheetJS en el navegador.
- * 100% libre de errores de apertura en Google Sheets y Microsoft Excel.
+ * Descarga la plantilla oficial en formato CSV con BOM UTF-8 sin columna de notas.
+ * Formato universal, texto plano, compatible con doble clic en Google Sheets y Microsoft Excel.
+ */
+export function downloadCsvTemplate() {
+  const csvRows = [
+    CSV_TEMPLATE_COLUMNS.join(','),
+    'AquaDrak,Mulagua,Índigo,1,Macho,200,867582,Fertil,Ninguna,2000,20000,20000,20000',
+    'Flamito,Dragopavo,Pelirroja,1,Hembra,8,633,Fertil,Ninguna,2000,20000,20000,20000',
+    'Titanio,Vueloceronte,Marfil,3,Hembra,96,157620,Esteril,Ninguna,0,0,0,0',
+  ];
+
+  const csvContent = '\uFEFF' + csvRows.join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'plantilla_crianza_dofus.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Función auxiliar para descargar plantilla Excel si fuera requerida internamente.
  */
 export function downloadExcelTemplate() {
   const wb = XLSX.utils.book_new();
 
-  // 1. Hoja principal: Registro_Monturas con ejemplos
   const sampleRows = [
-    [
-      'AquaDrak',
-      'Mulagua',
-      'Índigo',
-      1,
-      'Macho',
-      200,
-      867582,
-      'Fertil',
-      'Ninguna',
-      2000,
-      20000,
-      20000,
-      20000,
-      'Ejemplo: Nivel 200 con XP máxima',
-    ],
-    [
-      'Flamito',
-      'Dragopavo',
-      'Pelirroja',
-      1,
-      'Hembra',
-      8,
-      633,
-      'Fertil',
-      'Ninguna',
-      2000,
-      20000,
-      20000,
-      20000,
-      'Ejemplo: Nivel 8 en desarrollo',
-    ],
-    [
-      'Titanio',
-      'Vueloceronte',
-      'Marfil',
-      3,
-      'Hembra',
-      96,
-      157620,
-      'Esteril',
-      'Ninguna',
-      0,
-      0,
-      0,
-      0,
-      'Ejemplo: Estéril (medidores en 0)',
-    ],
+    ['AquaDrak', 'Mulagua', 'Índigo', 1, 'Macho', 200, 867582, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
+    ['Flamito', 'Dragopavo', 'Pelirroja', 1, 'Hembra', 8, 633, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
+    ['Titanio', 'Vueloceronte', 'Marfil', 3, 'Hembra', 96, 157620, 'Esteril', 'Ninguna', 0, 0, 0, 0],
   ];
 
-  const ws1 = XLSX.utils.aoa_to_sheet([EXCEL_TEMPLATE_COLUMNS, ...sampleRows]);
-
-  // Configuración de anchos de columna para legibilidad óptima
+  const ws1 = XLSX.utils.aoa_to_sheet([CSV_TEMPLATE_COLUMNS, ...sampleRows]);
   ws1['!cols'] = [
-    { wch: 22 }, // Nombre de la montura
+    { wch: 22 }, // Nombre
     { wch: 16 }, // Especie
     { wch: 25 }, // Color / Raza
     { wch: 14 }, // Generación
     { wch: 12 }, // Sexo
-    { wch: 18 }, // Nivel de la montura
-    { wch: 18 }, // XP de la montura
+    { wch: 18 }, // Nivel
+    { wch: 18 }, // XP
     { wch: 14 }, // Fertilidad
     { wch: 18 }, // Capacidad
     { wch: 14 }, // Serenidad
     { wch: 14 }, // Amor
     { wch: 14 }, // Madurez
     { wch: 14 }, // Resistencia
-    { wch: 35 }, // Notas / Observaciones
   ];
-
   XLSX.utils.book_append_sheet(wb, ws1, 'Registro_Monturas');
 
-  // 2. Hoja secundaria: Guía de Valores y Reglas
   const guideHeaders = ['Columna', 'Valores Aceptados', 'Reglas y Consejos'];
   const guideRows = [
     ['Nombre de la montura', 'Texto libre (ej. AquaDrak, Rayito)', 'Apodo personalizado de tu montura'],
@@ -117,14 +90,12 @@ export function downloadExcelTemplate() {
     ['Amor', '0 a 20000', 'Medidor de amor para fecundación'],
     ['Madurez', '0 a 20000', 'Medidor de madurez para montar'],
     ['Resistencia', '0 a 20000', 'Medidor de resistencia para fecundación'],
-    ['Notas / Observaciones', 'Texto libre', 'Notas de árbol genealógico, camada o recordatorios'],
   ];
 
   const ws2 = XLSX.utils.aoa_to_sheet([guideHeaders, ...guideRows]);
   ws2['!cols'] = [{ wch: 24 }, { wch: 45 }, { wch: 60 }];
   XLSX.utils.book_append_sheet(wb, ws2, 'Guia_Valores');
 
-  // 3. Hoja terciaria: Catálogo Completo de Razas
   const catHeaders = ['Especie', 'Color / Raza Oficial', 'Generación'];
   const catRows: any[][] = [];
   ALL_MOUNTS_DATA.forEach((m) => {
@@ -138,33 +109,7 @@ export function downloadExcelTemplate() {
   ws3['!cols'] = [{ wch: 18 }, { wch: 30 }, { wch: 14 }];
   XLSX.utils.book_append_sheet(wb, ws3, 'Catalogo_Razas');
 
-  // Escritura limpia y directa sin dependencias de red
   XLSX.writeFile(wb, 'plantilla_crianza_dofus.xlsx');
-}
-
-/**
- * Descarga la plantilla en formato CSV con BOM UTF-8.
- * El formato CSV es texto plano universal e inmune a cualquier error de software.
- * Compatible al 100% con doble clic en Google Sheets y Microsoft Excel.
- */
-export function downloadCsvTemplate() {
-  const csvRows = [
-    EXCEL_TEMPLATE_COLUMNS.join(','),
-    'AquaDrak,Mulagua,Índigo,1,Macho,200,867582,Fertil,Ninguna,2000,20000,20000,20000,Ejemplo: Nivel 200 con XP completa',
-    'Flamito,Dragopavo,Pelirroja,1,Hembra,8,633,Fertil,Ninguna,2000,20000,20000,20000,Ejemplo: Nivel 8',
-    'Titanio,Vueloceronte,Marfil,3,Hembra,96,157620,Esteril,Ninguna,0,0,0,0,Ejemplo: Estéril (medidores en 0)',
-  ];
-
-  const csvContent = '\uFEFF' + csvRows.join('\r\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'plantilla_crianza_dofus.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
 
 export function exportMountsToExcel(mounts: UserMount[]) {

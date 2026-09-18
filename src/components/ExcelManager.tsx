@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Download, Upload, FileSpreadsheet, FileJson, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import type { UserMount } from '../types/mount';
-import { downloadExcelTemplate, downloadCsvTemplate, exportMountsToExcel, exportMountsToJson, parseExcelFile } from '../utils/excelHelper';
+import { downloadCsvTemplate, exportMountsToExcel, exportMountsToJson, parseExcelFile } from '../utils/excelHelper';
 import { db } from '../db/mountsDb';
 
 interface ExcelManagerProps {
@@ -53,22 +53,14 @@ export const ExcelManager: React.FC<ExcelManagerProps> = ({ mounts, onDataChange
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={downloadExcelTemplate}
-            className="flex items-center justify-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition"
-            title="Descarga la plantilla en formato Excel (.xlsx)"
-          >
-            <Download className="w-4 h-4 text-emerald-100" />
-            Descargar Plantilla (.xlsx)
-          </button>
+        <div>
           <button
             onClick={downloadCsvTemplate}
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-semibold border border-slate-700 transition"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition"
             title="Descarga la plantilla en formato CSV universal (.csv)"
           >
-            <Download className="w-4 h-4 text-sky-400" />
-            Plantilla CSV (.csv)
+            <Download className="w-4 h-4 text-emerald-100" />
+            Descargar Plantilla CSV (.csv)
           </button>
         </div>
       </div>

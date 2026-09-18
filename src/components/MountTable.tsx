@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import type { UserMount, SpeciesType, SpecialCapacity, FertilityStatus } from '../types/mount';
 import {
-  downloadExcelTemplate,
   downloadCsvTemplate,
   exportMountsToExcel,
   exportMountsToJson,
@@ -217,7 +216,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
   return (
     <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
-      {/* 1. SECCIÓN SUPERIOR SIMPLIFICADA: Botones Seleccionar Archivo y Descargar Plantilla */}
+      {/* 1. SECCIÓN SUPERIOR: Botón Seleccionar Archivo y Botón Descargar Plantilla CSV */}
       <div className="space-y-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
           {/* Botón Seleccionar Archivo */}
@@ -237,25 +236,15 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             <span>Seleccionar archivo</span>
           </label>
 
-          {/* Botón Descargar Plantilla */}
-          <div className="flex gap-2">
-            <button
-              onClick={downloadExcelTemplate}
-              className="flex-1 flex items-center justify-center gap-2 px-3.5 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
-              title="Descargar plantilla Excel (.xlsx) generada limpiamente en tu navegador"
-            >
-              <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />
-              <span>Plantilla Excel (.xlsx)</span>
-            </button>
-            <button
-              onClick={downloadCsvTemplate}
-              className="flex items-center justify-center gap-1.5 px-3.5 py-3 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition border border-slate-300 shadow-sm"
-              title="Descargar plantilla CSV (.csv) formato universal"
-            >
-              <Download className="w-4 h-4 text-slate-500 flex-shrink-0" />
-              <span>CSV (.csv)</span>
-            </button>
-          </div>
+          {/* Botón Descargar Plantilla CSV */}
+          <button
+            onClick={downloadCsvTemplate}
+            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
+            title="Descargar plantilla CSV (.csv) universal para Google Sheets y Excel"
+          >
+            <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />
+            <span>Descargar plantilla CSV</span>
+          </button>
         </div>
 
         {/* Acciones de respaldo y exportación discretas */}

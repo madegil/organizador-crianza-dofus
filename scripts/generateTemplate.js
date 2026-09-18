@@ -20,58 +20,12 @@ const headers = [
   'Amor',
   'Madurez',
   'Resistencia',
-  'Notas / Observaciones'
 ];
 
 const sampleRows = [
-  [
-    'AquaDrak',
-    'Mulagua',
-    'Índigo',
-    1,
-    'Macho',
-    200,
-    867582,
-    'Fertil',
-    'Ninguna',
-    2000,
-    20000,
-    20000,
-    20000,
-    'Ejemplo: Nivel 200 con XP máxima'
-  ],
-  [
-    'Flamito',
-    'Dragopavo',
-    'Pelirroja',
-    1,
-    'Hembra',
-    8,
-    633,
-    'Fertil',
-    'Ninguna',
-    2000,
-    20000,
-    20000,
-    20000,
-    'Ejemplo: Nivel 8'
-  ],
-  [
-    'Titanio',
-    'Vueloceronte',
-    'Marfil',
-    3,
-    'Hembra',
-    96,
-    157620,
-    'Esteril',
-    'Ninguna',
-    0,
-    0,
-    0,
-    0,
-    'Ejemplo: Estéril (medidores en 0)'
-  ]
+  ['AquaDrak', 'Mulagua', 'Índigo', 1, 'Macho', 200, 867582, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
+  ['Flamito', 'Dragopavo', 'Pelirroja', 1, 'Hembra', 8, 633, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
+  ['Titanio', 'Vueloceronte', 'Marfil', 3, 'Hembra', 96, 157620, 'Esteril', 'Ninguna', 0, 0, 0, 0],
 ];
 
 const wb = XLSX.utils.book_new();
@@ -90,7 +44,6 @@ ws1['!cols'] = [
   { wch: 14 },
   { wch: 14 },
   { wch: 14 },
-  { wch: 35 }
 ];
 XLSX.utils.book_append_sheet(wb, ws1, 'Registro_Monturas');
 
