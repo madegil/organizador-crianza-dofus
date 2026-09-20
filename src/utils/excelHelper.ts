@@ -29,7 +29,7 @@ export function downloadCsvTemplate() {
   const csvRows = [
     CSV_TEMPLATE_COLUMNS.join(','),
     'AquaDrak,Mulagua,Índigo,1,Macho,200,867582,Fertil,Ninguna,2000,20000,20000,20000',
-    'Flamito,Dragopavo,Pelirroja,1,Hembra,8,633,Fertil,Ninguna,2000,20000,20000,20000',
+    'Flamito,Dragopavo,Pelirrojo,1,Hembra,8,633,Fertil,Ninguna,2000,20000,20000,20000',
     'Titanio,Vueloceronte,Marfil,3,Hembra,96,157620,Esteril,Ninguna,0,0,0,0',
   ];
 
@@ -53,7 +53,7 @@ export function downloadExcelTemplate() {
 
   const sampleRows = [
     ['AquaDrak', 'Mulagua', 'Índigo', 1, 'Macho', 200, 867582, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
-    ['Flamito', 'Dragopavo', 'Pelirroja', 1, 'Hembra', 8, 633, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
+    ['Flamito', 'Dragopavo', 'Pelirrojo', 1, 'Hembra', 8, 633, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
     ['Titanio', 'Vueloceronte', 'Marfil', 3, 'Hembra', 96, 157620, 'Esteril', 'Ninguna', 0, 0, 0, 0],
   ];
 
@@ -79,7 +79,7 @@ export function downloadExcelTemplate() {
   const guideRows = [
     ['Nombre de la montura', 'Texto libre (ej. AquaDrak, Rayito)', 'Apodo personalizado de tu montura'],
     ['Especie', 'Dragopavo, Mulagua, Vueloceronte', 'Especie oficial de la montura'],
-    ['Color / Raza', 'Cualquier color oficial (ej. Almendrada, Marfil)', 'Revisa la hoja "Catalogo_Razas" para la lista completa'],
+    ['Color / Raza', 'Cualquier color oficial (ej. Almendrado, Marfil)', 'Revisa la hoja "Catalogo_Razas" para la lista completa'],
     ['Generación', '1 al 10', 'Número de generación correspondiente a la raza'],
     ['Sexo', 'Macho, Hembra (o M, F)', 'Sexo de la montura'],
     ['Nivel de la montura', '1 al 200', 'Nivel actual en el juego (si se omite, se calcula con la XP)'],
@@ -190,7 +190,7 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     if (rawSpecies.includes('muldo') || rawSpecies.includes('mulagua') || rawSpecies.includes('muluaga')) species = 'muluaga';
     else if (rawSpecies.includes('volk') || rawSpecies.includes('vuelo') || rawSpecies.includes('ceronte')) species = 'vueloceronte';
 
-    const matchedDef = findMountByBreedAndSpecies(breed || 'Almendrada', species);
+    const matchedDef = findMountByBreedAndSpecies(breed || 'Almendrado', species);
     const definitionId = matchedDef ? matchedDef.id : `${species}_custom_${i}`;
     const generation = Number(row[3]) || (matchedDef ? matchedDef.generation : 1);
     const rawGender = String(row[4] || 'M').toUpperCase().trim();
@@ -235,7 +235,7 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
       nickname: nickname || breed || (matchedDef ? matchedDef.name : 'Sin Nombre'),
       definitionId,
       species,
-      breed: breed || (matchedDef ? matchedDef.name : 'Almendrada'),
+      breed: breed || (matchedDef ? matchedDef.name : 'Almendrado'),
       generation,
       gender,
       currentLevel,

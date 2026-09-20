@@ -24,7 +24,7 @@ const headers = [
 
 const sampleRows = [
   ['AquaDrak', 'Mulagua', 'Índigo', 1, 'Macho', 200, 867582, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
-  ['Flamito', 'Dragopavo', 'Pelirroja', 1, 'Hembra', 8, 633, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
+  ['Flamito', 'Dragopavo', 'Pelirrojo', 1, 'Hembra', 8, 633, 'Fertil', 'Ninguna', 2000, 20000, 20000, 20000],
   ['Titanio', 'Vueloceronte', 'Marfil', 3, 'Hembra', 96, 157620, 'Esteril', 'Ninguna', 0, 0, 0, 0],
 ];
 

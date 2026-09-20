@@ -17,10 +17,21 @@ export function getMountDefinitionById(id: string): MountDefinition | undefined 
   return ALL_MOUNTS_DATA.find((m) => m.id === id);
 }
 
+function normalizeBreedName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/\balmendrada\b/g, 'almendrado')
+    .replace(/\bdorada\b/g, 'dorado')
+    .replace(/\bpelirroja\b/g, 'pelirrojo')
+    .replace(/\borqu[íi]dea\b/g, 'orquídeo');
+}
+
 export function findMountByBreedAndSpecies(breedName: string, species?: SpeciesType): MountDefinition | undefined {
-  const norm = breedName.toLowerCase().trim();
+  const norm = normalizeBreedName(breedName);
   return ALL_MOUNTS_DATA.find((m) => {
     if (species && m.species !== species) return false;
-    return m.name.toLowerCase().includes(norm) || norm.includes(m.name.toLowerCase().split(' ')[0]);
+    const mNorm = normalizeBreedName(m.name);
+    return mNorm === norm || mNorm.includes(norm) || norm.includes(mNorm.split(' ')[0]);
   });
 }
