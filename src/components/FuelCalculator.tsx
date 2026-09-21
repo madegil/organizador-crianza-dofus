@@ -9,6 +9,9 @@ import {
   Zap,
   Layers,
   ArrowRight,
+  Hourglass,
+  Gauge,
+  Flame,
 } from 'lucide-react';
 import {
   FUEL_TIERS,
@@ -16,11 +19,12 @@ import {
   FUEL_ITEM_NAMES,
   MAX_MOUNT_XP,
   MAX_ENCLOS_GAUGE,
+  TOTAL_CONTINUOUS_DRAIN_SECONDS,
   calculateLevelFromXp,
   calculateXpForLevel,
 } from '../data/fuelData';
 import type { FuelTier, FuelVariant, UserMount } from '../types/mount';
-import { calculateFuelBreakdown } from '../utils/calculator';
+import { calculateFuelBreakdown, type TrainingStrategy, formatDurationSpanish } from '../utils/calculator';
 import { db, initSeedDataIfEmpty } from '../db/mountsDb';
 import { MountAvatar } from './MountAvatar';
 import { XpGauge } from './XpGauge';
@@ -37,6 +41,7 @@ export const FuelCalculator: React.FC = () => {
   const [selectedVariant, setSelectedVariant] = useState<FuelVariant>('gigantesco');
   const [targetMode, setTargetMode] = useState<CalculationTarget>('nextLevel');
   const [customXp, setCustomXp] = useState<number>(80000);
+  const [strategy, setStrategy] = useState<TrainingStrategy>('cascade');
 
   // Cargar monturas de Dexie
   const loadMounts = async () => {
@@ -96,10 +101,10 @@ export const FuelCalculator: React.FC = () => {
     }
   }, [selectedMount, targetMode, xpForNextLevel, xpForLevel200, customXp]);
 
-  // Cálculo principal de carburante y tiempo
+  // Cálculo principal de carburante y tiempo diferenciando vaciado vs subida de montura
   const breakdown = useMemo(() => {
-    return calculateFuelBreakdown(xpNeeded, selectedVariant, isSage);
-  }, [xpNeeded, selectedVariant, isSage]);
+    return calculateFuelBreakdown(xpNeeded, selectedVariant, isSage, strategy);
+  }, [xpNeeded, selectedVariant, isSage, strategy]);
 
   // XP que se muestra en el medidor físico (tope 200.000)
   const gaugeDisplayXp = useMemo(() => {
@@ -213,7 +218,7 @@ export const FuelCalculator: React.FC = () => {
         )}
       </div>
 
-      {/* 2. SECCIÓN INFERIOR: MEDIDOR XP [XP.PNG] (0-200.000) Y PANEL DE INFORMACIÓN */}
+      {/* 2. SECCIÓN INFERIOR: MEDIDOR XP Y PANEL DE INFORMACIÓN */}
       <div className="bg-dofus-card rounded-2xl border border-dofus-border p-4 sm:p-6 shadow-xl space-y-6">
         {/* Cabecera del cálculo para la montura activa */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-dofus-border pb-4">
@@ -287,7 +292,7 @@ export const FuelCalculator: React.FC = () => {
 
         {/* CONTENEDOR PRINCIPAL: MEDIDOR A LA IZQUIERDA, INFORMACIÓN A LA DERECHA */}
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6 lg:gap-8">
-          {/* MEDIDOR DE 0-200.000 XP SEGÚN XP.PNG / XP_Medidor.png (Ojo sin texto quemado en el medidor) */}
+          {/* MEDIDOR DE 0-200.000 XP */}
           <div className="flex flex-col items-center gap-2 flex-shrink-0">
             <XpGauge currentXp={gaugeDisplayXp} maxGauge={MAX_ENCLOS_GAUGE} />
             <div className="text-center">
@@ -343,49 +348,165 @@ export const FuelCalculator: React.FC = () => {
                   ¿Tiene capacidad « Sabia »?
                 </span>
                 <span className="text-xs font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                  XP x2 • Tiempo a la mitad
+                  XP x2 • Requiere mitad de tiempo y carburante
                 </span>
               </div>
             </label>
 
-            {/* B. Tiempo que tarda en subir el nivel */}
-            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 via-slate-900/90 to-slate-900 border border-amber-500/30 shadow-lg">
-              <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-                <span className="font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
-                  <Clock className="w-4 h-4 text-amber-400" />
-                  Tiempo que tarda en subir el nivel
+            {/* B. SELECTOR DE ESTRATEGIA: MANTENER NIVEL FIJO VS VACIADO CONTINUO (CASCADA) */}
+            <div className="p-3.5 bg-slate-900/90 rounded-xl border border-dofus-border space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <Zap className="w-4 h-4 text-amber-400" />
+                  Estrategia de Entrenamiento en Pesebre
                 </span>
-                <span className="font-mono text-amber-400/90">
-                  {xpNeeded.toLocaleString()} XP a ganar
+                <span className="text-[10px] text-slate-400">
+                  ¿Cómo mantienes el pesebre?
                 </span>
               </div>
 
-              <p className="text-xl sm:text-2xl font-black text-amber-400 font-mono tracking-tight">
-                {breakdown.formattedTotalTime}
-              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {/* Opción 1: Vaciado Continuo Natural (Cascada 200k -> 0) */}
+                <button
+                  onClick={() => setStrategy('cascade')}
+                  className={`p-2.5 rounded-xl border text-left transition flex items-start gap-2 ${
+                    strategy === 'cascade'
+                      ? 'bg-amber-500/15 border-amber-400 ring-2 ring-amber-400/30 text-white'
+                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-400'
+                  }`}
+                >
+                  <Hourglass className={`w-4 h-4 mt-0.5 flex-shrink-0 ${strategy === 'cascade' ? 'text-amber-400' : 'text-slate-500'}`} />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-black text-white">Vaciado Natural Continuo</span>
+                      <span className="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">Cascada</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
+                      Llenas el pesebre y dejas que se vacíe solo (Nivel 4 → 3 → 2 → 1). Total: 35h 39m.
+                    </p>
+                  </div>
+                </button>
 
-              <p className="text-[11px] text-slate-400 mt-1">
-                {isSage ? (
-                  <span className="text-purple-300 font-medium">
-                    ✨ Velocidad duplicada por capacidad « Sabia » (~3.12 XP/s en pesebre).
-                  </span>
-                ) : (
-                  <span>
-                    Velocidad estándar de pesebre (~1.56 XP/s sin capacidad Sabia).
-                  </span>
-                )}
-              </p>
+                {/* Opción 2: Mantener Nivel Fijo (Optimización activa) */}
+                <div
+                  className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between gap-1.5 ${
+                    strategy !== 'cascade'
+                      ? 'bg-amber-500/15 border-amber-400 ring-2 ring-amber-400/30 text-white'
+                      : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Flame className={`w-4 h-4 ${strategy !== 'cascade' ? 'text-amber-400' : 'text-slate-500'}`} />
+                      <span className="text-xs font-black text-white">Mantener Nivel Fijo</span>
+                    </div>
+                    <span className="text-[9px] text-amber-300 font-bold">Ritmo Constante</span>
+                  </div>
+
+                  {/* Sub-selector de Nivel 4, 3, 2, 1 */}
+                  <div className="grid grid-cols-4 gap-1 pt-1">
+                    {([4, 3, 2, 1] as FuelTier[]).map((t) => {
+                      const stratKey: TrainingStrategy = t === 4 ? 'tier4' : t === 3 ? 'tier3' : t === 2 ? 'tier2' : 'tier1';
+                      const isTierActive = strategy === stratKey;
+                      const rate = FUEL_TIERS[t].gainPer10s! / 10;
+                      return (
+                        <button
+                          key={t}
+                          onClick={() => setStrategy(stratKey)}
+                          className={`px-1.5 py-1 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center ${
+                            isTierActive
+                              ? 'bg-amber-500 text-slate-950 shadow-sm'
+                              : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300'
+                          }`}
+                        >
+                          <span>Nvl {t}</span>
+                          <span className="text-[9px] opacity-80 font-mono">+{rate}XP/s</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* C. Cantidad de carburante a usar teniendo en cuenta sus limitantes */}
+            {/* C. PANEL DUAL: TIEMPO PARA SUBIR LA MONTURA VS TIEMPO DE VACIADO DEL CARBURANTE */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Tarjeta 1: Tiempo que tarda en subir el nivel la montura */}
+              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/15 via-slate-900/90 to-slate-900 border border-amber-500/40 shadow-lg flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                    <span className="font-black text-amber-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                      <Clock className="w-4 h-4 text-amber-400" />
+                      Tiempo de Subida de Nivel
+                    </span>
+                    <span className="font-mono text-amber-400/90 text-[10px]">
+                      {xpNeeded.toLocaleString()} XP
+                    </span>
+                  </div>
+
+                  <p className="text-xl sm:text-2xl font-black text-amber-400 font-mono tracking-tight mt-1">
+                    {breakdown.formattedMountTrainingTime}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-amber-500/20 text-[11px] text-slate-300 mt-2">
+                  {strategy === 'cascade' ? (
+                    <span>
+                      Velocidad en cascada: {isSage ? '✨ 2x por Sabia (~2.0 - 8.0 XP/s)' : '1.0 - 4.0 XP/s promedio'}
+                    </span>
+                  ) : (
+                    <span>
+                      Velocidad fija ({strategy.toUpperCase()}):{' '}
+                      <strong className="text-amber-300 font-mono">{breakdown.effectiveRatePerSec.toFixed(1)} XP/s</strong>{' '}
+                      {isSage ? '✨ (Sabia x2)' : ''}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Tarjeta 2: Tiempo de vaciado físico del carburante (Autonomía del Pesebre) */}
+              <div className="p-4 rounded-xl bg-gradient-to-br from-sky-500/10 via-slate-900/90 to-slate-900 border border-sky-500/30 shadow-lg flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                    <span className="font-black text-sky-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                      <Gauge className="w-4 h-4 text-sky-400" />
+                      Vaciado del Carburante
+                    </span>
+                    <span className="font-mono text-sky-400/90 text-[10px]">
+                      Autonomía Pesebre
+                    </span>
+                  </div>
+
+                  <p className="text-xl sm:text-2xl font-black text-sky-400 font-mono tracking-tight mt-1">
+                    {strategy === 'cascade' && xpNeeded >= MAX_ENCLOS_GAUGE
+                      ? '35 h 39 min'
+                      : breakdown.formattedFuelDrainTime}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-sky-500/20 text-[11px] text-slate-300 mt-2">
+                  {strategy === 'cascade' ? (
+                    <span>
+                      Vaciado continuo total del medidor (200k a 0): <strong className="text-sky-300 font-mono">35 h 39 min</strong>
+                    </span>
+                  ) : (
+                    <span>
+                      Duración del tramo de pesebre antes de recargar.
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* D. COMPARATIVA POR NIVELES DE CARBURANTE Y SUS LIMITANTES */}
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h4 className="text-xs sm:text-sm font-bold text-white">
-                    Cantidad de carburante a usar (con limitantes de nivel)
+                    Desglose por Nivel de Carburante y Velocidades
                   </h4>
                   <p className="text-[11px] text-slate-400">
-                    Cada nivel del pesebre solo admite su tipo correspondiente de carburante.
+                    Haz clic en un nivel para fijar su ritmo o visualiza su consumo independiente.
                   </p>
                 </div>
 
@@ -407,56 +528,91 @@ export const FuelCalculator: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tarjetas de los 4 Niveles de Carburante con sus Limitantes */}
+              {/* Tarjetas de los 4 Niveles de Carburante con estética Establo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 {breakdown.tiers.map((t) => {
+                  const stratKey: TrainingStrategy = t.tier === 4 ? 'tier4' : t.tier === 3 ? 'tier3' : t.tier === 2 ? 'tier2' : 'tier1';
+                  const isThisTierSelected = strategy === stratKey;
                   const hasUsage = t.itemsNeeded > 0;
+
                   return (
                     <div
                       key={t.tier}
-                      className={`p-3.5 rounded-xl border transition flex flex-col justify-between gap-2 ${
-                        hasUsage
-                          ? 'bg-slate-900/90 border-slate-700 shadow-md text-white'
-                          : 'bg-slate-900/30 border-slate-800/60 opacity-60 text-slate-400'
+                      onClick={() => setStrategy(stratKey)}
+                      className={`p-3.5 rounded-xl border transition cursor-pointer flex flex-col justify-between gap-2 relative ${
+                        isThisTierSelected
+                          ? 'bg-amber-500/15 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10 text-white'
+                          : hasUsage
+                          ? 'bg-slate-900/90 border-slate-700 shadow-md text-white hover:border-slate-600'
+                          : 'bg-slate-900/40 border-slate-800/80 text-slate-400 hover:border-slate-700'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`text-xs font-black px-2 py-0.5 rounded ${
-                            t.tier === 1 ? 'bg-purple-500/20 text-purple-300' :
-                            t.tier === 2 ? 'bg-blue-500/20 text-blue-300' :
-                            t.tier === 3 ? 'bg-amber-500/20 text-amber-300' :
-                            'bg-rose-500/20 text-rose-300'
-                          }`}>
+                          <span
+                            className={`text-xs font-black px-2 py-0.5 rounded ${
+                              t.tier === 1
+                                ? 'bg-purple-500/20 text-purple-300'
+                                : t.tier === 2
+                                ? 'bg-blue-500/20 text-blue-300'
+                                : t.tier === 3
+                                ? 'bg-amber-500/20 text-amber-300'
+                                : 'bg-rose-500/20 text-rose-300'
+                            }`}
+                          >
                             Nivel {t.tier} - {t.tierName}
                           </span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
                             {t.rangeLabel}
                           </span>
                         </div>
 
-                        <p className="text-sm sm:text-base font-black text-amber-300 font-mono mt-1">
-                          {t.itemsNeeded} {t.itemsNeeded === 1 ? 'unidad' : 'unidades'}
-                        </p>
+                        {/* Velocidad y Consumo */}
+                        <div className="flex items-center justify-between text-xs mt-1.5">
+                          <span className="text-slate-400">
+                            Baja: <strong className="text-slate-200 font-mono">{t.consumptionRatePer10s} / 10s</strong> ({t.baseXpPerSec} pts/s)
+                          </span>
+                          <span className="font-mono font-bold text-amber-300">
+                            +{t.effectiveXpPerSec} XP/s {isSage ? '✨' : ''}
+                          </span>
+                        </div>
 
-                        <p className="text-[11px] text-slate-300 font-medium mt-0.5 line-clamp-1" title={t.itemName}>
-                          {t.itemName} (+{t.variantValue.toLocaleString()} XP)
-                        </p>
+                        {/* Tiempo si se mantiene fijo */}
+                        <div className="mt-1.5 p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-[11px]">
+                          <span className="text-slate-400">Tiempo si mantienes Nivel {t.tier}:</span>
+                          <span className="font-mono font-bold text-amber-400">
+                            {t.formattedTimeIfMaintained}
+                          </span>
+                        </div>
+
+                        {/* Ítems para la estrategia activa */}
+                        <div className="mt-2 flex items-baseline justify-between">
+                          <p className="text-sm font-black text-white font-mono">
+                            {t.itemsNeeded} {t.itemsNeeded === 1 ? 'unidad' : 'unidades'}
+                          </p>
+                          <span className="text-[10px] text-slate-400 truncate max-w-[160px]" title={t.itemName}>
+                            {t.itemName}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 flex justify-between">
-                        <span>XP: {t.xpNeeded.toLocaleString()}</span>
-                        <span>Vaciado: {t.drainDurationText}</span>
+                        <span>Vaciado del tramo: <strong className="text-slate-300">{t.drainDurationText}</strong></span>
+                        {isThisTierSelected && (
+                          <span className="text-amber-400 font-bold flex items-center gap-1">
+                            <Check className="w-3 h-3 stroke-[3]" /> Activo
+                          </span>
+                        )}
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Resumen total de unidades */}
+              {/* Resumen total de unidades de la estrategia activa */}
               <div className="p-3 bg-slate-900/60 rounded-xl border border-dofus-border flex items-center justify-between text-xs">
                 <span className="text-slate-300 font-medium">
-                  Total de carburantes requeridos:
+                  Total de carburantes requeridos ({strategy === 'cascade' ? 'Modo Cascada' : `Manteniendo Nivel ${strategy.slice(-1)}`}):
                 </span>
                 <span className="font-mono font-black text-amber-400 text-sm">
                   {breakdown.totalItemsNeeded} {breakdown.totalItemsNeeded === 1 ? 'unidad' : 'unidades'} ({FUEL_VARIANTS[selectedVariant].name})

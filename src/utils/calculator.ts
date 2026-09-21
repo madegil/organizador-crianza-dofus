@@ -1,4 +1,11 @@
-import { FUEL_TIERS, FUEL_VARIANTS, FUEL_ITEM_NAMES, MAX_MOUNT_XP, MAX_ENCLOS_GAUGE } from '../data/fuelData';
+import {
+  FUEL_TIERS,
+  FUEL_VARIANTS,
+  FUEL_ITEM_NAMES,
+  MAX_MOUNT_XP,
+  MAX_ENCLOS_GAUGE,
+  TOTAL_CONTINUOUS_DRAIN_SECONDS,
+} from '../data/fuelData';
 import type { FuelTier, FuelVariant, UserMount } from '../types/mount';
 
 export function calculateRemainingXp(currentXp: number, targetXp: number = MAX_MOUNT_XP): number {
@@ -29,58 +36,88 @@ export function formatSecondsToTime(totalSeconds: number): string {
   return formatDurationSpanish(totalSeconds);
 }
 
+export function formatShortTime(totalSeconds: number): string {
+  const rounded = Math.round(totalSeconds);
+  if (rounded <= 0) return '0s';
+
+  const totalMinutes = Math.round(totalSeconds / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h`;
+  if (minutes > 0) return `${minutes}m`;
+  return `${rounded}s`;
+}
+
+export type TrainingStrategy = 'cascade' | 'tier4' | 'tier3' | 'tier2' | 'tier1';
+
 export interface TierFuelBreakdown {
   tier: FuelTier;
   tierName: string;
   itemName: string;
   rangeLabel: string;
+  consumptionRatePer10s: number;
+  baseXpPerSec: number;
+  effectiveXpPerSec: number;
   drainDurationText: string;
+  drainDurationSeconds: number;
   xpNeeded: number;
+  durabilityNeeded: number;
   maxTierCapacity: number;
   itemsNeeded: number;
   variantValue: number;
   effectiveXpAdded: number;
+  timeToTargetIfMaintainedSeconds: number;
+  formattedTimeIfMaintained: string;
 }
 
 export interface FuelBreakdownResult {
   totalXp: number;
   variant: FuelVariant;
   variantValue: number;
-  fullCycles: number;
-  remainderXp: number;
+  isSage: boolean;
+  strategy: TrainingStrategy;
   tiers: TierFuelBreakdown[];
+
+  // Tiempo que tarda la montura en subir la XP objetivo
+  mountTrainingSeconds: number;
+  formattedMountTrainingTime: string;
+  effectiveRatePerSec: number;
+
+  // Tiempo de vaciado físico del carburante (autonomía del depósito)
+  fuelDrainSeconds: number;
+  formattedFuelDrainTime: string;
+
+  // Carburantes
   totalItemsNeeded: number;
-  totalDurationSeconds: number;
-  formattedTotalTime: string;
+  totalDurabilityNeeded: number;
+
+  // Referencia general del medidor
+  fullCascadeDrainSeconds: number;
+  formattedFullCascadeDrainTime: string;
 }
 
 export function calculateFuelBreakdown(
   xpNeeded: number,
   variant: FuelVariant = 'gigantesco',
-  isSage: boolean = false
+  isSage: boolean = false,
+  strategy: TrainingStrategy = 'cascade'
 ): FuelBreakdownResult {
   const safeXp = Math.max(0, Math.round(xpNeeded));
   const variantInfo = FUEL_VARIANTS[variant] || FUEL_VARIANTS.gigantesco;
   const variantVal = variantInfo.durability;
 
-  const fullCycles = Math.floor(safeXp / MAX_ENCLOS_GAUGE);
-  const remainderXp = safeXp % MAX_ENCLOS_GAUGE;
+  // Durabilidad de carburante neta necesaria para la montura
+  // (Si es sabia, recibe x2 XP por cada punto de durabilidad)
+  const durabilityNeededTotal = isSage ? Math.ceil(safeXp / 2) : safeXp;
 
-  // Distribución exacta de XP por nivel respetando sus limitantes:
-  // Nivel 1 - Extracto: 0 - 80.000 (capacidad 80k)
-  // Nivel 2 - Filtro: 80.000 - 140.000 (capacidad 60k)
-  // Nivel 3 - Poción: 140.000 - 180.000 (capacidad 40k)
-  // Nivel 4 - Elixir: 180.000 - 200.000 (capacidad 20k)
-  const t1_xp = fullCycles * 80000 + Math.min(remainderXp, 80000);
-  const t2_xp = fullCycles * 60000 + Math.max(0, Math.min(remainderXp - 80000, 60000));
-  const t3_xp = fullCycles * 40000 + Math.max(0, Math.min(remainderXp - 140000, 40000));
-  const t4_xp = fullCycles * 20000 + Math.max(0, Math.min(remainderXp - 180000, 20000));
-
-  const tierXpMap: Record<FuelTier, number> = {
-    1: t1_xp,
-    2: t2_xp,
-    3: t3_xp,
-    4: t4_xp,
+  // Límites por tier
+  const tierCapacities: Record<FuelTier, number> = {
+    1: 80000,
+    2: 60000,
+    3: 40000,
+    4: 20000,
   };
 
   const rangeLabels: Record<FuelTier, string> = {
@@ -91,55 +128,115 @@ export function calculateFuelBreakdown(
   };
 
   const drainTexts: Record<FuelTier, string> = {
-    1: '14 horas y 16 minutos',
-    2: '10 horas y 41 minutos',
-    3: '7 horas y 08 minutos',
-    4: '3 horas y 34 minutos',
+    1: '22 horas y 13 minutos',
+    2: '8 horas y 20 minutos',
+    3: '3 horas y 42 minutos',
+    4: '1 hora y 23 minutos',
+  };
+
+  // 1. Cálculo si se mantiene un tier específico (tier4, tier3, tier2 o tier1)
+  const selectedFixedTier: FuelTier | null =
+    strategy === 'tier4' ? 4 : strategy === 'tier3' ? 3 : strategy === 'tier2' ? 2 : strategy === 'tier1' ? 1 : null;
+
+  // 2. Reparto en cascada de la durabilidad (por si se usa cascade o como referencia)
+  const fullCycles = Math.floor(durabilityNeededTotal / MAX_ENCLOS_GAUGE);
+  const remainderDur = durabilityNeededTotal % MAX_ENCLOS_GAUGE;
+
+  const t1_dur = fullCycles * 80000 + Math.min(remainderDur, 80000);
+  const t2_dur = fullCycles * 60000 + Math.max(0, Math.min(remainderDur - 80000, 60000));
+  const t3_dur = fullCycles * 40000 + Math.max(0, Math.min(remainderDur - 140000, 40000));
+  const t4_dur = fullCycles * 20000 + Math.max(0, Math.min(remainderDur - 180000, 20000));
+
+  const tierCascadeDurMap: Record<FuelTier, number> = {
+    1: t1_dur,
+    2: t2_dur,
+    3: t3_dur,
+    4: t4_dur,
   };
 
   const tiers: TierFuelBreakdown[] = ([1, 2, 3, 4] as FuelTier[]).map((tier) => {
-    const xp = tierXpMap[tier];
-    const items = xp > 0 ? Math.ceil(xp / variantVal) : 0;
-    const itemName = FUEL_ITEM_NAMES[tier][variant];
     const tierInfo = FUEL_TIERS[tier];
+    const itemName = FUEL_ITEM_NAMES[tier][variant];
+    const consumptionRatePer10s = tierInfo.consumptionPer10s || 10;
+    const baseXpPerSec = consumptionRatePer10s / 10;
+    const effectiveXpPerSec = isSage ? baseXpPerSec * 2 : baseXpPerSec;
+
+    // Tiempo si mantienes exclusivamente este tier
+    const timeToTargetIfMaintainedSeconds = safeXp > 0 ? safeXp / effectiveXpPerSec : 0;
+
+    // Durabilidad asignada según la estrategia
+    let durabilityForThisTier = 0;
+    if (selectedFixedTier !== null) {
+      durabilityForThisTier = tier === selectedFixedTier ? durabilityNeededTotal : 0;
+    } else {
+      durabilityForThisTier = tierCascadeDurMap[tier];
+    }
+
+    const xpForThisTier = isSage ? durabilityForThisTier * 2 : durabilityForThisTier;
+    const items = durabilityForThisTier > 0 ? Math.ceil(durabilityForThisTier / variantVal) : 0;
 
     return {
       tier,
       tierName: tierInfo.name,
       itemName,
       rangeLabel: rangeLabels[tier],
+      consumptionRatePer10s,
+      baseXpPerSec,
+      effectiveXpPerSec,
       drainDurationText: drainTexts[tier],
-      xpNeeded: xp,
-      maxTierCapacity: tier === 1 ? 80000 : tier === 2 ? 60000 : tier === 3 ? 40000 : 20000,
+      drainDurationSeconds: tierInfo.drainDurationSeconds,
+      xpNeeded: xpForThisTier,
+      durabilityNeeded: durabilityForThisTier,
+      maxTierCapacity: tierCapacities[tier],
       itemsNeeded: items,
       variantValue: variantVal,
-      effectiveXpAdded: items * variantVal,
+      effectiveXpAdded: items * variantVal * (isSage ? 2 : 1),
+      timeToTargetIfMaintainedSeconds,
+      formattedTimeIfMaintained: formatDurationSpanish(timeToTargetIfMaintainedSeconds),
     };
   });
 
   const totalItemsNeeded = tiers.reduce((acc, t) => acc + t.itemsNeeded, 0);
 
-  // Cálculo de tiempo exacto de vaciado según cada tier
-  let totalDurationSeconds = 0;
-  totalDurationSeconds += t1_xp * (FUEL_TIERS[1].drainDurationSeconds / 80000);
-  totalDurationSeconds += t2_xp * (FUEL_TIERS[2].drainDurationSeconds / 60000);
-  totalDurationSeconds += t3_xp * (FUEL_TIERS[3].drainDurationSeconds / 40000);
-  totalDurationSeconds += t4_xp * (FUEL_TIERS[4].drainDurationSeconds / 20000);
+  // Cálculo del tiempo de subida de la montura y de vaciado de carburante
+  let mountTrainingSeconds = 0;
+  let fuelDrainSeconds = 0;
+  let effectiveRatePerSec = 1;
 
-  if (isSage) {
-    totalDurationSeconds /= 2;
+  if (selectedFixedTier !== null) {
+    const tierInfo = FUEL_TIERS[selectedFixedTier];
+    effectiveRatePerSec = isSage ? (tierInfo.gainPer10s! / 10) * 2 : tierInfo.gainPer10s! / 10;
+    mountTrainingSeconds = safeXp > 0 ? safeXp / effectiveRatePerSec : 0;
+    // Autonomía física del tramo seleccionado
+    fuelDrainSeconds = tierInfo.drainDurationSeconds;
+  } else {
+    // Cascada: drena a 4/s en T4, 3/s en T3, 2/s en T2, 1/s en T1
+    mountTrainingSeconds =
+      t4_dur / 4.0 +
+      t3_dur / 3.0 +
+      t2_dur / 2.0 +
+      t1_dur / 1.0;
+
+    fuelDrainSeconds = mountTrainingSeconds;
+    effectiveRatePerSec = mountTrainingSeconds > 0 ? safeXp / mountTrainingSeconds : 1;
   }
 
   return {
     totalXp: safeXp,
     variant,
     variantValue: variantVal,
-    fullCycles,
-    remainderXp,
+    isSage,
+    strategy,
     tiers,
+    mountTrainingSeconds,
+    formattedMountTrainingTime: formatDurationSpanish(mountTrainingSeconds),
+    effectiveRatePerSec,
+    fuelDrainSeconds,
+    formattedFuelDrainTime: formatDurationSpanish(fuelDrainSeconds),
     totalItemsNeeded,
-    totalDurationSeconds,
-    formattedTotalTime: formatDurationSpanish(totalDurationSeconds),
+    totalDurabilityNeeded: durabilityNeededTotal,
+    fullCascadeDrainSeconds: TOTAL_CONTINUOUS_DRAIN_SECONDS,
+    formattedFullCascadeDrainTime: '35 horas y 39 minutos',
   };
 }
 
@@ -158,11 +255,12 @@ export function calculateFuelForXp(
   variant: FuelVariant = 'gigantesco',
   isSage: boolean = false
 ): FuelCalculation {
-  const res = calculateFuelBreakdown(xpNeeded, variant, isSage);
+  const strat: TrainingStrategy = tier === 4 ? 'tier4' : tier === 3 ? 'tier3' : tier === 2 ? 'tier2' : 'tier1';
+  const res = calculateFuelBreakdown(xpNeeded, variant, isSage, strat);
   return {
     xpNeeded,
-    secondsNeeded: res.totalDurationSeconds,
-    formattedTime: res.formattedTotalTime,
+    secondsNeeded: res.mountTrainingSeconds,
+    formattedTime: res.formattedMountTrainingTime,
     itemsNeeded: res.totalItemsNeeded,
     variant,
     breakdown: res,
@@ -190,27 +288,30 @@ export function calculateEnclosBatch(
   variant: FuelVariant = 'gigantesco',
   targetXp: number = MAX_MOUNT_XP
 ): BatchCalculationResult {
+  const strat: TrainingStrategy = tier === 4 ? 'tier4' : tier === 3 ? 'tier3' : tier === 2 ? 'tier2' : 'tier1';
   const breakdown = mounts.map((mount) => {
     const xpNeeded = calculateRemainingXp(mount.currentXp, targetXp);
     const isSage = mount.capacity === 'sabia';
-    const res = calculateFuelBreakdown(xpNeeded, variant, isSage);
+    const res = calculateFuelBreakdown(xpNeeded, variant, isSage, strat);
 
     return {
       mount,
       xpNeeded,
-      individualSeconds: res.totalDurationSeconds,
-      individualFormattedTime: res.formattedTotalTime,
+      individualSeconds: res.mountTrainingSeconds,
+      individualFormattedTime: res.formattedMountTrainingTime,
     };
   });
 
   const maxSecondsNeeded = breakdown.length > 0 ? Math.max(...breakdown.map((b) => b.individualSeconds)) : 0;
-  const maxMountBreakdown = mounts.length > 0
-    ? calculateFuelBreakdown(
-        Math.max(...mounts.map((m) => calculateRemainingXp(m.currentXp, targetXp))),
-        variant,
-        false
-      )
-    : null;
+  const maxMountBreakdown =
+    mounts.length > 0
+      ? calculateFuelBreakdown(
+          Math.max(...mounts.map((m) => calculateRemainingXp(m.currentXp, targetXp))),
+          variant,
+          false,
+          strat
+        )
+      : null;
 
   const itemsNeeded = maxMountBreakdown ? maxMountBreakdown.totalItemsNeeded : 0;
   const totalFuelUnitsConsumed = itemsNeeded * (FUEL_VARIANTS[variant]?.durability || 10000);
