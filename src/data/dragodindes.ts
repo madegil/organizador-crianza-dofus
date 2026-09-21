@@ -421,7 +421,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "id": "dd_orchidee_rousse",
     "species": "dragopavo",
     "generation": 6,
-    "name": "Pelirrojo y Orquídeo",
+    "name": "Orquídeo y Pelirrojo",
     "bonuses": [
       "400 Vitalidad",
       "90 Inteligencia",

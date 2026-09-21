@@ -53,7 +53,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore",
       "species": "muluaga",
       "generation": 1,
-      "name": "Dorado",
+      "name": "Dorada",
       "bonuses": [
         "1 PM",
         "Estadísticas base Gen 1"
@@ -65,7 +65,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_ebene_indigo",
       "species": "muluaga",
       "generation": 2,
-      "name": "Ébano y Índigo",
+      "name": "Ébano e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus híbrido Gen 2"
@@ -110,7 +110,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_ebene_dore",
       "species": "muluaga",
       "generation": 2,
-      "name": "Ébano y Dorado",
+      "name": "Ébano y Dorada",
       "bonuses": [
         "1 PM",
         "Bonus híbrido Gen 2"
@@ -155,7 +155,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_indigo_dore",
       "species": "muluaga",
       "generation": 2,
-      "name": "Índigo y Dorado",
+      "name": "Índigo y Dorada",
       "bonuses": [
         "1 PM",
         "Bonus híbrido Gen 2"
@@ -185,7 +185,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_pourpre_dore",
       "species": "muluaga",
       "generation": 2,
-      "name": "Púrpura y Dorado",
+      "name": "Púrpura y Dorada",
       "bonuses": [
         "1 PM",
         "Bonus híbrido Gen 2"
@@ -200,7 +200,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_orchidee_dore",
       "species": "muluaga",
       "generation": 2,
-      "name": "Orquídea y Dorado",
+      "name": "Orquídea y Dorada",
       "bonuses": [
         "1 PM",
         "Bonus híbrido Gen 2"
@@ -215,7 +215,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_roux",
       "species": "muluaga",
       "generation": 3,
-      "name": "Pelirrojo",
+      "name": "Pelirroja",
       "bonuses": [
         "1 PM",
         "Bonus especial Gen 3"
@@ -227,7 +227,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_amande",
       "species": "muluaga",
       "generation": 3,
-      "name": "Almendrado",
+      "name": "Almendrada",
       "bonuses": [
         "1 PM",
         "Bonus especial Gen 3"
@@ -263,7 +263,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_roux_ebene",
       "species": "muluaga",
       "generation": 4,
-      "name": "Pelirrojo y Ébano",
+      "name": "Pelirroja y Ébano",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -278,7 +278,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_roux_indigo",
       "species": "muluaga",
       "generation": 4,
-      "name": "Pelirrojo y Índigo",
+      "name": "Pelirroja e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -293,7 +293,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_roux_pourpre",
       "species": "muluaga",
       "generation": 4,
-      "name": "Pelirrojo y Púrpura",
+      "name": "Pelirroja y Púrpura",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -308,7 +308,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_roux_orchidee",
       "species": "muluaga",
       "generation": 4,
-      "name": "Pelirrojo y Orquídea",
+      "name": "Pelirroja y Orquídea",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -323,7 +323,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_amande_ebene",
       "species": "muluaga",
       "generation": 4,
-      "name": "Almendrado y Ébano",
+      "name": "Almendrada y Ébano",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -338,7 +338,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_amande_indigo",
       "species": "muluaga",
       "generation": 4,
-      "name": "Almendrado y Índigo",
+      "name": "Almendrada e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -353,7 +353,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_amande_pourpre",
       "species": "muluaga",
       "generation": 4,
-      "name": "Almendrado y Púrpura",
+      "name": "Almendrada y Púrpura",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -368,7 +368,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_amande_orchidee",
       "species": "muluaga",
       "generation": 4,
-      "name": "Almendrado y Orquídea",
+      "name": "Almendrada y Orquídea",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -398,7 +398,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_ivoire_indigo",
       "species": "muluaga",
       "generation": 4,
-      "name": "Marfil y Índigo",
+      "name": "Marfil e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -458,7 +458,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_turquoise_indigo",
       "species": "muluaga",
       "generation": 4,
-      "name": "Turquesa y Índigo",
+      "name": "Turquesa e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus Gen 4"
@@ -542,7 +542,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_prune_indigo",
       "species": "muluaga",
       "generation": 6,
-      "name": "Ciruela y Índigo",
+      "name": "Ciruela e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus Gen 6"
@@ -602,7 +602,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_emeraude_indigo",
       "species": "muluaga",
       "generation": 6,
-      "name": "Esmeralda y Índigo",
+      "name": "Esmeralda e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus Gen 6"
@@ -647,7 +647,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_prune_roux",
       "species": "muluaga",
       "generation": 7,
-      "name": "Ciruela y Pelirrojo",
+      "name": "Ciruela y Pelirroja",
       "bonuses": [
         "1 PM",
         "Bonus Gen 7"
@@ -662,7 +662,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_prune_amande",
       "species": "muluaga",
       "generation": 7,
-      "name": "Ciruela y Almendrado",
+      "name": "Ciruela y Almendrada",
       "bonuses": [
         "1 PM",
         "Bonus Gen 7"
@@ -707,7 +707,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_emeraude_roux",
       "species": "muluaga",
       "generation": 7,
-      "name": "Esmeralda y Pelirrojo",
+      "name": "Esmeralda y Pelirroja",
       "bonuses": [
         "1 PM",
         "Bonus Gen 7"
@@ -722,7 +722,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_emeraude_amande",
       "species": "muluaga",
       "generation": 7,
-      "name": "Esmeralda y Almendrado",
+      "name": "Esmeralda y Almendrada",
       "bonuses": [
         "1 PM",
         "Bonus Gen 7"
@@ -767,7 +767,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_ebene",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Ébano",
+      "name": "Dorada y Ébano",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -780,7 +780,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_indigo",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Índigo",
+      "name": "Dorada e Índigo",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -793,7 +793,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_pourpre",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Púrpura",
+      "name": "Dorada y Púrpura",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -806,7 +806,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_orchidee",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Orquídea",
+      "name": "Dorada y Orquídea",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -819,7 +819,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_roux",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Pelirrojo",
+      "name": "Dorada y Pelirroja",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -832,7 +832,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_amande",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Almendrado",
+      "name": "Dorada y Almendrada",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -845,7 +845,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_ivoire",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Marfil",
+      "name": "Dorada y Marfil",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -858,7 +858,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_turquoise",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Turquesa",
+      "name": "Dorada y Turquesa",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -871,7 +871,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_prune",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Ciruela",
+      "name": "Dorada y Ciruela",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -884,7 +884,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "id": "muldo_dore_emeraude",
       "species": "muluaga",
       "generation": 8,
-      "name": "Dorado y Esmeralda",
+      "name": "Dorada y Esmeralda",
       "bonuses": [
         "1 PM",
         "200 Vitalidad",
@@ -902,7 +902,8 @@ export const MULDOS_DATA: MountDefinition[] = [
         "1 PM",
         "Bonus defensivo/ofensivo Gen 9"
       ],
-      "parents": null
+      "parents": null,
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/184.png"
     },
     {
       "id": "muldo_rubis",
@@ -913,7 +914,8 @@ export const MULDOS_DATA: MountDefinition[] = [
         "1 PM",
         "Bonus defensivo/ofensivo Gen 9"
       ],
-      "parents": null
+      "parents": null,
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/185.png"
     },
     {
       "id": "muldo_jade_ebene",
@@ -927,13 +929,14 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_jade",
         "muldo_ebene"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/186.png"
     },
     {
       "id": "muldo_jade_indigo",
       "species": "muluaga",
       "generation": 10,
-      "name": "Jade y Índigo",
+      "name": "Jade e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus superior Gen 10"
@@ -941,7 +944,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_jade",
         "muldo_indigo"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/187.png"
     },
     {
       "id": "muldo_jade_pourpre",
@@ -955,7 +959,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_jade",
         "muldo_pourpre"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/188.png"
     },
     {
       "id": "muldo_jade_orchidee",
@@ -969,7 +974,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_jade",
         "muldo_orchidee"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/189.png"
     },
     {
       "id": "muldo_jade_prune",
@@ -983,7 +989,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_jade",
         "muldo_prune"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/190.png"
     },
     {
       "id": "muldo_jade_emeraude",
@@ -997,7 +1004,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_jade",
         "muldo_emeraude"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/191.png"
     },
     {
       "id": "muldo_rubis_ebene",
@@ -1011,13 +1019,14 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_rubis",
         "muldo_ebene"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/192.png"
     },
     {
       "id": "muldo_rubis_indigo",
       "species": "muluaga",
       "generation": 10,
-      "name": "Rubí y Índigo",
+      "name": "Rubí e Índigo",
       "bonuses": [
         "1 PM",
         "Bonus superior Gen 10"
@@ -1025,7 +1034,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_rubis",
         "muldo_indigo"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/193.png"
     },
     {
       "id": "muldo_rubis_pourpre",
@@ -1039,7 +1049,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_rubis",
         "muldo_pourpre"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/194.png"
     },
     {
       "id": "muldo_rubis_orchidee",
@@ -1053,7 +1064,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_rubis",
         "muldo_orchidee"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/195.png"
     },
     {
       "id": "muldo_rubis_prune",
@@ -1067,7 +1079,8 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_rubis",
         "muldo_prune"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/196.png"
     },
     {
       "id": "muldo_rubis_emeraude",
@@ -1081,6 +1094,7 @@ export const MULDOS_DATA: MountDefinition[] = [
       "parents": [
         "muldo_rubis",
         "muldo_emeraude"
-      ]
+      ],
+      "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/197.png"
     }
-  ];
+];

@@ -27,11 +27,24 @@ function normalizeBreedName(name: string): string {
     .replace(/\borqu[íi]dea\b/g, 'orquídeo');
 }
 
+function normalizeBreedParts(name: string): string {
+  return normalizeBreedName(name)
+    .replace(/\b(y|e)\b/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .sort()
+    .join(' ');
+}
+
 export function findMountByBreedAndSpecies(breedName: string, species?: SpeciesType): MountDefinition | undefined {
   const norm = normalizeBreedName(breedName);
+  const normParts = normalizeBreedParts(breedName);
   return ALL_MOUNTS_DATA.find((m) => {
     if (species && m.species !== species) return false;
     const mNorm = normalizeBreedName(m.name);
-    return mNorm === norm || mNorm.includes(norm) || norm.includes(mNorm.split(' ')[0]);
+    if (mNorm === norm) return true;
+    const mParts = normalizeBreedParts(m.name);
+    if (mParts === normParts) return true;
+    return mNorm.includes(norm) || norm.includes(mNorm.split(' ')[0]);
   });
 }
