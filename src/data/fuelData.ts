@@ -11,42 +11,49 @@ export const FUEL_TIERS: Record<FuelTier, FuelInfo> = {
     name: 'Extracto',
     rangeMin: 0,
     rangeMax: 80000,
-    consumptionPer10s: 15.576,
-    gainPer10s: 15.576,
-    drainDurationSeconds: 14 * 3600 + 16 * 60, // 14 horas y 16 minutos (51.360 s)
+    consumptionPer10s: 10,
+    gainPer10s: 10, // 1.0 XP/s base
+    drainDurationSeconds: 80000, // 22 horas, 13 minutos y 20 segundos (80.000 s)
     dustCostGigantesque: 50,
+    capacity: 80000,
   },
   2: {
     tier: 2,
     name: 'Filtro',
     rangeMin: 80000,
     rangeMax: 140000,
-    consumptionPer10s: 15.6,
-    gainPer10s: 15.6,
-    drainDurationSeconds: 10 * 3600 + 41 * 60, // 10 horas y 41 minutos (38.460 s)
+    consumptionPer10s: 20,
+    gainPer10s: 20, // 2.0 XP/s base
+    drainDurationSeconds: 30000, // 8 horas y 20 minutos (30.000 s)
     dustCostGigantesque: 200,
+    capacity: 60000,
   },
   3: {
     tier: 3,
     name: 'Poción',
     rangeMin: 140000,
     rangeMax: 180000,
-    consumptionPer10s: 15.576,
-    gainPer10s: 15.576,
-    drainDurationSeconds: 7 * 3600 + 8 * 60, // 7 horas y 08 minutos (25.680 s)
+    consumptionPer10s: 30,
+    gainPer10s: 30, // 3.0 XP/s base
+    drainDurationSeconds: 40000 / 3, // 3 horas, 42 minutos y 13 segundos (13.333,33 s)
     dustCostGigantesque: 800,
+    capacity: 40000,
   },
   4: {
     tier: 4,
     name: 'Elixir',
     rangeMin: 180000,
     rangeMax: 200000,
-    consumptionPer10s: 15.576,
-    gainPer10s: 15.576,
-    drainDurationSeconds: 3 * 3600 + 34 * 60, // 3 horas y 34 minutos (12.840 s)
+    consumptionPer10s: 40,
+    gainPer10s: 40, // 4.0 XP/s base
+    drainDurationSeconds: 5000, // 1 hora, 23 minutos y 20 segundos (5.000 s)
     dustCostGigantesque: 3200,
+    capacity: 20000,
   },
 };
+
+// Duración total del vaciado completo continuo de 200.000 a 0: 35 h 38 m 53 s (35 h 39 min)
+export const TOTAL_CONTINUOUS_DRAIN_SECONDS = 80000 + 30000 + 40000 / 3 + 5000; // 128.333,33 s
 
 export const FUEL_VARIANTS: Record<FuelVariant, { name: string; durability: number }> = {
   gigantesco: { name: 'Gigantesco', durability: 10000 },
