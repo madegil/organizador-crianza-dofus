@@ -23,8 +23,8 @@ export const BreedingHelper: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto">
-      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl border border-slate-200/90 p-4 sm:p-6 shadow-2xl space-y-5 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
+      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
         {/* Cabecera Principal */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
@@ -155,7 +155,7 @@ export const BreedingHelper: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
             {catalog.map((m) => (
               <div
                 key={m.id}

@@ -120,9 +120,9 @@ export const FuelCalculator: React.FC = () => {
   }
 
   return (
-    <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
       {/* 1. SECCIÓN SUPERIOR: ESTABLO DONDE EL USUARIO ESCOGE LA MONTURA */}
-      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl border border-slate-200/90 p-4 sm:p-6 shadow-2xl space-y-4">
+      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3 sm:pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
@@ -146,13 +146,13 @@ export const FuelCalculator: React.FC = () => {
             <p className="text-sm font-medium">No tienes monturas registradas en tu establo aún.</p>
             <button
               onClick={loadMounts}
-              className="px-4 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold rounded-xl text-xs transition shadow-sm cursor-pointer"
+              className="px-4 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold rounded-xl text-xs transition shadow-sm"
             >
               Cargar monturas de prueba
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
             {mounts.map((m) => {
               const isSelected = selectedMount?.id === m.id;
               const lvl =
@@ -221,7 +221,7 @@ export const FuelCalculator: React.FC = () => {
       </div>
 
       {/* 2. SECCIÓN INFERIOR: MEDIDOR XP Y PANEL DE INFORMACIÓN UNIFICADO */}
-      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl border border-slate-200/90 p-4 sm:p-6 shadow-2xl space-y-5 sm:space-y-6">
+      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
         {/* Cabecera del cálculo para la montura activa */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
           <div className="flex items-center gap-3">
@@ -293,9 +293,9 @@ export const FuelCalculator: React.FC = () => {
         </div>
 
         {/* CONTENEDOR PRINCIPAL: MEDIDOR A LA IZQUIERDA, INFORMACIÓN A LA DERECHA */}
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6 lg:gap-8">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-8">
           {/* MEDIDOR DE 0-200.000 XP */}
-          <div className="flex flex-col items-center gap-2 flex-shrink-0 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex flex-col items-center gap-2 flex-shrink-0 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm w-full sm:w-auto">
             <XpGauge currentXp={gaugeDisplayXp} maxGauge={MAX_ENCLOS_GAUGE} />
             <div className="text-center pt-1">
               <span className="text-[11px] font-mono text-slate-800 font-extrabold block">
@@ -307,7 +307,7 @@ export const FuelCalculator: React.FC = () => {
             </div>
           </div>
 
-          {/* INFORMACIÓN AL LADO DEL MEDIDOR */}
+          {/* PANEL DE CÁLCULO ESTRATÉGICO Y CARBURANTES */}
           <div className="flex-1 w-full space-y-4">
             {/* Input personalizado si está en modo Manual */}
             {targetMode === 'custom' && (
@@ -367,7 +367,7 @@ export const FuelCalculator: React.FC = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
                 {/* Opción 1: Vaciado Continuo Natural (Cascada 200k -> 0) */}
                 <button
                   onClick={() => setStrategy('cascade')}
@@ -408,11 +408,11 @@ export const FuelCalculator: React.FC = () => {
                   </div>
 
                   {/* Sub-selector de Nivel 4, 3, 2, 1 */}
-                  <div className="grid grid-cols-4 gap-1 pt-1">
+                  <div className="grid grid-cols-4 gap-1 mt-1">
                     {([4, 3, 2, 1] as FuelTier[]).map((t) => {
                       const stratKey: TrainingStrategy = t === 4 ? 'tier4' : t === 3 ? 'tier3' : t === 2 ? 'tier2' : 'tier1';
                       const isTierActive = strategy === stratKey;
-                      const rate = FUEL_TIERS[t].gainPer10s! / 10;
+
                       return (
                         <button
                           key={t}
@@ -424,7 +424,9 @@ export const FuelCalculator: React.FC = () => {
                           }`}
                         >
                           <span>Nvl {t}</span>
-                          <span className="text-[9px] opacity-80 font-mono">+{rate}XP/s</span>
+                          <span className="text-[8px] opacity-75 font-mono">
+                            {t === 4 ? '4 XP/s' : t === 3 ? '3 XP/s' : t === 2 ? '2 XP/s' : '1 XP/s'}
+                          </span>
                         </button>
                       );
                     })}
@@ -611,7 +613,7 @@ export const FuelCalculator: React.FC = () => {
               </div>
 
               {/* Resumen total de unidades de la estrategia activa */}
-              <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between text-xs sm:text-sm">
+              <div className="p-3.5 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm">
                 <span className="text-slate-700 font-bold">
                   Total de carburantes requeridos ({strategy === 'cascade' ? 'Modo Cascada' : `Manteniendo Nivel ${strategy.slice(-1)}`}):
                 </span>

@@ -84,11 +84,11 @@ export const CollectionTracker: React.FC = () => {
       : 0;
 
   return (
-    <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto">
-      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl border border-slate-200/90 p-4 sm:p-6 shadow-2xl space-y-5 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
+      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
         {/* Cabecera y Selector de Especies */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-3">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
               <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
@@ -108,7 +108,7 @@ export const CollectionTracker: React.FC = () => {
               onClick={() => setActiveSpecies('dragopavo')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                 activeSpecies === 'dragopavo'
-                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20 font-extrabold'
+                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -121,7 +121,7 @@ export const CollectionTracker: React.FC = () => {
               onClick={() => setActiveSpecies('muluaga')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                 activeSpecies === 'muluaga'
-                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20 font-extrabold'
+                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -134,7 +134,7 @@ export const CollectionTracker: React.FC = () => {
               onClick={() => setActiveSpecies('vueloceronte')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
                 activeSpecies === 'vueloceronte'
-                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20 font-extrabold'
+                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -236,7 +236,7 @@ export const CollectionTracker: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
                   {filteredGenBreeds.map((def) => {
                     const match = userMounts.find(
                       (m) =>
