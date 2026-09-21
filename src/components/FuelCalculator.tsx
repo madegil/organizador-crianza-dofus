@@ -114,39 +114,39 @@ export const FuelCalculator: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-6xl mx-auto">
+    <div className="space-y-5 sm:space-y-6 max-w-4xl mx-auto">
       {/* 1. SECCIÓN SUPERIOR: ESTABLO DONDE EL USUARIO ESCOGE LA MONTURA */}
-      <div className="bg-dofus-card rounded-2xl border border-dofus-border p-4 sm:p-6 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-dofus-border pb-3 sm:pb-4">
+      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl border border-slate-200/90 p-4 sm:p-6 shadow-2xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3 sm:pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 flex-shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
               <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h2 className="text-base sm:text-xl font-black text-white">Establo de Monturas</h2>
-              <p className="text-[11px] sm:text-xs text-slate-400">
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Establo de Monturas</h2>
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
                 Selecciona una montura de tu establo para ver sus cálculos de nivel y carburante.
               </p>
             </div>
           </div>
-          <span className="self-start sm:self-auto text-[11px] sm:text-xs font-bold px-3 py-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-xl font-mono">
+          <span className="self-start sm:self-auto text-[11px] sm:text-xs font-bold px-3 py-1 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-mono">
             {mounts.length} {mounts.length === 1 ? 'ejemplar' : 'ejemplares'}
           </span>
         </div>
 
-        {/* Cuadrícula interactiva del Establo */}
+        {/* Cuadrícula interactiva del Establo con estilo unificado al index */}
         {mounts.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 space-y-3">
-            <p className="text-sm">No tienes monturas registradas en tu establo aún.</p>
+          <div className="p-8 text-center text-slate-500 space-y-3 bg-white rounded-2xl border border-slate-200">
+            <p className="text-sm font-medium">No tienes monturas registradas en tu establo aún.</p>
             <button
               onClick={loadMounts}
-              className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-amber-400 transition"
+              className="px-4 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold rounded-xl text-xs transition shadow-sm cursor-pointer"
             >
               Cargar monturas de prueba
             </button>
@@ -167,10 +167,10 @@ export const FuelCalculator: React.FC = () => {
                 <button
                   key={m.id}
                   onClick={() => handleSelectMount(m)}
-                  className={`p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between gap-2 ${
+                  className={`p-3 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-2 shadow-sm hover:shadow-md cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-500/15 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10 text-white'
-                      : 'bg-slate-900/60 border-dofus-border hover:border-slate-600 text-slate-300'
+                      ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-400/30 text-slate-900'
+                      : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -182,32 +182,34 @@ export const FuelCalculator: React.FC = () => {
                       generation={m.generation}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-black text-xs text-white truncate">{m.nickname}</p>
-                      <p className="text-[10px] text-slate-400 truncate">{m.breed}</p>
+                      <p className="font-extrabold text-xs text-slate-900 truncate">{m.nickname}</p>
+                      <p className="text-[10px] text-slate-500 truncate font-medium">{m.breed}</p>
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
-                    <span className="font-semibold text-slate-300">
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                    <span className="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                       Nivel {lvl}
                     </span>
                     {isMax200 ? (
-                      <span className="text-emerald-400 font-bold">200 ✓</span>
+                      <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                        200 ✓
+                      </span>
                     ) : (
-                      <span className="text-amber-400 font-mono">
+                      <span className="text-slate-700 font-mono font-bold">
                         {m.currentXp.toLocaleString()} XP
                       </span>
                     )}
                   </div>
 
                   {m.capacity === 'sabia' && (
-                    <span className="absolute top-1.5 right-1.5 text-[9px] px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+                    <span className="absolute top-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-extrabold border border-purple-200">
                       ✨ Sabia
                     </span>
                   )}
 
                   {isSelected && (
-                    <div className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow-md">
+                    <div className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center shadow-md">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                   )}
@@ -218,10 +220,10 @@ export const FuelCalculator: React.FC = () => {
         )}
       </div>
 
-      {/* 2. SECCIÓN INFERIOR: MEDIDOR XP Y PANEL DE INFORMACIÓN */}
-      <div className="bg-dofus-card rounded-2xl border border-dofus-border p-4 sm:p-6 shadow-xl space-y-6">
+      {/* 2. SECCIÓN INFERIOR: MEDIDOR XP Y PANEL DE INFORMACIÓN UNIFICADO */}
+      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl border border-slate-200/90 p-4 sm:p-6 shadow-2xl space-y-5 sm:space-y-6">
         {/* Cabecera del cálculo para la montura activa */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-dofus-border pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
           <div className="flex items-center gap-3">
             {selectedMount && (
               <MountAvatar
@@ -233,56 +235,56 @@ export const FuelCalculator: React.FC = () => {
               />
             )}
             <div>
-              <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
                 <span>{selectedMount ? selectedMount.nickname : 'Montura'}</span>
-                <span className="text-xs font-normal text-slate-400">
+                <span className="text-xs font-medium text-slate-500">
                   ({selectedMount?.breed || 'Sin selección'})
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">
-                Nivel actual: <strong className="text-amber-300 font-mono">{mountLevel}</strong> • Experiencia actual: <strong className="text-amber-300 font-mono">{currentMountXp.toLocaleString()} XP</strong>
+              <p className="text-xs text-slate-600 font-medium">
+                Nivel actual: <strong className="text-slate-900 font-mono">{mountLevel}</strong> • Experiencia actual: <strong className="text-slate-900 font-mono">{currentMountXp.toLocaleString()} XP</strong>
               </p>
             </div>
           </div>
 
-          {/* Selector de Objetivo de Subida */}
-          <div className="flex flex-wrap gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-dofus-border">
+          {/* Selector de Objetivo de Subida (Estilo botones de index) */}
+          <div className="flex flex-wrap gap-1 bg-slate-200/60 p-1 rounded-2xl border border-slate-200">
             <button
               onClick={() => setTargetMode('nextLevel')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 targetMode === 'nextLevel'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               Siguiente Nivel ({nextLevel})
             </button>
             <button
               onClick={() => setTargetMode('gauge200k')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 targetMode === 'gauge200k'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               Llenar Medidor (200k)
             </button>
             <button
               onClick={() => setTargetMode('level200')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 targetMode === 'level200'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               Meta Nivel 200
             </button>
             <button
               onClick={() => setTargetMode('custom')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 targetMode === 'custom'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               Manual
@@ -293,13 +295,13 @@ export const FuelCalculator: React.FC = () => {
         {/* CONTENEDOR PRINCIPAL: MEDIDOR A LA IZQUIERDA, INFORMACIÓN A LA DERECHA */}
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6 lg:gap-8">
           {/* MEDIDOR DE 0-200.000 XP */}
-          <div className="flex flex-col items-center gap-2 flex-shrink-0">
+          <div className="flex flex-col items-center gap-2 flex-shrink-0 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
             <XpGauge currentXp={gaugeDisplayXp} maxGauge={MAX_ENCLOS_GAUGE} />
-            <div className="text-center">
-              <span className="text-[11px] font-mono text-amber-300 font-bold block">
+            <div className="text-center pt-1">
+              <span className="text-[11px] font-mono text-slate-800 font-extrabold block">
                 {gaugeDisplayXp.toLocaleString()} / 200.000 XP
               </span>
-              <span className="text-[10px] text-slate-400">
+              <span className="text-[10px] text-slate-500 font-medium">
                 Capacidad del medidor
               </span>
             </div>
@@ -309,8 +311,8 @@ export const FuelCalculator: React.FC = () => {
           <div className="flex-1 w-full space-y-4">
             {/* Input personalizado si está en modo Manual */}
             {targetMode === 'custom' && (
-              <div className="p-3 bg-slate-900/80 rounded-xl border border-dofus-border">
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                <label className="block text-xs font-bold text-slate-700">
                   XP a calcular en el medidor (1 a 200.000 XP):
                 </label>
                 <div className="flex items-center gap-3">
@@ -321,7 +323,7 @@ export const FuelCalculator: React.FC = () => {
                     step={1000}
                     value={customXp}
                     onChange={(e) => setCustomXp(Number(e.target.value))}
-                    className="flex-1 accent-amber-500"
+                    className="flex-1 accent-[#1e3a8a]"
                   />
                   <input
                     type="number"
@@ -329,38 +331,38 @@ export const FuelCalculator: React.FC = () => {
                     max={200000}
                     value={customXp}
                     onChange={(e) => setCustomXp(Number(e.target.value))}
-                    className="w-28 px-2 py-1 bg-slate-950 border border-dofus-border rounded-lg text-xs text-white font-mono text-right"
+                    className="w-28 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-mono font-bold text-right focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                   />
                 </div>
               </div>
             )}
 
             {/* A. Casilla ¿Tiene capacidad « Sabia »? • XP x2 */}
-            <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-slate-900/90 border border-dofus-border hover:border-amber-500/50 transition select-none">
+            <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 transition select-none shadow-sm">
               <input
                 type="checkbox"
                 checked={isSage}
                 onChange={(e) => setIsSage(e.target.checked)}
-                className="rounded border-slate-700 bg-slate-800 text-amber-500 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                <span className="text-xs sm:text-sm font-bold text-white">
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900">
                   ¿Tiene capacidad « Sabia »?
                 </span>
-                <span className="text-xs font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                <span className="text-xs font-extrabold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
                   XP x2 • Requiere mitad de tiempo y carburante
                 </span>
               </div>
             </label>
 
             {/* B. SELECTOR DE ESTRATEGIA: MANTENER NIVEL FIJO VS VACIADO CONTINUO (CASCADA) */}
-            <div className="p-3.5 bg-slate-900/90 rounded-xl border border-dofus-border space-y-2.5">
+            <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <Zap className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                  <Zap className="w-4 h-4 text-amber-500" />
                   Estrategia de Entrenamiento en Pesebre
                 </span>
-                <span className="text-[10px] text-slate-400">
+                <span className="text-[10px] text-slate-500 font-medium">
                   ¿Cómo mantienes el pesebre?
                 </span>
               </div>
@@ -369,19 +371,19 @@ export const FuelCalculator: React.FC = () => {
                 {/* Opción 1: Vaciado Continuo Natural (Cascada 200k -> 0) */}
                 <button
                   onClick={() => setStrategy('cascade')}
-                  className={`p-2.5 rounded-xl border text-left transition flex items-start gap-2 ${
+                  className={`p-3 rounded-2xl border text-left transition flex items-start gap-2.5 cursor-pointer ${
                     strategy === 'cascade'
-                      ? 'bg-amber-500/15 border-amber-400 ring-2 ring-amber-400/30 text-white'
-                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-400'
+                      ? 'bg-blue-50/80 border-blue-500 ring-2 ring-blue-400/30 text-slate-900 shadow-sm'
+                      : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600'
                   }`}
                 >
-                  <Hourglass className={`w-4 h-4 mt-0.5 flex-shrink-0 ${strategy === 'cascade' ? 'text-amber-400' : 'text-slate-500'}`} />
+                  <Hourglass className={`w-4 h-4 mt-0.5 flex-shrink-0 ${strategy === 'cascade' ? 'text-[#1e3a8a]' : 'text-slate-400'}`} />
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-black text-white">Vaciado Natural Continuo</span>
-                      <span className="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">Cascada</span>
+                      <span className="text-xs font-extrabold text-slate-900">Vaciado Natural Continuo</span>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-slate-200 text-slate-700 font-mono font-bold">Cascada</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-tight font-medium">
                       Llenas el pesebre y dejas que se vacíe solo (Nivel 4 → 3 → 2 → 1). Total: 35h 39m.
                     </p>
                   </div>
@@ -389,18 +391,20 @@ export const FuelCalculator: React.FC = () => {
 
                 {/* Opción 2: Mantener Nivel Fijo (Optimización activa) */}
                 <div
-                  className={`p-2.5 rounded-xl border text-left transition flex flex-col justify-between gap-1.5 ${
+                  className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between gap-1.5 ${
                     strategy !== 'cascade'
-                      ? 'bg-amber-500/15 border-amber-400 ring-2 ring-amber-400/30 text-white'
-                      : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                      ? 'bg-blue-50/80 border-blue-500 ring-2 ring-blue-400/30 text-slate-900 shadow-sm'
+                      : 'bg-slate-50 border-slate-200 text-slate-600'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <Flame className={`w-4 h-4 ${strategy !== 'cascade' ? 'text-amber-400' : 'text-slate-500'}`} />
-                      <span className="text-xs font-black text-white">Mantener Nivel Fijo</span>
+                      <Flame className={`w-4 h-4 ${strategy !== 'cascade' ? 'text-amber-500' : 'text-slate-400'}`} />
+                      <span className="text-xs font-extrabold text-slate-900">Mantener Nivel Fijo</span>
                     </div>
-                    <span className="text-[9px] text-amber-300 font-bold">Ritmo Constante</span>
+                    <span className="text-[9px] text-amber-700 font-extrabold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                      Ritmo Constante
+                    </span>
                   </div>
 
                   {/* Sub-selector de Nivel 4, 3, 2, 1 */}
@@ -413,10 +417,10 @@ export const FuelCalculator: React.FC = () => {
                         <button
                           key={t}
                           onClick={() => setStrategy(stratKey)}
-                          className={`px-1.5 py-1 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center ${
+                          className={`px-1.5 py-1 rounded-xl text-[10px] font-extrabold text-center transition flex flex-col items-center cursor-pointer ${
                             isTierActive
-                              ? 'bg-amber-500 text-slate-950 shadow-sm'
-                              : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300'
+                              ? 'bg-[#1e3a8a] text-white shadow-sm'
+                              : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                           }`}
                         >
                           <span>Nvl {t}</span>
@@ -432,24 +436,24 @@ export const FuelCalculator: React.FC = () => {
             {/* C. PANEL DUAL: TIEMPO PARA SUBIR LA MONTURA VS TIEMPO DE VACIADO DEL CARBURANTE */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Tarjeta 1: Tiempo que tarda en subir el nivel la montura */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/15 via-slate-900/90 to-slate-900 border border-amber-500/40 shadow-lg flex flex-col justify-between">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 via-amber-50/50 to-orange-50/30 border border-amber-200 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-                    <span className="font-black text-amber-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
-                      <Clock className="w-4 h-4 text-amber-400" />
+                  <div className="flex items-center justify-between text-xs text-amber-900/80 mb-1">
+                    <span className="font-extrabold text-amber-900 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                      <Clock className="w-4 h-4 text-amber-600" />
                       Tiempo de Subida de Nivel
                     </span>
-                    <span className="font-mono text-amber-400/90 text-[10px]">
+                    <span className="font-mono text-amber-800 font-bold text-[10px]">
                       {xpNeeded.toLocaleString()} XP
                     </span>
                   </div>
 
-                  <p className="text-xl sm:text-2xl font-black text-amber-400 font-mono tracking-tight mt-1">
+                  <p className="text-xl sm:text-2xl font-black text-amber-800 font-mono tracking-tight mt-1">
                     {breakdown.formattedMountTrainingTime}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-amber-500/20 text-[11px] text-slate-300 mt-2">
+                <div className="pt-2 border-t border-amber-200/60 text-[11px] text-amber-900 font-medium mt-2">
                   {strategy === 'cascade' ? (
                     <span>
                       Velocidad en cascada: {isSage ? '✨ 2x por Sabia (~2.0 - 8.0 XP/s)' : '1.0 - 4.0 XP/s promedio'}
@@ -457,7 +461,7 @@ export const FuelCalculator: React.FC = () => {
                   ) : (
                     <span>
                       Velocidad fija ({strategy.toUpperCase()}):{' '}
-                      <strong className="text-amber-300 font-mono">{breakdown.effectiveRatePerSec.toFixed(1)} XP/s</strong>{' '}
+                      <strong className="text-amber-900 font-mono">{breakdown.effectiveRatePerSec.toFixed(1)} XP/s</strong>{' '}
                       {isSage ? '✨ (Sabia x2)' : ''}
                     </span>
                   )}
@@ -465,29 +469,29 @@ export const FuelCalculator: React.FC = () => {
               </div>
 
               {/* Tarjeta 2: Tiempo de vaciado físico del carburante (Autonomía del Pesebre) */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-sky-500/10 via-slate-900/90 to-slate-900 border border-sky-500/30 shadow-lg flex flex-col justify-between">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-indigo-50/30 border border-blue-200 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-                    <span className="font-black text-sky-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
-                      <Gauge className="w-4 h-4 text-sky-400" />
+                  <div className="flex items-center justify-between text-xs text-blue-900/80 mb-1">
+                    <span className="font-extrabold text-[#1e3a8a] flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                      <Gauge className="w-4 h-4 text-blue-600" />
                       Vaciado del Carburante
                     </span>
-                    <span className="font-mono text-sky-400/90 text-[10px]">
+                    <span className="font-mono text-blue-800 font-bold text-[10px]">
                       Autonomía Pesebre
                     </span>
                   </div>
 
-                  <p className="text-xl sm:text-2xl font-black text-sky-400 font-mono tracking-tight mt-1">
+                  <p className="text-xl sm:text-2xl font-black text-[#1e3a8a] font-mono tracking-tight mt-1">
                     {strategy === 'cascade' && xpNeeded >= MAX_ENCLOS_GAUGE
                       ? '35 h 39 min'
                       : breakdown.formattedFuelDrainTime}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-sky-500/20 text-[11px] text-slate-300 mt-2">
+                <div className="pt-2 border-t border-blue-200/60 text-[11px] text-blue-900 font-medium mt-2">
                   {strategy === 'cascade' ? (
                     <span>
-                      Vaciado continuo total del medidor (200k a 0): <strong className="text-sky-300 font-mono">35 h 39 min</strong>
+                      Vaciado continuo total del medidor (200k a 0): <strong className="text-[#1e3a8a] font-mono">35 h 39 min</strong>
                     </span>
                   ) : (
                     <span>
@@ -502,24 +506,24 @@ export const FuelCalculator: React.FC = () => {
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-white">
+                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
                     Desglose por Nivel de Carburante y Velocidades
                   </h4>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-500 font-medium">
                     Haz clic en un nivel para fijar su ritmo o visualiza su consumo independiente.
                   </p>
                 </div>
 
                 {/* Selector de Variante */}
-                <div className="flex flex-wrap gap-1 bg-slate-900 p-1 rounded-xl border border-dofus-border">
+                <div className="flex flex-wrap gap-1 bg-slate-200/60 p-1 rounded-2xl border border-slate-200">
                   {(Object.keys(FUEL_VARIANTS) as FuelVariant[]).map((v) => (
                     <button
                       key={v}
                       onClick={() => setSelectedVariant(v)}
-                      className={`px-2 py-1 rounded-lg text-[11px] font-bold transition ${
+                      className={`px-2 py-1 rounded-xl text-[11px] font-bold transition cursor-pointer ${
                         selectedVariant === v
-                          ? 'bg-amber-500 text-slate-950 shadow-sm'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-[#1e3a8a] text-white shadow-sm'
+                          : 'text-slate-700 hover:text-slate-900 hover:bg-white'
                       }`}
                     >
                       {FUEL_VARIANTS[v].name} (+{FUEL_VARIANTS[v].durability / 1000}k)
@@ -528,78 +532,75 @@ export const FuelCalculator: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tarjetas de los 4 Niveles de Carburante con estética Establo */}
+              {/* Tarjetas de los 4 Niveles de Carburante con estética unificada al index */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 {breakdown.tiers.map((t) => {
                   const stratKey: TrainingStrategy = t.tier === 4 ? 'tier4' : t.tier === 3 ? 'tier3' : t.tier === 2 ? 'tier2' : 'tier1';
                   const isThisTierSelected = strategy === stratKey;
-                  const hasUsage = t.itemsNeeded > 0;
 
                   return (
                     <div
                       key={t.tier}
                       onClick={() => setStrategy(stratKey)}
-                      className={`p-3.5 rounded-xl border transition cursor-pointer flex flex-col justify-between gap-2 relative ${
+                      className={`p-3.5 rounded-2xl border transition cursor-pointer flex flex-col justify-between gap-2 relative shadow-sm hover:shadow-md ${
                         isThisTierSelected
-                          ? 'bg-amber-500/15 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10 text-white'
-                          : hasUsage
-                          ? 'bg-slate-900/90 border-slate-700 shadow-md text-white hover:border-slate-600'
-                          : 'bg-slate-900/40 border-slate-800/80 text-slate-400 hover:border-slate-700'
+                          ? 'bg-blue-50/70 border-2 border-[#1e3a8a] ring-2 ring-blue-500/20 text-slate-900'
+                          : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <span
-                            className={`text-xs font-black px-2 py-0.5 rounded ${
+                            className={`text-xs font-black px-2 py-0.5 rounded-lg border ${
                               t.tier === 1
-                                ? 'bg-purple-500/20 text-purple-300'
+                                ? 'bg-purple-100 text-purple-800 border-purple-200'
                                 : t.tier === 2
-                                ? 'bg-blue-500/20 text-blue-300'
+                                ? 'bg-blue-100 text-blue-800 border-blue-200'
                                 : t.tier === 3
-                                ? 'bg-amber-500/20 text-amber-300'
-                                : 'bg-rose-500/20 text-rose-300'
+                                ? 'bg-amber-100 text-amber-800 border-amber-200'
+                                : 'bg-rose-100 text-rose-800 border-rose-200'
                             }`}
                           >
                             Nivel {t.tier} - {t.tierName}
                           </span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold border border-slate-200">
                             {t.rangeLabel}
                           </span>
                         </div>
 
                         {/* Velocidad y Consumo */}
                         <div className="flex items-center justify-between text-xs mt-1.5">
-                          <span className="text-slate-400">
-                            Baja: <strong className="text-slate-200 font-mono">{t.consumptionRatePer10s} / 10s</strong> ({t.baseXpPerSec} pts/s)
+                          <span className="text-slate-500 font-medium">
+                            Baja: <strong className="text-slate-800 font-mono">{t.consumptionRatePer10s} / 10s</strong> ({t.baseXpPerSec} pts/s)
                           </span>
-                          <span className="font-mono font-bold text-amber-300">
+                          <span className="font-mono font-black text-[#1e3a8a]">
                             +{t.effectiveXpPerSec} XP/s {isSage ? '✨' : ''}
                           </span>
                         </div>
 
                         {/* Tiempo si se mantiene fijo */}
-                        <div className="mt-1.5 p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-[11px]">
-                          <span className="text-slate-400">Tiempo si mantienes Nivel {t.tier}:</span>
-                          <span className="font-mono font-bold text-amber-400">
+                        <div className="mt-1.5 p-2 rounded-xl bg-slate-50 border border-slate-200/90 flex items-center justify-between text-[11px]">
+                          <span className="text-slate-500 font-medium">Tiempo si mantienes Nvl {t.tier}:</span>
+                          <span className="font-mono font-bold text-amber-800">
                             {t.formattedTimeIfMaintained}
                           </span>
                         </div>
 
                         {/* Ítems para la estrategia activa */}
                         <div className="mt-2 flex items-baseline justify-between">
-                          <p className="text-sm font-black text-white font-mono">
+                          <p className="text-sm font-black text-slate-900 font-mono">
                             {t.itemsNeeded} {t.itemsNeeded === 1 ? 'unidad' : 'unidades'}
                           </p>
-                          <span className="text-[10px] text-slate-400 truncate max-w-[160px]" title={t.itemName}>
+                          <span className="text-[10px] text-slate-500 truncate max-w-[160px] font-medium" title={t.itemName}>
                             {t.itemName}
                           </span>
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 flex justify-between">
-                        <span>Vaciado del tramo: <strong className="text-slate-300">{t.drainDurationText}</strong></span>
+                      <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-500 flex justify-between">
+                        <span>Vaciado del tramo: <strong className="text-slate-700">{t.drainDurationText}</strong></span>
                         {isThisTierSelected && (
-                          <span className="text-amber-400 font-bold flex items-center gap-1">
+                          <span className="text-[#1e3a8a] font-extrabold flex items-center gap-1">
                             <Check className="w-3 h-3 stroke-[3]" /> Activo
                           </span>
                         )}
@@ -610,11 +611,11 @@ export const FuelCalculator: React.FC = () => {
               </div>
 
               {/* Resumen total de unidades de la estrategia activa */}
-              <div className="p-3 bg-slate-900/60 rounded-xl border border-dofus-border flex items-center justify-between text-xs">
-                <span className="text-slate-300 font-medium">
+              <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-slate-700 font-bold">
                   Total de carburantes requeridos ({strategy === 'cascade' ? 'Modo Cascada' : `Manteniendo Nivel ${strategy.slice(-1)}`}):
                 </span>
-                <span className="font-mono font-black text-amber-400 text-sm">
+                <span className="font-mono font-black text-[#1e3a8a] text-sm sm:text-base">
                   {breakdown.totalItemsNeeded} {breakdown.totalItemsNeeded === 1 ? 'unidad' : 'unidades'} ({FUEL_VARIANTS[selectedVariant].name})
                 </span>
               </div>
