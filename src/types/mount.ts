@@ -1,4 +1,4 @@
-export type SpeciesType = 'dragopavo' | 'muluaga' | 'vueloceronte';
+export type SpeciesType = 'dragopavo' | 'muldo' | 'muluaga' | 'volkorne' | 'vueloceronte';
 export type FertilityStatus = 'fertil' | 'fecunda' | 'esteril' | 'senil';
 export type SpecialCapacity = 'ninguna' | 'sabia' | 'enamoradiza' | 'resistente' | 'precoz' | 'reproductora' | 'camaleon';
 
@@ -7,7 +7,7 @@ export interface MountDefinition {
   species: SpeciesType;
   generation: number;
   name: string;
-  parents?: [string, string];
+  parents?: [string, string] | null;
   bonuses: string[];
   imageUrl?: string;
 }
@@ -42,8 +42,9 @@ export interface FuelInfo {
   name: string;
   rangeMin: number;
   rangeMax: number;
-  consumptionPer10s: number;
-  gainPer10s: number;
+  consumptionPer10s?: number;
+  gainPer10s?: number;
   drainDurationSeconds: number;
-  dustCostGigantesque: number;
+  dustCostGigantesque?: number;
+  capacity?: number;
 }
