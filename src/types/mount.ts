@@ -24,6 +24,8 @@ export interface UserMount {
   currentXp: number;
   fertility: FertilityStatus;
   capacity: SpecialCapacity;
+  reproductionCount?: number;
+  maxReproductions?: number;
   serenity: number;
   love: number;
   maturity: number;
