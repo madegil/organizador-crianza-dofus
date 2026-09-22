@@ -4,7 +4,8 @@ import type { SpeciesType, UserMount } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
 import { VOLKORNES_DATA } from '../data/volkornes';
-import { db } from '../db/mountsDb';
+import { normalizeBreedParts } from '../data/allMounts';
+import { db, initSeedDataIfEmpty } from '../db/mountsDb';
 import { MountAvatar } from './MountAvatar';
 
 export const CollectionTracker: React.FC = () => {
@@ -13,6 +14,7 @@ export const CollectionTracker: React.FC = () => {
   const [userMounts, setUserMounts] = useState<UserMount[]>([]);
 
   const loadMounts = async () => {
+    await initSeedDataIfEmpty();
     const all = await db.mounts.toArray();
     setUserMounts(all);
   };
@@ -28,23 +30,24 @@ export const CollectionTracker: React.FC = () => {
       ? MULDOS_DATA
       : VOLKORNES_DATA;
 
+  const isMountOfDef = (m: UserMount, def: any) => {
+    if (m.species !== activeSpecies) return false;
+    if (m.definitionId && m.definitionId === def.id) return true;
+    return normalizeBreedParts(m.breed) === normalizeBreedParts(def.name);
+  };
+
   const generations = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   const totalSpeciesBreeds = catalog.length;
   const ownedBreedsCount = catalog.filter((def) =>
-    userMounts.some(
-      (m) =>
-        m.species === activeSpecies &&
-        m.breed.toLowerCase().includes(def.name.toLowerCase().split(' ')[0])
-    )
+    userMounts.some((m) => isMountOfDef(m, def))
   ).length;
 
   const level200BreedsCount = catalog.filter((def) =>
     userMounts.some(
       (m) =>
-        m.species === activeSpecies &&
-        (m.currentLevel >= 200 || m.currentXp >= 867582) &&
-        m.breed.toLowerCase().includes(def.name.toLowerCase().split(' ')[0])
+        isMountOfDef(m, def) &&
+        (m.currentLevel >= 200 || m.currentXp >= 867582)
     )
   ).length;
 
@@ -231,11 +234,7 @@ export const CollectionTracker: React.FC = () => {
         {/* Grid de Razas adaptable (1 col en xs, 2 en sm, 3 en lg, 4 en xl) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
           {filteredCatalog.map((def) => {
-            const matches = userMounts.filter(
-              (m) =>
-                m.species === activeSpecies &&
-                m.breed.toLowerCase().includes(def.name.toLowerCase().split(' ')[0])
-            );
+            const matches = userMounts.filter((m) => isMountOfDef(m, def));
             const isOwned = matches.length > 0;
             const hasLvl200 = matches.some(
               (m) => m.currentLevel >= 200 || m.currentXp >= 867582

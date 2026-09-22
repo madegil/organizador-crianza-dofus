@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import type { UserMount } from '../types/mount';
 import { getFertilityLabel } from '../utils/badgeHelpers';
 import { MAX_MOUNT_XP, calculateLevelFromXp } from '../data/mountXpTable';
+import { findMountByBreedAndSpecies } from '../data/allMounts';
 
 export class BreedingDatabase extends Dexie {
   mounts!: EntityTable<UserMount, 'id'>;
@@ -9,7 +10,7 @@ export class BreedingDatabase extends Dexie {
   constructor() {
     super('DofusBreedingDB');
     this.version(1).stores({
-      mounts: 'id, definitionId, species, breed, generation, gender, currentLevel, currentXp, fertility, capacity, updatedAt',
+      mounts: 'id, nickname, species, breed, generation, gender, currentLevel, fertility, capacity',
     });
   }
 }
@@ -69,7 +70,7 @@ export async function initSeedDataIfEmpty() {
         nickname: 'Flamito',
         definitionId: 'dd_rousse',
         species: 'dragopavo',
-        breed: 'Pelirroja',
+        breed: 'Pelirrojo',
         generation: 1,
         gender: 'F',
         currentLevel: 8,
@@ -81,7 +82,7 @@ export async function initSeedDataIfEmpty() {
         maturity: 20000,
         stamina: 20000,
         imageUrl: 'https://api.dofusdu.de/dofus2/img/mount/10.png',
-        notes: 'Dragopavo Pelirroja hembra nivel 8',
+        notes: 'Dragopavo Pelirrojo hembra nivel 8',
         createdAt: Date.now() - 400000,
         updatedAt: Date.now(),
       },
@@ -111,7 +112,7 @@ export async function initSeedDataIfEmpty() {
         nickname: 'Rocafuego',
         definitionId: 'dd_rousse',
         species: 'dragopavo',
-        breed: 'Pelirroja',
+        breed: 'Pelirrojo',
         generation: 1,
         gender: 'F',
         currentLevel: 7,
@@ -123,7 +124,7 @@ export async function initSeedDataIfEmpty() {
         maturity: 20000,
         stamina: 20000,
         imageUrl: 'https://api.dofusdu.de/dofus2/img/mount/10.png',
-        notes: 'Dragopavo Pelirroja hembra nivel 7',
+        notes: 'Dragopavo Pelirrojo hembra nivel 7',
         createdAt: Date.now() - 200000,
         updatedAt: Date.now(),
       },
@@ -173,13 +174,12 @@ export async function initSeedDataIfEmpty() {
     await db.mounts.bulkAdd(sampleMounts);
   } else {
     markSeedAsInitialized();
-    // Normalizar registros existentes con discrepancias de fertilidad, capacidad o nivel/XP
+    // Normalizar registros existentes con discrepancias de fertilidad, capacidad, nivel/XP y definición de raza
     const all = await db.mounts.toArray();
     for (const m of all) {
       let changed = false;
-      const cleanFert = getFertilityLabel(m.fertility).toLowerCase().replace('é', 'e');
-      const actualFert = cleanFert === 'fecunda' ? 'fecunda' : cleanFert === 'esteril' ? 'esteril' : cleanFert === 'senil' ? 'senil' : 'fertil';
-      if (m.fertility !== actualFert) {
+      const actualFert = getFertilityLabel(m.fertility).toLowerCase();
+      if (actualFert !== m.fertility) {
         m.fertility = actualFert as any;
         changed = true;
       }
@@ -205,6 +205,22 @@ export async function initSeedDataIfEmpty() {
           m.maturity = 0;
           m.stamina = 0;
           m.serenity = 0;
+          changed = true;
+        }
+      }
+      // Sincronizar y reparar definitionId, breed canónico e imageUrl si estaban desalineados
+      const matchedDef = findMountByBreedAndSpecies(m.breed, m.species, m.generation);
+      if (matchedDef) {
+        if (m.definitionId !== matchedDef.id) {
+          m.definitionId = matchedDef.id;
+          changed = true;
+        }
+        if (matchedDef.imageUrl && m.imageUrl !== matchedDef.imageUrl) {
+          m.imageUrl = matchedDef.imageUrl;
+          changed = true;
+        }
+        if (m.breed !== matchedDef.name) {
+          m.breed = matchedDef.name;
           changed = true;
         }
       }

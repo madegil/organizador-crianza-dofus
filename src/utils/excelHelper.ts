@@ -190,9 +190,10 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     if (rawSpecies.includes('muldo') || rawSpecies.includes('mulagua') || rawSpecies.includes('muluaga')) species = 'muluaga';
     else if (rawSpecies.includes('volk') || rawSpecies.includes('vuelo') || rawSpecies.includes('ceronte')) species = 'vueloceronte';
 
-    const matchedDef = findMountByBreedAndSpecies(breed || 'Almendrado', species);
+    const inputGen = Number(row[3]) || undefined;
+    const matchedDef = findMountByBreedAndSpecies(breed || 'Almendrado', species, inputGen);
     const definitionId = matchedDef ? matchedDef.id : `${species}_custom_${i}`;
-    const generation = Number(row[3]) || (matchedDef ? matchedDef.generation : 1);
+    const generation = inputGen || (matchedDef ? matchedDef.generation : 1);
     const rawGender = String(row[4] || 'M').toUpperCase().trim();
     const gender: 'M' | 'F' = rawGender.startsWith('F') || rawGender.startsWith('H') ? 'F' : 'M';
 
@@ -232,10 +233,10 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
 
     parsedMounts.push({
       id: `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      nickname: nickname || breed || (matchedDef ? matchedDef.name : 'Sin Nombre'),
+      nickname: nickname || (matchedDef ? matchedDef.name : breed) || 'Sin Nombre',
       definitionId,
       species,
-      breed: breed || (matchedDef ? matchedDef.name : 'Almendrado'),
+      breed: (matchedDef ? matchedDef.name : breed) || 'Almendrado',
       generation,
       gender,
       currentLevel,
