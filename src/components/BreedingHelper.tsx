@@ -58,7 +58,7 @@ export const BreedingHelper: React.FC = () => {
                   <Heart className="w-3.5 h-3.5 flex-shrink-0" /> Amor: Dragonalgas
                 </span>
                 <p className="text-xs text-rose-900 mt-1 font-bold">
-                  Requiere Serenidad > 0
+                  Requiere Serenidad &gt; 0
                 </p>
                 <p className="text-[11px] text-rose-700/90 font-medium mt-0.5">
                   Entre 0 y 2.000, sube Amor y Madurez a la vez.
@@ -72,7 +72,7 @@ export const BreedingHelper: React.FC = () => {
                   <Shield className="w-3.5 h-3.5 flex-shrink-0" /> Resistencia: Fulminador
                 </span>
                 <p className="text-xs text-amber-900 mt-1 font-bold">
-                  Requiere Serenidad < 0
+                  Requiere Serenidad &lt; 0
                 </p>
                 <p className="text-[11px] text-amber-700/90 font-medium mt-0.5">
                   Entre -2.000 y -1, sube Resistencia y Madurez.
