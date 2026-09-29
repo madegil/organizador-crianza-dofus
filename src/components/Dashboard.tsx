@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { UserMount } from '../types/mount';
 import { MountTable } from './MountTable';
+import { BreedingGuide } from './BreedingGuide';
 import { db, initSeedDataIfEmpty } from '../db/mountsDb';
 
 export const Dashboard: React.FC = () => {
@@ -27,7 +28,8 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="space-y-4 sm:space-y-6">
+      <BreedingGuide />
       <MountTable mounts={mounts} onDataChanged={fetchMounts} />
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GitFork, Sparkles, Heart, Shield, Droplet } from 'lucide-react';
+import { GitFork } from 'lucide-react';
 import type { SpeciesType } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
@@ -33,85 +33,12 @@ export const BreedingHelper: React.FC = () => {
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-                Árbol de Cruces & Guía de Hibridaciones
+                Árbol de Cruces &amp; Guía de Hibridaciones
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
                 Consulta cómo obtener cada generación a partir de cruces según Dofus 3.5.
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Reglas de Serenidad y Medidores */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 shadow-sm space-y-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0" />
-            <h2 className="text-xs sm:text-sm font-extrabold text-slate-900">
-              Guía de Medidores y Serenidad (-5.000 a +5.000)
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-            <div className="p-3 sm:p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-950 shadow-xs flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-black text-rose-800 flex items-center gap-1.5">
-                  <Heart className="w-3.5 h-3.5 flex-shrink-0" /> Amor: Dragonalgas
-                </span>
-                <p className="text-xs text-rose-900 mt-1 font-bold">
-                  Requiere Serenidad &gt; 0
-                </p>
-                <p className="text-[11px] text-rose-700/90 font-medium mt-0.5">
-                  Entre 0 y 2.000, sube Amor y Madurez a la vez.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 sm:p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 shadow-xs flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-black text-amber-800 flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5 flex-shrink-0" /> Resistencia: Fulminador
-                </span>
-                <p className="text-xs text-amber-900 mt-1 font-bold">
-                  Requiere Serenidad &lt; 0
-                </p>
-                <p className="text-[11px] text-amber-700/90 font-medium mt-0.5">
-                  Entre -2.000 y -1, sube Resistencia y Madurez.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 sm:p-3.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-950 shadow-xs flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-black text-sky-800 flex items-center gap-1.5">
-                  <Droplet className="w-3.5 h-3.5 flex-shrink-0" /> Madurez: Abrevadero
-                </span>
-                <p className="text-xs text-sky-900 mt-1 font-bold">
-                  Entre -2.000 y +2.000
-                </p>
-                <p className="text-[11px] text-sky-700/90 font-medium mt-0.5">
-                  Zona neutra óptima para entrenar madurez.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 sm:p-3.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-950 shadow-xs flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-black text-purple-800 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 flex-shrink-0" /> Experiencia: Pesebre
-                </span>
-                <p className="text-xs text-purple-900 mt-1 font-bold">
-                  Cualquier Serenidad
-                </p>
-                <p className="text-[11px] text-purple-700/90 font-medium mt-0.5">
-                  Sube de nivel pasivamente a 200 en cualquier estado.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-2.5 sm:p-3 bg-slate-50 rounded-xl text-[11px] sm:text-xs text-slate-600 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 font-medium">
-            <span>• <strong className="text-slate-800 font-bold">Aporreador:</strong> Disminuye serenidad hacia valores negativos</span>
-            <span>• <strong className="text-slate-800 font-bold">Acariciador:</strong> Aumenta serenidad hacia valores positivos</span>
           </div>
         </div>
 
