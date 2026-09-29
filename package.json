@@ -11,18 +11,20 @@
     "astro": "astro",
     "prebuild": "node scripts/generateTemplate.js"
   },
+  "allowScripts": {
+    "esbuild": true,
+    "sharp": true
+  },
   "dependencies": {
     "@astrojs/react": "^3.6.2",
     "@astrojs/tailwind": "^5.1.0",
     "astro": "^4.15.0",
-    "clsx": "^2.1.1",
     "dexie": "^4.0.8",
     "dexie-react-hooks": "^1.1.7",
     "lucide-react": "^0.439.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.5.2",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",
