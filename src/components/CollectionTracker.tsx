@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layers, CheckCircle2, Circle, Eye, Sparkles, Filter, Plus } from 'lucide-react';
 import type { SpeciesType, UserMount } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
@@ -71,21 +71,23 @@ export const CollectionTracker: React.FC = () => {
       maturity: 20000,
       stamina: 20000,
       imageUrl: def.imageUrl || '',
-      notes: 'Registrado desde Colección',
+      notes: 'Registrada desde Catálogo',
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    await db.mounts.put(newMount);
+
+    await db.mounts.add(newMount);
     await loadMounts();
   };
+
+  const percentageOwned =
+    totalSpeciesBreeds > 0
+      ? Math.round((ownedBreedsCount / totalSpeciesBreeds) * 100)
+      : 0;
 
   const percentage200 =
     totalSpeciesBreeds > 0
       ? Math.round((level200BreedsCount / totalSpeciesBreeds) * 100)
-      : 0;
-  const percentageOwned =
-    totalSpeciesBreeds > 0
-      ? Math.round((ownedBreedsCount / totalSpeciesBreeds) * 100)
       : 0;
 
   const filteredCatalog =
@@ -104,7 +106,7 @@ export const CollectionTracker: React.FC = () => {
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-                Catálogo & Meta Nivel 200
+                Catálogo &amp; Meta Nivel 200
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
                 Seguimiento de las {totalSpeciesBreeds} razas. Registra ejemplares y completa tu colección.
@@ -125,7 +127,7 @@ export const CollectionTracker: React.FC = () => {
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              🐴 Dragos ({DRAGODINDES_DATA.length})
+              🐴 Dragopavos ({DRAGODINDES_DATA.length})
             </button>
             <button
               onClick={() => {
@@ -138,7 +140,7 @@ export const CollectionTracker: React.FC = () => {
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              🐟 Muldos ({MULDOS_DATA.length})
+              🐟 Mulaguas ({MULDOS_DATA.length})
             </button>
             <button
               onClick={() => {
@@ -151,7 +153,7 @@ export const CollectionTracker: React.FC = () => {
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              🦏 Vuelos ({VOLKORNES_DATA.length})
+              🦏 Vuelocerontes ({VOLKORNES_DATA.length})
             </button>
           </div>
         </div>
@@ -219,7 +221,7 @@ export const CollectionTracker: React.FC = () => {
               <button
                 key={g}
                 onClick={() => setSelectedGen(g)}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
+                className={`px-3 py-1 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
                   selectedGen === g
                     ? 'bg-[#1e3a8a] text-white shadow-xs'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -243,16 +245,17 @@ export const CollectionTracker: React.FC = () => {
             return (
               <div
                 key={def.id}
-                className={`p-3 sm:p-3.5 rounded-2xl border transition shadow-xs flex flex-col justify-between space-y-2.5 ${
+                className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex flex-col justify-between space-y-2.5 ${
                   hasLvl200
-                    ? 'bg-emerald-50/50 border-emerald-300/80 hover:bg-emerald-50/80'
+                    ? 'bg-emerald-50/50 border-emerald-300/80 shadow-xs'
                     : isOwned
-                    ? 'bg-blue-50/40 border-blue-200 hover:bg-blue-50/70'
-                    : 'bg-white border-slate-200 hover:border-slate-300'
+                    ? 'bg-blue-50/40 border-blue-200 shadow-xs'
+                    : 'bg-white border-slate-200/90 shadow-2xs hover:border-slate-300'
                 }`}
               >
-                <div>
-                  <div className="flex items-center gap-2.5">
+                {/* Cabecera de la Tarjeta */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <MountAvatar
                       species={activeSpecies}
                       breed={def.name}
@@ -260,47 +263,66 @@ export const CollectionTracker: React.FC = () => {
                       size="sm"
                       generation={def.generation}
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start gap-1">
-                        <span className="font-extrabold text-xs text-slate-900 truncate">
-                          {def.name}
-                        </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 font-bold flex-shrink-0">
-                          G{def.generation}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 mt-1 flex-wrap">
-                        {hasLvl200 ? (
-                          <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" /> Nivel 200
-                          </span>
-                        ) : isOwned ? (
-                          <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Obtenida ({matches.length})
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
-                            <Circle className="w-3 h-3" /> Pendiente
-                          </span>
-                        )}
-                      </div>
+                    <div className="min-w-0">
+                      <span className="font-extrabold text-xs text-slate-900 block truncate leading-tight">
+                        {def.name}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        Gen {def.generation}
+                      </span>
                     </div>
+                  </div>
+
+                  {/* Estado de posesión */}
+                  <div className="flex-shrink-0">
+                    {hasLvl200 ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold border border-emerald-200">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Nvl 200
+                      </span>
+                    ) : isOwned ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold border border-blue-200">
+                        <Eye className="w-3 h-3 text-blue-600" /> Obtenida
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => quickRegisterMount(def)}
+                        title="Registrar montura en tu establo"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-800 text-[10px] font-bold border border-slate-200 transition cursor-pointer"
+                      >
+                        <Plus className="w-3 h-3" /> Registrar
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-slate-200/70 flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-slate-500 font-medium truncate">
-                    {def.bonuses?.[0] || ''}
-                  </span>
-                  {!isOwned && (
-                    <button
-                      onClick={() => quickRegisterMount(def)}
-                      className="flex items-center gap-1 px-2.5 py-1 bg-[#1e3a8a] hover:bg-[#172554] text-white rounded-lg text-[10px] font-bold shadow-xs transition cursor-pointer flex-shrink-0"
-                      title="Registrar ejemplar en tu establo"
-                    >
-                      <Plus className="w-3 h-3" />
-                      <span>Registrar</span>
-                    </button>
+                {/* Lista de ejemplares en establo */}
+                <div className="pt-2 border-t border-slate-100 space-y-1">
+                  {matches.length === 0 ? (
+                    <span className="text-[10px] text-slate-400 italic block">
+                      Sin ejemplares en establo
+                    </span>
+                  ) : (
+                    <div className="space-y-1">
+                      {matches.map((m) => (
+                        <div
+                          key={m.id}
+                          className="flex items-center justify-between text-[11px] bg-white/80 px-2 py-1 rounded-lg border border-slate-200/60 font-medium"
+                        >
+                          <span className="text-slate-800 truncate font-semibold">
+                            {m.nickname}
+                          </span>
+                          <span
+                            className={`font-mono text-[10px] font-bold ${
+                              m.currentLevel >= 200
+                                ? 'text-emerald-700'
+                                : 'text-slate-500'
+                            }`}
+                          >
+                            Nvl {m.currentLevel}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>

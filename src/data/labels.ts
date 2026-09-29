@@ -19,6 +19,6 @@ export const CAPACITY_LABELS: Record<SpecialCapacity, string> = {
 
 export const SPECIES_LABELS: Record<SpeciesType, string> = {
   dragopavo: 'Dragopavo',
-  muluaga: 'Muluaga',
+  muluaga: 'Mulagua',
   vueloceronte: 'Vueloceronte',
 };

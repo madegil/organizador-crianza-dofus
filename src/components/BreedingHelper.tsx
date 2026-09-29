@@ -68,7 +68,7 @@ export const BreedingHelper: React.FC = () => {
                     : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
                 }`}
               >
-                Muldos
+                Mulaguas
               </button>
               <button
                 onClick={() => setSpecies('vueloceronte')}

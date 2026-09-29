@@ -668,7 +668,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                           <div className="space-y-1 w-28">
                             {/* Serenidad */}
                             <div className="flex items-center justify-between text-[9px] text-slate-500 font-mono">
-                              <span>Seren:</span>
+                              <span>Serenidad:</span>
                               <span
                                 className={`font-bold ${
                                   mount.serenity > 0
@@ -776,7 +776,8 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}\n              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
               className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
               <ChevronLeft className="w-4 h-4" />
