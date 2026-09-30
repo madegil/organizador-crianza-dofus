@@ -10,7 +10,6 @@ export const Dashboard: React.FC = () => {
   const [loadError, setLoadError] = useState(false);
 
   const fetchMounts = async () => {
-    setLoading(true);
     setLoadError(false);
     try {
       await normalizeStoredMounts();
@@ -43,7 +42,10 @@ export const Dashboard: React.FC = () => {
           No se pudo acceder al almacenamiento local (¿modo privado o almacenamiento bloqueado?)
         </p>
         <button
-          onClick={fetchMounts}
+          onClick={() => {
+            setLoading(true);
+            fetchMounts();
+          }}
           className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
         >
           Reintentar

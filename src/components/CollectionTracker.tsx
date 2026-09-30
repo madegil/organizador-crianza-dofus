@@ -17,7 +17,6 @@ export const CollectionTracker: React.FC = () => {
   const [loadError, setLoadError] = useState(false);
 
   const loadMounts = async () => {
-    setLoading(true);
     setLoadError(false);
     try {
       await normalizeStoredMounts();
@@ -122,7 +121,10 @@ export const CollectionTracker: React.FC = () => {
           No se pudo acceder al almacenamiento local (¿modo privado o almacenamiento bloqueado?)
         </p>
         <button
-          onClick={loadMounts}
+          onClick={() => {
+            setLoading(true);
+            loadMounts();
+          }}
           className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
         >
           Reintentar
@@ -251,7 +253,7 @@ export const CollectionTracker: React.FC = () => {
         </div>
 
         {/* Grid de Razas adaptable (1 col en xs, 2 en sm, 3 en lg, 4 en xl) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
           {filteredCatalog.map((def) => {
             const matches = userMounts.filter((m) => isMountOfDef(m, def));
             const isOwned = matches.length > 0;

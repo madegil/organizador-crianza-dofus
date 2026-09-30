@@ -34,7 +34,6 @@ type CalculationTarget = 'nextLevel' | 'gauge200k' | 'level200' | 'custom';
 export const FuelCalculator: React.FC = () => {
   const [mounts, setMounts] = useState<UserMount[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
   const [selectedMountId, setSelectedMountId] = useState<string | null>(null);
 
   // Opciones de cálculo
@@ -44,9 +43,10 @@ export const FuelCalculator: React.FC = () => {
   const [customXp, setCustomXp] = useState<number | ''>(80000);
   const [strategy, setStrategy] = useState<TrainingStrategy>('cascade');
 
+  const [loadError, setLoadError] = useState(false);
+
   // Cargar monturas de Dexie
   const loadMounts = async () => {
-    setLoading(true);
     setLoadError(false);
     try {
       await normalizeStoredMounts();
@@ -137,7 +137,10 @@ export const FuelCalculator: React.FC = () => {
           No se pudo acceder al almacenamiento local (¿modo privado o almacenamiento bloqueado?)
         </p>
         <button
-          onClick={loadMounts}
+          onClick={() => {
+            setLoading(true);
+            loadMounts();
+          }}
           className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
         >
           Reintentar
@@ -186,83 +189,71 @@ export const FuelCalculator: React.FC = () => {
         </div>
 
         {/* Cuadrícula interactiva del Establo con estilo unificado al index */}
-        {mounts.length === 0 ? (
-          <div className="p-8 text-center text-slate-500 space-y-3 bg-white rounded-2xl border border-slate-200">
-            <p className="text-sm font-medium">No tienes monturas registradas en tu establo aún.</p>
-            <button
-              onClick={loadMounts}
-              className="px-4 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold rounded-xl text-xs transition shadow-sm"
-            >
-              Cargar monturas de prueba
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
-            {mounts.map((m) => {
-              const isSelected = selectedMount?.id === m.id;
-              const lvl =
-                m.currentXp >= MAX_MOUNT_XP
-                  ? 200
-                  : m.currentXp > 0
-                  ? calculateLevelFromXp(m.currentXp)
-                  : m.currentLevel || 1;
-              const isMax200 = lvl >= 200 || m.currentXp >= MAX_MOUNT_XP;
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
+          {mounts.map((m) => {
+            const isSelected = selectedMount?.id === m.id;
+            const lvl =
+              m.currentXp >= MAX_MOUNT_XP
+                ? 200
+                : m.currentXp > 0
+                ? calculateLevelFromXp(m.currentXp)
+                : m.currentLevel || 1;
+            const isMax200 = lvl >= 200 || m.currentXp >= MAX_MOUNT_XP;
 
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => handleSelectMount(m)}
-                  className={`p-3 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-2 shadow-sm hover:shadow-md cursor-pointer ${
-                    isSelected
-                      ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-400/30 text-slate-900'
-                      : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <MountAvatar
-                      species={m.species}
-                      breed={m.breed}
-                      imageUrl={m.imageUrl}
-                      size="sm"
-                      generation={m.generation}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-extrabold text-xs text-slate-900 truncate">{m.nickname}</p>
-                      <p className="text-[10px] text-slate-500 truncate font-medium">{m.breed}</p>
-                    </div>
+            return (
+              <button
+                key={m.id}
+                onClick={() => handleSelectMount(m)}
+                className={`p-3 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-2 shadow-sm hover:shadow-md cursor-pointer ${
+                  isSelected
+                    ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-400/30 text-slate-900'
+                    : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <MountAvatar
+                    species={m.species}
+                    breed={m.breed}
+                    imageUrl={m.imageUrl}
+                    size="sm"
+                    generation={m.generation}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-extrabold text-xs text-slate-900 truncate">{m.nickname}</p>
+                    <p className="text-[10px] text-slate-500 truncate font-medium">{m.breed}</p>
                   </div>
+                </div>
 
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-                    <span className="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                      Nivel {lvl}
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                  <span className="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                    Nivel {lvl}
+                  </span>
+                  {isMax200 ? (
+                    <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                      200 ✓
                     </span>
-                    {isMax200 ? (
-                      <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                        200 ✓
-                      </span>
-                    ) : (
-                      <span className="text-slate-700 font-mono font-bold">
-                        {m.currentXp.toLocaleString()} XP
-                      </span>
-                    )}
-                  </div>
-
-                  {m.capacity === 'sabia' && (
-                    <span className="absolute top-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-extrabold border border-purple-200">
-                      ✨ Sabia
+                  ) : (
+                    <span className="text-slate-700 font-mono font-bold">
+                      {m.currentXp.toLocaleString()} XP
                     </span>
                   )}
+                </div>
 
-                  {isSelected && (
-                    <div className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center shadow-md">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
+                {m.capacity === 'sabia' && (
+                  <span className="absolute top-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-extrabold border border-purple-200">
+                    ✨ Sabia
+                  </span>
+                )}
+
+                {isSelected && (
+                  <div className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center shadow-md">
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 2. SECCIÓN INFERIOR: MEDIDOR XP Y PANEL DE INFORMACIÓN UNIFICADO */}
