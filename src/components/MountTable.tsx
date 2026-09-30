@@ -187,8 +187,15 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   // Limpiar establo completo
   const handleClearAll = async () => {
     if (!window.confirm('¿Seguro que deseas eliminar TODAS las monturas del establo? Esta acción es irreversible.')) return;
-    await db.mounts.clear();
-    onDataChanged();
+    try {
+      await db.mounts.clear();
+      onDataChanged();
+    } catch (err: any) {
+      setStatusMessage({
+        type: 'error',
+        text: err?.message || 'Error al vaciar el establo.',
+      });
+    }
   };
 
   const handleRemoveSampleMounts = async () => {
@@ -201,8 +208,15 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
     );
     if (!confirmed) return;
 
-    await db.mounts.bulkDelete(sampleMounts.map((m) => m.id));
-    onDataChanged();
+    try {
+      await db.mounts.bulkDelete(sampleMounts.map((m) => m.id));
+      onDataChanged();
+    } catch (err: any) {
+      setStatusMessage({
+        type: 'error',
+        text: err?.message || 'Error al eliminar las monturas de ejemplo.',
+      });
+    }
   };
 
   const handleDeleteMount = async (id: string) => {
@@ -211,8 +225,15 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
     if (!window.confirm(`¿Seguro que deseas eliminar a "${mountName}" de tu establo?`)) return;
 
-    await db.mounts.delete(id);
-    onDataChanged();
+    try {
+      await db.mounts.delete(id);
+      onDataChanged();
+    } catch (err: any) {
+      setStatusMessage({
+        type: 'error',
+        text: err?.message || 'Error al eliminar la montura.',
+      });
+    }
   };
 
   // Filtrado
@@ -317,17 +338,24 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       updatedAt: Date.now(),
     };
 
-    if (isSample && oldId) {
-      await db.transaction('rw', db.mounts, async () => {
-        await db.mounts.delete(oldId);
+    try {
+      if (isSample && oldId) {
+        await db.transaction('rw', db.mounts, async () => {
+          await db.mounts.delete(oldId);
+          await db.mounts.put(mountData);
+        });
+      } else {
         await db.mounts.put(mountData);
+      }
+      setIsEditModalOpen(false);
+      setEditingMount(null);
+      onDataChanged();
+    } catch (err: any) {
+      setStatusMessage({
+        type: 'error',
+        text: err?.message || 'Error al guardar la montura en la base de datos.',
       });
-    } else {
-      await db.mounts.put(mountData);
     }
-    setIsEditModalOpen(false);
-    setEditingMount(null);
-    onDataChanged();
   };
 
   const handleOpenNewMountModal = () => {
@@ -710,6 +738,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                                 {mount.nickname}
                               </span>
                               <span
+                                role="img"
                                 aria-label={mount.gender === 'M' ? 'Macho' : 'Hembra'}
                                 className={`text-[10px] font-bold ${
                                   mount.gender === 'M' ? 'text-blue-600' : 'text-rose-500'
@@ -932,6 +961,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             </div>
 
             <form onSubmit={handleSaveMount} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+              {statusMessage && statusMessage.type === 'error' && (
+                <div className="p-3 rounded-xl text-xs font-semibold flex items-center justify-between bg-rose-50 text-rose-800 border border-rose-200">
+                  <span>{statusMessage.text}</span>
+                  <button type="button" onClick={() => setStatusMessage(null)}>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Especie */}
                 <div>

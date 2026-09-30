@@ -25,7 +25,7 @@ import {
 } from '../data/fuelData';
 import type { FuelTier, FuelVariant, UserMount } from '../types/mount';
 import { calculateFuelBreakdown, type TrainingStrategy, formatDurationSpanish } from '../utils/calculator';
-import { db, initSeedDataIfEmpty } from '../db/mountsDb';
+import { db, normalizeStoredMounts } from '../db/mountsDb';
 import { MountAvatar } from './MountAvatar';
 import { XpGauge } from './XpGauge';
 
@@ -34,25 +34,34 @@ type CalculationTarget = 'nextLevel' | 'gauge200k' | 'level200' | 'custom';
 export const FuelCalculator: React.FC = () => {
   const [mounts, setMounts] = useState<UserMount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selectedMountId, setSelectedMountId] = useState<string | null>(null);
 
   // Opciones de cálculo
   const [isSage, setIsSage] = useState<boolean>(false);
   const [selectedVariant, setSelectedVariant] = useState<FuelVariant>('gigantesco');
   const [targetMode, setTargetMode] = useState<CalculationTarget>('nextLevel');
-  const [customXp, setCustomXp] = useState<number>(80000);
+  const [customXp, setCustomXp] = useState<number | ''>(80000);
   const [strategy, setStrategy] = useState<TrainingStrategy>('cascade');
 
   // Cargar monturas de Dexie
   const loadMounts = async () => {
-    await initSeedDataIfEmpty();
-    const all = await db.mounts.toArray();
-    setMounts(all);
-    if (all.length > 0 && !selectedMountId) {
-      setSelectedMountId(all[0].id);
-      setIsSage(all[0].capacity === 'sabia');
+    setLoading(true);
+    setLoadError(false);
+    try {
+      await normalizeStoredMounts();
+      const all = await db.mounts.toArray();
+      setMounts(all);
+      if (all.length > 0 && !selectedMountId) {
+        setSelectedMountId(all[0].id);
+        setIsSage(all[0].capacity === 'sabia');
+      }
+    } catch (err) {
+      console.error(err);
+      setLoadError(true);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -86,20 +95,22 @@ export const FuelCalculator: React.FC = () => {
   const xpForLevel200 = Math.max(0, MAX_MOUNT_XP - currentMountXp);
 
   const xpNeeded = useMemo(() => {
-    if (!selectedMount) return 80000;
+    if (!selectedMount) return 0;
     switch (targetMode) {
       case 'nextLevel':
-        return xpForNextLevel > 0 ? xpForNextLevel : 1000;
+        return mountLevel >= 200 ? 0 : xpForNextLevel;
       case 'gauge200k':
         return MAX_ENCLOS_GAUGE;
       case 'level200':
         return xpForLevel200;
-      case 'custom':
-        return Math.min(MAX_MOUNT_XP, Math.max(1, customXp));
+      case 'custom': {
+        const val = customXp === '' ? 1000 : Number(customXp);
+        return Math.min(200000, Math.max(1000, val));
+      }
       default:
         return xpForNextLevel;
     }
-  }, [selectedMount, targetMode, xpForNextLevel, xpForLevel200, customXp]);
+  }, [selectedMount, targetMode, mountLevel, xpForNextLevel, xpForLevel200, customXp]);
 
   // Cálculo principal de carburante y tiempo diferenciando vaciado vs subida de montura
   const breakdown = useMemo(() => {
@@ -115,6 +126,40 @@ export const FuelCalculator: React.FC = () => {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center space-y-3 max-w-lg mx-auto my-12 text-rose-900">
+        <p className="text-sm font-semibold">
+          No se pudo acceder al almacenamiento local (¿modo privado o almacenamiento bloqueado?)
+        </p>
+        <button
+          onClick={loadMounts}
+          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (mounts.length === 0) {
+    return (
+      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-200/90 text-center max-w-2xl mx-auto my-8 space-y-4">
+        <p className="text-sm sm:text-base font-semibold text-slate-700">
+          Aún no tienes monturas. Regístralas en{' '}
+          <a href="/coleccion" className="text-blue-600 hover:text-blue-800 font-bold underline">
+            Colección
+          </a>{' '}
+          o en{' '}
+          <a href="/" className="text-blue-600 hover:text-blue-800 font-bold underline">
+            Establo
+          </a>
+          .
+        </p>
       </div>
     );
   }
@@ -309,319 +354,338 @@ export const FuelCalculator: React.FC = () => {
 
           {/* PANEL DE CÁLCULO ESTRATÉGICO Y CARBURANTES */}
           <div className="flex-1 w-full space-y-4">
-            {/* Input personalizado si está en modo Manual */}
-            {targetMode === 'custom' && (
-              <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
-                <label className="block text-xs font-bold text-slate-700">
-                  XP a calcular en el medidor (1 a 200.000 XP):
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min={1000}
-                    max={200000}
-                    step={1000}
-                    value={customXp}
-                    onChange={(e) => setCustomXp(Number(e.target.value))}
-                    className="flex-1 accent-[#1e3a8a]"
-                  />
-                  <input
-                    type="number"
-                    min={1}
-                    max={200000}
-                    value={customXp}
-                    onChange={(e) => setCustomXp(Number(e.target.value))}
-                    className="w-28 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-mono font-bold text-right focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                  />
-                </div>
+            {targetMode === 'nextLevel' && mountLevel >= 200 ? (
+              <div className="p-6 sm:p-8 bg-white rounded-2xl border border-slate-200 shadow-sm text-center">
+                <p className="text-sm sm:text-base font-bold text-slate-800">
+                  Esta montura ya está en nivel 200
+                </p>
               </div>
-            )}
-
-            {/* A. Casilla ¿Tiene capacidad « Sabia »? • XP x2 */}
-            <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 transition select-none shadow-sm">
-              <input
-                type="checkbox"
-                checked={isSage}
-                onChange={(e) => setIsSage(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-              />
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                <span className="text-xs sm:text-sm font-extrabold text-slate-900">
-                  ¿Tiene capacidad « Sabia »?
-                </span>
-                <span className="text-xs font-extrabold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
-                  XP x2 • Requiere mitad de tiempo y carburante
-                </span>
-              </div>
-            </label>
-
-            {/* B. SELECTOR DE ESTRATEGIA: MANTENER NIVEL FIJO VS VACIADO CONTINUO (CASCADA) */}
-            <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
-                  <Zap className="w-4 h-4 text-amber-500" />
-                  Estrategia de Entrenamiento en Pesebre
-                </span>
-                <span className="text-[10px] text-slate-500 font-medium">
-                  ¿Cómo mantienes el pesebre?
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
-                {/* Opción 1: Vaciado Continuo Natural (Cascada 200k -> 0) */}
-                <button
-                  onClick={() => setStrategy('cascade')}
-                  className={`p-3 rounded-2xl border text-left transition flex items-start gap-2.5 cursor-pointer ${
-                    strategy === 'cascade'
-                      ? 'bg-blue-50/80 border-blue-500 ring-2 ring-blue-400/30 text-slate-900 shadow-sm'
-                      : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600'
-                  }`}
-                >
-                  <Hourglass className={`w-4 h-4 mt-0.5 flex-shrink-0 ${strategy === 'cascade' ? 'text-[#1e3a8a]' : 'text-slate-400'}`} />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-extrabold text-slate-900">Vaciado Natural Continuo</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-slate-200 text-slate-700 font-mono font-bold">Cascada</span>
+            ) : (
+              <>
+                {/* Input personalizado si está en modo Manual */}
+                {targetMode === 'custom' && (
+                  <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                    <label className="block text-xs font-bold text-slate-700">
+                      XP a calcular en el medidor (1.000 a 200.000 XP):
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={1000}
+                        max={200000}
+                        step={1000}
+                        value={customXp === '' ? 1000 : customXp}
+                        onChange={(e) => setCustomXp(Number(e.target.value))}
+                        className="flex-1 accent-[#1e3a8a]"
+                      />
+                      <input
+                        type="number"
+                        min={1000}
+                        max={200000}
+                        value={customXp}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomXp(val === '' ? '' : Number(val));
+                        }}
+                        onBlur={() => {
+                          const val = customXp === '' ? 1000 : Number(customXp);
+                          setCustomXp(Math.min(200000, Math.max(1000, val)));
+                        }}
+                        className="w-28 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-mono font-bold text-right focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                      />
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5 leading-tight font-medium">
-                      Llenas el pesebre y dejas que se vacíe solo (Nivel 4 → 3 → 2 → 1). Total: 35h 39m.
-                    </p>
                   </div>
-                </button>
+                )}
 
-                {/* Opción 2: Mantener Nivel Fijo (Optimización activa) */}
-                <div
-                  className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between gap-1.5 ${
-                    strategy !== 'cascade'
-                      ? 'bg-blue-50/80 border-blue-500 ring-2 ring-blue-400/30 text-slate-900 shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-600'
-                  }`}
-                >
+                {/* A. Casilla ¿Tiene capacidad « Sabia »? • XP x2 */}
+                <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 transition select-none shadow-sm">
+                  <input
+                    type="checkbox"
+                    checked={isSage}
+                    onChange={(e) => setIsSage(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span className="text-xs sm:text-sm font-extrabold text-slate-900">
+                      ¿Tiene capacidad « Sabia »?
+                    </span>
+                    <span className="text-xs font-extrabold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
+                      XP x2 • Requiere mitad de tiempo y carburante
+                    </span>
+                  </div>
+                </label>
+
+                {/* B. SELECTOR DE ESTRATEGIA: MANTENER NIVEL FIJO VS VACIADO CONTINUO (CASCADA) */}
+                <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <Flame className={`w-4 h-4 ${strategy !== 'cascade' ? 'text-amber-500' : 'text-slate-400'}`} />
-                      <span className="text-xs font-extrabold text-slate-900">Mantener Nivel Fijo</span>
-                    </div>
-                    <span className="text-[9px] text-amber-700 font-extrabold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                      Ritmo Constante
+                    <span className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                      <Zap className="w-4 h-4 text-amber-500" />
+                      Estrategia de Entrenamiento en Pesebre
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">
+                      ¿Cómo mantienes el pesebre?
                     </span>
                   </div>
 
-                  {/* Sub-selector de Nivel 4, 3, 2, 1 */}
-                  <div className="grid grid-cols-4 gap-1 mt-1">
-                    {([4, 3, 2, 1] as FuelTier[]).map((t) => {
-                      const stratKey: TrainingStrategy = t === 4 ? 'tier4' : t === 3 ? 'tier3' : t === 2 ? 'tier2' : 'tier1';
-                      const isTierActive = strategy === stratKey;
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
+                    {/* Opción 1: Vaciado Continuo Natural (Cascada 200k -> 0) */}
+                    <button
+                      onClick={() => setStrategy('cascade')}
+                      className={`p-3 rounded-2xl border text-left transition flex items-start gap-2.5 cursor-pointer ${
+                        strategy === 'cascade'
+                          ? 'bg-blue-50/80 border-blue-500 ring-2 ring-blue-400/30 text-slate-900 shadow-sm'
+                          : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600'
+                      }`}
+                    >
+                      <Hourglass className={`w-4 h-4 mt-0.5 flex-shrink-0 ${strategy === 'cascade' ? 'text-[#1e3a8a]' : 'text-slate-400'}`} />
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-extrabold text-slate-900">Vaciado Natural Continuo</span>
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-slate-200 text-slate-700 font-mono font-bold">Cascada</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-0.5 leading-tight font-medium">
+                          Llenas el pesebre y dejas que se vacíe solo (Nivel 4 → 3 → 2 → 1). Total: 35h 39m.
+                        </p>
+                      </div>
+                    </button>
 
-                      return (
+                    {/* Opción 2: Mantener Nivel Fijo (Optimización activa) */}
+                    <div
+                      className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between gap-1.5 ${
+                        strategy !== 'cascade'
+                          ? 'bg-blue-50/80 border-blue-500 ring-2 ring-blue-400/30 text-slate-900 shadow-sm'
+                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <Flame className={`w-4 h-4 ${strategy !== 'cascade' ? 'text-amber-500' : 'text-slate-400'}`} />
+                          <span className="text-xs font-extrabold text-slate-900">Mantener Nivel Fijo</span>
+                        </div>
+                        <span className="text-[9px] text-amber-700 font-extrabold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                          Ritmo Constante
+                        </span>
+                      </div>
+
+                      {/* Sub-selector de Nivel 4, 3, 2, 1 */}
+                      <div className="grid grid-cols-4 gap-1 mt-1">
+                        {([4, 3, 2, 1] as FuelTier[]).map((t) => {
+                          const stratKey: TrainingStrategy = t === 4 ? 'tier4' : t === 3 ? 'tier3' : t === 2 ? 'tier2' : 'tier1';
+                          const isTierActive = strategy === stratKey;
+
+                          return (
+                            <button
+                              key={t}
+                              onClick={() => setStrategy(stratKey)}
+                              className={`px-1.5 py-1 rounded-xl text-[10px] font-extrabold text-center transition flex flex-col items-center cursor-pointer ${
+                                isTierActive
+                                  ? 'bg-[#1e3a8a] text-white shadow-sm'
+                                  : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                              }`}
+                            >
+                              <span>Nvl {t}</span>
+                              <span className="text-[8px] opacity-75 font-mono">
+                                {t === 4 ? '4 XP/s' : t === 3 ? '3 XP/s' : t === 2 ? '2 XP/s' : '1 XP/s'}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* C. PANEL DUAL: TIEMPO PARA SUBIR LA MONTURA VS TIEMPO DE VACIADO DEL CARBURANTE */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Tarjeta 1: Tiempo que tarda en subir el nivel la montura */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 via-amber-50/50 to-orange-50/30 border border-amber-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-amber-900/80 mb-1">
+                        <span className="font-extrabold text-amber-900 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                          <Clock className="w-4 h-4 text-amber-600" />
+                          Tiempo de Subida de Nivel
+                        </span>
+                        <span className="font-mono text-amber-800 font-bold text-[10px]">
+                          {xpNeeded.toLocaleString()} XP
+                        </span>
+                      </div>
+
+                      <p className="text-xl sm:text-2xl font-black text-amber-800 font-mono tracking-tight mt-1">
+                        {breakdown.formattedMountTrainingTime}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-amber-200/60 text-[11px] text-amber-900 font-medium mt-2">
+                      {strategy === 'cascade' ? (
+                        <span>
+                          Velocidad en cascada: {isSage ? '✨ 2x por Sabia (~2.0 - 8.0 XP/s)' : '1.0 - 4.0 XP/s promedio'}
+                        </span>
+                      ) : (
+                        <span>
+                          Velocidad fija ({strategy.toUpperCase()}):{' '}
+                          <strong className="text-amber-900 font-mono">{breakdown.effectiveRatePerSec.toFixed(1)} XP/s</strong>{' '}
+                          {isSage ? '✨ (Sabia x2)' : ''}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tarjeta 2: Tiempo de vaciado físico del carburante (Autonomía del Pesebre) */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-indigo-50/30 border border-blue-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-blue-900/80 mb-1">
+                        <span className="font-extrabold text-[#1e3a8a] flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                          <Gauge className="w-4 h-4 text-blue-600" />
+                          Vaciado del Carburante
+                        </span>
+                        <span className="font-mono text-blue-800 font-bold text-[10px]">
+                          Autonomía Pesebre
+                        </span>
+                      </div>
+
+                      <p className="text-xl sm:text-2xl font-black text-[#1e3a8a] font-mono tracking-tight mt-1">
+                        {strategy === 'cascade' && xpNeeded >= MAX_ENCLOS_GAUGE
+                          ? '35 h 39 min'
+                          : breakdown.formattedFuelDrainTime}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-blue-200/60 text-[11px] text-blue-900 font-medium mt-2">
+                      {strategy === 'cascade' ? (
+                        <span>
+                          Vaciado continuo total del medidor (200k a 0): <strong className="text-blue-900 font-mono">35 h 39 min</strong>
+                        </span>
+                      ) : (
+                        <span>
+                          Duración del tramo de pesebre antes de recargar.
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* D. COMPARATIVA POR NIVELES DE CARBURANTE Y SUS LIMITANTES */}
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                        Desglose por Nivel de Carburante y Velocidades
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-medium">
+                        Haz clic en un nivel para fijar su ritmo o visualiza su consumo independiente.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+                      {(Object.keys(FUEL_VARIANTS) as FuelVariant[]).map((v) => (
                         <button
-                          key={t}
-                          onClick={() => setStrategy(stratKey)}
-                          className={`px-1.5 py-1 rounded-xl text-[10px] font-extrabold text-center transition flex flex-col items-center cursor-pointer ${
-                            isTierActive
-                              ? 'bg-[#1e3a8a] text-white shadow-sm'
-                              : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                          key={v}
+                          onClick={() => setSelectedVariant(v)}
+                          className={`px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                            selectedVariant === v
+                              ? 'bg-[#1e3a8a] text-white shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-white'
                           }`}
                         >
-                          <span>Nvl {t}</span>
-                          <span className="text-[8px] opacity-75 font-mono">
-                            {t === 4 ? '4 XP/s' : t === 3 ? '3 XP/s' : t === 2 ? '2 XP/s' : '1 XP/s'}
-                          </span>
+                          {FUEL_VARIANTS[v].name}
                         </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tarjetas de los 4 Niveles de Carburante con estética Establo */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                    {breakdown.tiers.map((t) => {
+                      const stratKey: TrainingStrategy = t.tier === 4 ? 'tier4' : t.tier === 3 ? 'tier3' : t.tier === 2 ? 'tier2' : 'tier1';
+                      const isThisTierSelected = strategy === stratKey;
+                      const hasUsage = t.itemsNeeded > 0;
+
+                      return (
+                        <div
+                          key={t.tier}
+                          onClick={() => setStrategy(stratKey)}
+                          className={`p-3.5 rounded-2xl border transition cursor-pointer flex flex-col justify-between gap-2 relative ${
+                            isThisTierSelected
+                              ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-400/30 text-slate-900 shadow-sm'
+                              : hasUsage
+                              ? 'bg-white border-slate-200 shadow-sm text-slate-800 hover:border-slate-300'
+                              : 'bg-slate-50/60 border-slate-200 text-slate-500 hover:border-slate-300'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span
+                                className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+                                  t.tier === 1
+                                    ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                                    : t.tier === 2
+                                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                    : t.tier === 3
+                                    ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                                    : 'bg-rose-100 text-rose-800 border border-rose-200'
+                                }`}
+                              >
+                                Nivel {t.tier} - {t.tierName}
+                              </span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold border border-slate-200">
+                                {t.rangeLabel}
+                              </span>
+                            </div>
+
+                            {/* Velocidad y Consumo */}
+                            <div className="flex items-center justify-between text-xs mt-1.5">
+                              <span className="text-slate-500 font-medium">
+                                Baja: <strong className="text-slate-700 font-mono">{t.consumptionRatePer10s} / 10s</strong> ({t.baseXpPerSec} pts/s)
+                              </span>
+                              <span className="font-mono font-bold text-[#1e3a8a]">
+                                +{t.effectiveXpPerSec} XP/s {isSage ? '✨' : ''}
+                              </span>
+                            </div>
+
+                            {/* Tiempo si se mantiene fijo */}
+                            <div className="mt-1.5 p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-[11px]">
+                              <span className="text-slate-500 font-medium">Tiempo si mantienes Nivel {t.tier}:</span>
+                              <span className="font-mono font-bold text-amber-800">
+                                {t.formattedTimeIfMaintained}
+                              </span>
+                            </div>
+
+                            {/* Ítems para la estrategia activa */}
+                            <div className="mt-2 flex items-baseline justify-between">
+                              <p className="text-sm font-black text-slate-900 font-mono">
+                                {t.itemsNeeded} {t.itemsNeeded === 1 ? 'unidad' : 'unidades'}
+                              </p>
+                              <span className="text-[10px] text-slate-500 truncate max-w-[160px] font-medium" title={t.itemName}>
+                                {t.itemName}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-500 flex justify-between">
+                            <span>Vaciado del tramo: <strong className="text-slate-700">{t.drainDurationText}</strong></span>
+                            {isThisTierSelected && (
+                              <span className="text-[#1e3a8a] font-extrabold flex items-center gap-1">
+                                <Check className="w-3 h-3 stroke-[3]" /> Activo
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
-                </div>
-              </div>
-            </div>
 
-            {/* C. PANEL DUAL: TIEMPO PARA SUBIR LA MONTURA VS TIEMPO DE VACIADO DEL CARBURANTE */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Tarjeta 1: Tiempo que tarda en subir el nivel la montura */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 via-amber-50/50 to-orange-50/30 border border-amber-200 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs text-amber-900/80 mb-1">
-                    <span className="font-extrabold text-amber-900 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
-                      <Clock className="w-4 h-4 text-amber-600" />
-                      Tiempo de Subida de Nivel
+                  {/* Resumen total de unidades de la estrategia activa */}
+                  <div className="p-3.5 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm">
+                    <span className="text-slate-700 font-bold">
+                      Total de carburantes requeridos ({strategy === 'cascade' ? 'Modo Cascada' : `Manteniendo Nivel ${strategy.slice(-1)}`}):
                     </span>
-                    <span className="font-mono text-amber-800 font-bold text-[10px]">
-                      {xpNeeded.toLocaleString()} XP
+                    <span className="font-mono font-black text-[#1e3a8a] text-sm sm:text-base">
+                      {breakdown.totalItemsNeeded} {breakdown.totalItemsNeeded === 1 ? 'unidad' : 'unidades'} ({FUEL_VARIANTS[selectedVariant].name})
                     </span>
                   </div>
-
-                  <p className="text-xl sm:text-2xl font-black text-amber-800 font-mono tracking-tight mt-1">
-                    {breakdown.formattedMountTrainingTime}
-                  </p>
                 </div>
-
-                <div className="pt-2 border-t border-amber-200/60 text-[11px] text-amber-900 font-medium mt-2">
-                  {strategy === 'cascade' ? (
-                    <span>
-                      Velocidad en cascada: {isSage ? '✨ 2x por Sabia (~2.0 - 8.0 XP/s)' : '1.0 - 4.0 XP/s promedio'}
-                    </span>
-                  ) : (
-                    <span>
-                      Velocidad fija ({strategy.toUpperCase()}):{' '}
-                      <strong className="text-amber-900 font-mono">{breakdown.effectiveRatePerSec.toFixed(1)} XP/s</strong>{' '}
-                      {isSage ? '✨ (Sabia x2)' : ''}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Tarjeta 2: Tiempo de vaciado físico del carburante (Autonomía del Pesebre) */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-indigo-50/30 border border-blue-200 shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs text-blue-900/80 mb-1">
-                    <span className="font-extrabold text-[#1e3a8a] flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
-                      <Gauge className="w-4 h-4 text-blue-600" />
-                      Vaciado del Carburante
-                    </span>
-                    <span className="font-mono text-blue-800 font-bold text-[10px]">
-                      Autonomía Pesebre
-                    </span>
-                  </div>
-
-                  <p className="text-xl sm:text-2xl font-black text-[#1e3a8a] font-mono tracking-tight mt-1">
-                    {strategy === 'cascade' && xpNeeded >= MAX_ENCLOS_GAUGE
-                      ? '35 h 39 min'
-                      : breakdown.formattedFuelDrainTime}
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-blue-200/60 text-[11px] text-blue-900 font-medium mt-2">
-                  {strategy === 'cascade' ? (
-                    <span>
-                      Vaciado continuo total del medidor (200k a 0): <strong className="text-[#1e3a8a] font-mono">35 h 39 min</strong>
-                    </span>
-                  ) : (
-                    <span>
-                      Duración del tramo de pesebre antes de recargar.
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* D. COMPARATIVA POR NIVELES DE CARBURANTE Y SUS LIMITANTES */}
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
-                    Desglose por Nivel de Carburante y Velocidades
-                  </h4>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Haz clic en un nivel para fijar su ritmo o visualiza su consumo independiente.
-                  </p>
-                </div>
-
-                {/* Selector de Variante */}
-                <div className="flex flex-wrap gap-1 bg-slate-200/60 p-1 rounded-2xl border border-slate-200">
-                  {(Object.keys(FUEL_VARIANTS) as FuelVariant[]).map((v) => (
-                    <button
-                      key={v}
-                      onClick={() => setSelectedVariant(v)}
-                      className={`px-2 py-1 rounded-xl text-[11px] font-bold transition cursor-pointer ${
-                        selectedVariant === v
-                          ? 'bg-[#1e3a8a] text-white shadow-sm'
-                          : 'text-slate-700 hover:text-slate-900 hover:bg-white'
-                      }`}
-                    >
-                      {FUEL_VARIANTS[v].name} (+{FUEL_VARIANTS[v].durability / 1000}k)
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tarjetas de los 4 Niveles de Carburante con estética unificada al index */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                {breakdown.tiers.map((t) => {
-                  const stratKey: TrainingStrategy = t.tier === 4 ? 'tier4' : t.tier === 3 ? 'tier3' : t.tier === 2 ? 'tier2' : 'tier1';
-                  const isThisTierSelected = strategy === stratKey;
-
-                  return (
-                    <div
-                      key={t.tier}
-                      onClick={() => setStrategy(stratKey)}
-                      className={`p-3.5 rounded-2xl border transition cursor-pointer flex flex-col justify-between gap-2 relative shadow-sm hover:shadow-md ${
-                        isThisTierSelected
-                          ? 'bg-blue-50/70 border-2 border-[#1e3a8a] ring-2 ring-blue-500/20 text-slate-900'
-                          : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span
-                            className={`text-xs font-black px-2 py-0.5 rounded-lg border ${
-                              t.tier === 1
-                                ? 'bg-purple-100 text-purple-800 border-purple-200'
-                                : t.tier === 2
-                                ? 'bg-blue-100 text-blue-800 border-blue-200'
-                                : t.tier === 3
-                                ? 'bg-amber-100 text-amber-800 border-amber-200'
-                                : 'bg-rose-100 text-rose-800 border-rose-200'
-                            }`}
-                          >
-                            Nivel {t.tier} - {t.tierName}
-                          </span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-bold border border-slate-200">
-                            {t.rangeLabel}
-                          </span>
-                        </div>
-
-                        {/* Velocidad y Consumo */}
-                        <div className="flex items-center justify-between text-xs mt-1.5">
-                          <span className="text-slate-500 font-medium">
-                            Baja: <strong className="text-slate-800 font-mono">{t.consumptionRatePer10s} / 10s</strong> ({t.baseXpPerSec} pts/s)
-                          </span>
-                          <span className="font-mono font-black text-[#1e3a8a]">
-                            +{t.effectiveXpPerSec} XP/s {isSage ? '✨' : ''}
-                          </span>
-                        </div>
-
-                        {/* Tiempo si se mantiene fijo */}
-                        <div className="mt-1.5 p-2 rounded-xl bg-slate-50 border border-slate-200/90 flex items-center justify-between text-[11px]">
-                          <span className="text-slate-500 font-medium">Tiempo si mantienes Nvl {t.tier}:</span>
-                          <span className="font-mono font-bold text-amber-800">
-                            {t.formattedTimeIfMaintained}
-                          </span>
-                        </div>
-
-                        {/* Ítems para la estrategia activa */}
-                        <div className="mt-2 flex items-baseline justify-between">
-                          <p className="text-sm font-black text-slate-900 font-mono">
-                            {t.itemsNeeded} {t.itemsNeeded === 1 ? 'unidad' : 'unidades'}
-                          </p>
-                          <span className="text-[10px] text-slate-500 truncate max-w-[160px] font-medium" title={t.itemName}>
-                            {t.itemName}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-500 flex justify-between">
-                        <span>Vaciado del tramo: <strong className="text-slate-700">{t.drainDurationText}</strong></span>
-                        {isThisTierSelected && (
-                          <span className="text-[#1e3a8a] font-extrabold flex items-center gap-1">
-                            <Check className="w-3 h-3 stroke-[3]" /> Activo
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Resumen total de unidades de la estrategia activa */}
-              <div className="p-3.5 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm">
-                <span className="text-slate-700 font-bold">
-                  Total de carburantes requeridos ({strategy === 'cascade' ? 'Modo Cascada' : `Manteniendo Nivel ${strategy.slice(-1)}`}):
-                </span>
-                <span className="font-mono font-black text-[#1e3a8a] text-sm sm:text-base">
-                  {breakdown.totalItemsNeeded} {breakdown.totalItemsNeeded === 1 ? 'unidad' : 'unidades'} ({FUEL_VARIANTS[selectedVariant].name})
-                </span>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </div>
       </div>

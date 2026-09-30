@@ -6,18 +6,29 @@ import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
 import { VOLKORNES_DATA } from '../data/volkornes';
 import { normalizeBreedParts } from '../data/allMounts';
-import { db, initSeedDataIfEmpty } from '../db/mountsDb';
+import { db, normalizeStoredMounts } from '../db/mountsDb';
 import { MountAvatar } from './MountAvatar';
 
 export const CollectionTracker: React.FC = () => {
   const [activeSpecies, setActiveSpecies] = useState<SpeciesType>('dragopavo');
   const [selectedGen, setSelectedGen] = useState<number | 'all'>('all');
   const [userMounts, setUserMounts] = useState<UserMount[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const loadMounts = async () => {
-    await initSeedDataIfEmpty();
-    const all = await db.mounts.toArray();
-    setUserMounts(all);
+    setLoading(true);
+    setLoadError(false);
+    try {
+      await normalizeStoredMounts();
+      const all = await db.mounts.toArray();
+      setUserMounts(all);
+    } catch (err) {
+      console.error(err);
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -95,6 +106,30 @@ export const CollectionTracker: React.FC = () => {
     selectedGen === 'all'
       ? catalog
       : catalog.filter((m) => m.generation === selectedGen);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center space-y-3 max-w-lg mx-auto my-12 text-rose-900">
+        <p className="text-sm font-semibold">
+          No se pudo acceder al almacenamiento local (¿modo privado o almacenamiento bloqueado?)
+        </p>
+        <button
+          onClick={loadMounts}
+          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
@@ -203,7 +238,7 @@ export const CollectionTracker: React.FC = () => {
               <button
                 key={g}
                 onClick={() => setSelectedGen(g)}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
                   selectedGen === g
                     ? 'bg-[#1e3a8a] text-white shadow-xs'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -216,7 +251,7 @@ export const CollectionTracker: React.FC = () => {
         </div>
 
         {/* Grid de Razas adaptable (1 col en xs, 2 en sm, 3 en lg, 4 en xl) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {filteredCatalog.map((def) => {
             const matches = userMounts.filter((m) => isMountOfDef(m, def));
             const isOwned = matches.length > 0;

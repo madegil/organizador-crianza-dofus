@@ -19,7 +19,7 @@ export const db = new BreedingDatabase();
 
 const NORMALIZATION_KEY = 'dofus_breeding_normalized_v4';
 
-export async function initSeedDataIfEmpty() {
+export async function normalizeStoredMounts() {
   const count = await db.mounts.count();
   if (count === 0) {
     return;
