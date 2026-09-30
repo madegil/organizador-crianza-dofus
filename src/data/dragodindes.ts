@@ -44,7 +44,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Almendrado y Pelirrojo",
     "bonuses": [
       "400 Vitalidad",
-      "60 Curas",
+      "45 Curas",
       "1200 Iniciativa"
     ],
     "parents": [
@@ -60,7 +60,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Dorado y Pelirrojo",
     "bonuses": [
       "400 Vitalidad",
-      "1 Invocation",
+      "1 Invocación",
       "45 Curas"
     ],
     "parents": [
@@ -76,8 +76,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Almendrado y Dorado",
     "bonuses": [
       "400 Vitalidad",
-      "1 Invocation",
-      "1000 Iniciativa"
+      "1 Invocación",
+      "1200 Iniciativa"
     ],
     "parents": [
       "dd_amande",
@@ -122,7 +122,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Almendrado y Ébano",
     "bonuses": [
       "400 Vitalidad",
-      "120 Agilidad",
+      "90 Agilidad",
       "1200 Iniciativa"
     ],
     "parents": [
@@ -138,7 +138,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Almendrado e Índigo",
     "bonuses": [
       "400 Vitalidad",
-      "120 Suerte",
+      "90 Suerte",
       "1200 Iniciativa"
     ],
     "parents": [
@@ -155,7 +155,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "bonuses": [
       "400 Vitalidad",
       "90 Agilidad",
-      "1 Invocation"
+      "1 Invocación"
     ],
     "parents": [
       "dd_doree",
@@ -171,7 +171,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "bonuses": [
       "400 Vitalidad",
       "90 Suerte",
-      "1 Invocation"
+      "1 Invocación"
     ],
     "parents": [
       "dd_doree",
@@ -297,7 +297,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "bonuses": [
       "400 Vitalidad",
       "90 Fuerza",
-      "1 Invocation"
+      "1 Invocación"
     ],
     "parents": [
       "dd_doree",
@@ -313,7 +313,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "bonuses": [
       "400 Vitalidad",
       "90 Inteligencia",
-      "1 Invocation"
+      "1 Invocación"
     ],
     "parents": [
       "dd_doree",
@@ -503,7 +503,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "bonuses": [
       "400 Vitalidad",
       "70 Potencia",
-      "1 Invocation"
+      "1 Invocación"
     ],
     "parents": [
       "dd_doree",
@@ -519,7 +519,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "bonuses": [
       "400 Vitalidad",
       "70 Prospección",
-      "1 Invocation"
+      "1 Invocación"
     ],
     "parents": [
       "dd_doree",
@@ -710,7 +710,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Esmeralda",
     "bonuses": [
       "400 Vitalidad",
-      "1 PM"
+      "14% Crítico"
     ],
     "parents": [
       "dd_ivoire_turquoise",
@@ -740,7 +740,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Almendrado y Esmeralda",
     "bonuses": [
       "400 Vitalidad",
-      "1 PM",
+      "10% Crítico",
       "1200 Iniciativa"
     ],
     "parents": [
@@ -772,8 +772,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Dorado y Esmeralda",
     "bonuses": [
       "400 Vitalidad",
-      "1 PM",
-      "1 Invocation"
+      "10% Crítico",
+      "1 Invocación"
     ],
     "parents": [
       "dd_doree",
@@ -789,7 +789,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "bonuses": [
       "400 Vitalidad",
       "1 Alcance",
-      "1 Invocation"
+      "1 Invocación"
     ],
     "parents": [
       "dd_doree",
@@ -804,8 +804,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Ébano y Esmeralda",
     "bonuses": [
       "400 Vitalidad",
-      "90 Agilidad",
-      "1 PM"
+      "10% Crítico",
+      "90 Agilidad"
     ],
     "parents": [
       "dd_ebene",
@@ -836,8 +836,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Esmeralda y Púrpura",
     "bonuses": [
       "400 Vitalidad",
-      "90 Fuerza",
-      "1 PM"
+      "10% Crítico",
+      "90 Fuerza"
     ],
     "parents": [
       "dd_emeraude",
@@ -852,8 +852,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Esmeralda y Orquídeo",
     "bonuses": [
       "400 Vitalidad",
-      "90 Inteligencia",
-      "1 PM"
+      "10% Crítico",
+      "90 Inteligencia"
     ],
     "parents": [
       "dd_emeraude",
@@ -868,8 +868,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Esmeralda e Índigo",
     "bonuses": [
       "400 Vitalidad",
-      "90 Suerte",
-      "1 PM"
+      "10% Crítico",
+      "90 Suerte"
     ],
     "parents": [
       "dd_emeraude",
@@ -884,8 +884,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Esmeralda y Marfil",
     "bonuses": [
       "400 Vitalidad",
-      "70 Potencia",
-      "1 PM"
+      "10% Crítico",
+      "70 Potencia"
     ],
     "parents": [
       "dd_emeraude",
@@ -900,8 +900,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Esmeralda y Turquesa",
     "bonuses": [
       "400 Vitalidad",
-      "70 Prospección",
-      "1 PM"
+      "10% Crítico",
+      "70 Prospección"
     ],
     "parents": [
       "dd_emeraude",
@@ -916,7 +916,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Esmeralda y Pelirrojo",
     "bonuses": [
       "400 Vitalidad",
-      "1 PM",
+      "10% Crítico",
       "45 Curas"
     ],
     "parents": [
@@ -1028,7 +1028,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     "name": "Esmeralda y Ciruela",
     "bonuses": [
       "400 Vitalidad",
-      "1 PM",
+      "10% Crítico",
       "1 Alcance"
     ],
     "parents": [
