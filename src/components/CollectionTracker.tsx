@@ -1,3 +1,4 @@
+import { getDefaultMaxReproductions } from '../utils/mountRules';
 import React, { useState, useEffect } from 'react';
 import { Layers, CheckCircle2, Circle, Eye, Sparkles, Filter, Plus } from 'lucide-react';
 import type { SpeciesType, UserMount } from '../types/mount';
@@ -53,7 +54,7 @@ export const CollectionTracker: React.FC = () => {
 
   const quickRegisterMount = async (def: any) => {
     const newMount: UserMount = {
-      id: `mount_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       nickname: def.name,
       definitionId: def.id,
       species: activeSpecies,
@@ -65,7 +66,7 @@ export const CollectionTracker: React.FC = () => {
       fertility: 'fertil',
       capacity: 'ninguna',
       reproductionCount: 0,
-      maxReproductions: activeSpecies === 'dragopavo' ? 5 : activeSpecies === 'muluaga' ? 4 : 2,
+      maxReproductions: getDefaultMaxReproductions(activeSpecies),
       serenity: 2000,
       love: 20000,
       maturity: 20000,
@@ -96,13 +97,13 @@ export const CollectionTracker: React.FC = () => {
       : catalog.filter((m) => m.generation === selectedGen);
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
-      <div className="bg-[#f8fafc] text-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 p-3.5 sm:p-5 md:p-6 shadow-xl space-y-4 sm:space-y-6">
-        {/* Cabecera y Selector de Especies */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3 sm:pb-4">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
-              <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
+    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+      {/* Encabezado */}
+      <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-100 flex-shrink-0">
+              <Layers className="w-5 h-5" />
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
@@ -114,42 +115,33 @@ export const CollectionTracker: React.FC = () => {
             </div>
           </div>
 
-          {/* Selector de Especie simétrico en mobile */}
-          <div className="grid grid-cols-3 w-full sm:w-auto sm:flex gap-1 bg-slate-200/60 p-1 rounded-xl border border-slate-200">
+          {/* Selector de Especie */}
+          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
             <button
-              onClick={() => {
-                setActiveSpecies('dragopavo');
-                setSelectedGen('all');
-              }}
-              className={`py-1.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold transition cursor-pointer text-center ${
+              onClick={() => setActiveSpecies('dragopavo')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 activeSpecies === 'dragopavo'
-                  ? 'bg-[#1e3a8a] text-white shadow-sm font-extrabold'
+                  ? 'bg-[#1e3a8a] text-white shadow-xs'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               🐴 Dragopavos ({DRAGODINDES_DATA.length})
             </button>
             <button
-              onClick={() => {
-                setActiveSpecies('muluaga');
-                setSelectedGen('all');
-              }}
-              className={`py-1.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold transition cursor-pointer text-center ${
+              onClick={() => setActiveSpecies('muluaga')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 activeSpecies === 'muluaga'
-                  ? 'bg-[#1e3a8a] text-white shadow-sm font-extrabold'
+                  ? 'bg-[#1e3a8a] text-white shadow-xs'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               🐟 Mulaguas ({MULDOS_DATA.length})
             </button>
             <button
-              onClick={() => {
-                setActiveSpecies('vueloceronte');
-                setSelectedGen('all');
-              }}
-              className={`py-1.5 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-bold transition cursor-pointer text-center ${
+              onClick={() => setActiveSpecies('vueloceronte')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 activeSpecies === 'vueloceronte'
-                  ? 'bg-[#1e3a8a] text-white shadow-sm font-extrabold'
+                  ? 'bg-[#1e3a8a] text-white shadow-xs'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -159,65 +151,55 @@ export const CollectionTracker: React.FC = () => {
         </div>
 
         {/* Barras de Progreso Globales */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-            <div className="flex justify-between items-center text-xs font-bold">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-5 pt-5 border-t border-slate-100">
+          <div>
+            <div className="flex justify-between text-xs font-bold mb-1.5">
               <span className="text-slate-700">Razas Obtenidas</span>
-              <span className="text-[#1e3a8a] font-mono font-extrabold">
+              <span className="text-[#1e3a8a] font-mono">
                 {ownedBreedsCount} / {totalSpeciesBreeds} ({percentageOwned}%)
               </span>
             </div>
-            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
+            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#1e3a8a] rounded-full transition-all duration-300"
+                className="h-full bg-[#1e3a8a] rounded-full transition-all"
                 style={{ width: `${percentageOwned}%` }}
               />
             </div>
           </div>
 
-          <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-            <div className="flex justify-between items-center text-xs font-bold">
+          <div>
+            <div className="flex justify-between text-xs font-bold mb-1.5">
               <span className="text-slate-700">Meta Nivel 200 (867.582 XP)</span>
-              <span className="text-emerald-700 font-mono font-extrabold">
+              <span className="text-emerald-700 font-mono">
                 {level200BreedsCount} / {totalSpeciesBreeds} ({percentage200}%)
               </span>
             </div>
-            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden border border-slate-200">
+            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
               <div
-                className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+                className="h-full bg-emerald-600 rounded-full transition-all"
                 style={{ width: `${percentage200}%` }}
               />
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Filtro por Generación con scroll horizontal amigable en móvil */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-xs space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-slate-400" /> Filtrar por Generación:
-            </span>
-            {selectedGen !== 'all' && (
-              <button
-                onClick={() => setSelectedGen('all')}
-                className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
-              >
-                Ver todas ({catalog.length})
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
-            <button
-              onClick={() => setSelectedGen('all')}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
-                selectedGen === 'all'
-                  ? 'bg-[#1e3a8a] text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              Todas
-            </button>
-            {generations.map((g) => (
+      {/* Grid por Generaciones */}
+      <div className="space-y-4 sm:space-y-6">
+        {/* Filtro por Generación */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={() => setSelectedGen('all')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
+              selectedGen === 'all'
+                ? 'bg-[#1e3a8a] text-white shadow-xs'
+                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Todas las Generaciones
+          </button>
+          {generations.map((g) => {
+            return (
               <button
                 key={g}
                 onClick={() => setSelectedGen(g)}
@@ -227,10 +209,10 @@ export const CollectionTracker: React.FC = () => {
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                Gen {g}
+                G{g}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
         {/* Grid de Razas adaptable (1 col en xs, 2 en sm, 3 en lg, 4 en xl) */}

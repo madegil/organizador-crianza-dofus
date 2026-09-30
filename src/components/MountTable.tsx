@@ -1,3 +1,4 @@
+import { getDefaultMaxReproductions } from '../utils/mountRules';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   FolderUp,
@@ -22,6 +23,7 @@ import {
   exportMountsToExcel,
   exportMountsToJson,
   parseExcelFile,
+  parseBackupFile,
 } from '../utils/excelHelper';
 import { db } from '../db/mountsDb';
 import { ALL_MOUNTS_DATA, getMountsBySpecies } from '../data/allMounts';
@@ -88,7 +90,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
-  // Importar Excel / CSV
+  // Importar Excel / CSV / JSON
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -97,11 +99,59 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
     setStatusMessage(null);
 
     try {
+      const isJson = file.name.toLowerCase().endsWith('.json');
+
+      if (isJson) {
+        const { mounts: backupMounts, invalid } = await parseBackupFile(file);
+        const currentIds = new Set(mounts.map((m) => m.id));
+        const existingCount = backupMounts.filter((m) => currentIds.has(m.id)).length;
+
+        if (existingCount > 0) {
+          const confirmed = window.confirm(
+            `Se restaurarán ${backupMounts.length} monturas; las que ya existen con el mismo id se sobrescribirán. ¿Continuar?`
+          );
+          if (!confirmed) {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+          }
+        }
+
+        await db.mounts.bulkPut(backupMounts);
+        setStatusMessage({
+          type: 'success',
+          text: `Se importaron ${backupMounts.length} monturas, 0 omitidas por duplicadas y ${invalid} inválidas.`,
+        });
+        onDataChanged();
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+
+      // Si es hoja de cálculo (.xlsx, .xls, .csv)
       const parsedMounts = await parseExcelFile(file);
-      await db.mounts.bulkPut(parsedMounts);
+
+      const getFingerprint = (m: { nickname: string; species: string; breed: string; generation: number; gender: string }) =>
+        `${m.nickname}|${m.species}|${m.breed}|${m.generation}|${m.gender}`.toLowerCase();
+
+      const currentFingerprints = new Set(mounts.map(getFingerprint));
+      const duplicates = parsedMounts.filter((m) => currentFingerprints.has(getFingerprint(m)));
+      let toImport = parsedMounts;
+      let duplicatesOmitted = 0;
+
+      if (duplicates.length > 0) {
+        const importOnlyNew = window.confirm(
+          `${duplicates.length} de ${parsedMounts.length} filas parecen ya existir. Aceptar = importar solo las nuevas; Cancelar = importar todas.`
+        );
+        if (importOnlyNew) {
+          toImport = parsedMounts.filter((m) => !currentFingerprints.has(getFingerprint(m)));
+          duplicatesOmitted = duplicates.length;
+        }
+      }
+
+      await db.mounts.bulkPut(toImport);
       setStatusMessage({
         type: 'success',
-        text: `¡Se importaron ${parsedMounts.length} monturas correctamente!`,
+        text: `Se importaron ${toImport.length} monturas, ${duplicatesOmitted} omitidas por duplicadas y 0 inválidas.`,
       });
       onDataChanged();
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -112,6 +162,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       });
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -200,7 +253,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
     if (!editingMount || !editingMount.breed) return;
 
     const breedDef = ALL_MOUNTS_DATA.find(
-      (m) => m.name.toLowerCase() === editingMount.breed?.toLowerCase() && m.species === editingMount.species
+      (d) => d.name === editingMount.breed && d.species === editingMount.species
     );
 
     const isEsterilOrSenil = editingMount.fertility === 'esteril' || editingMount.fertility === 'senil';
@@ -209,16 +262,18 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
     const currentLevel = Math.min(200, Math.max(1, toNum(editingMount.currentLevel) || calculateLevelFromXp(currentXp)));
 
     const isNew = !editingMount.id;
-    const defaultMaxRepro =
-      editingMount.species === 'dragopavo'
-        ? 5
-        : editingMount.species === 'muluaga'
-        ? 4
-        : 2;
+    const defaultMaxRepro = getDefaultMaxReproductions(editingMount.species);
 
-    const toSave: UserMount = {
-      id: editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      nickname: editingMount.nickname || 'Sin Nombre',
+    const isSample = typeof editingMount.id === 'string' && editingMount.id.startsWith('sample-');
+    const oldId = editingMount.id;
+    const newId = isSample
+      ? `mount_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
+      : (editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+
+    const mountData: UserMount = {
+      ...editingMount,
+      id: newId,
+      nickname: (editingMount.nickname?.trim()) || editingMount.breed,
       definitionId: breedDef ? breedDef.id : `${editingMount.species}_custom`,
       species: editingMount.species as SpeciesType,
       breed: editingMount.breed,
@@ -240,7 +295,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       updatedAt: Date.now(),
     };
 
-    await db.mounts.put(toSave);
+    if (isSample && oldId) {
+      await db.transaction('rw', db.mounts, async () => {
+        await db.mounts.delete(oldId);
+        await db.mounts.put(mountData);
+      });
+    } else {
+      await db.mounts.put(mountData);
+    }
     setIsEditModalOpen(false);
     setEditingMount(null);
     onDataChanged();
@@ -248,9 +310,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
   const handleOpenNewMountModal = () => {
     const defaultSpecies: SpeciesType = 'dragopavo';
-    const speciesMounts = getMountsBySpecies(defaultSpecies);
-    const first = speciesMounts[0];
-
+    const first = ALL_MOUNTS_DATA.find((m) => m.species === defaultSpecies);
     setEditingMount({
       species: defaultSpecies,
       breed: first?.name || 'Pelirroja',
@@ -280,27 +340,31 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       <div className="space-y-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
           {/* Botón Seleccionar Archivo */}
-          <label className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept=".xlsx,.xls,.csv"
-              className="hidden"
-              disabled={isUploading}
-            />
-            {isUploading ? (
-              <RefreshCw className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />
-            ) : (
-              <FolderUp className="w-5 h-5 text-[#1e3a8a] flex-shrink-0" />
-            )}
-            <span>Seleccionar archivo</span>
-          </label>
+          <div className="flex flex-col gap-1">
+            <label className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                accept=".xlsx,.xls,.csv,.json"
+                className="sr-only"
+              />
+              {isUploading ? (
+                <RefreshCw className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />
+              ) : (
+                <FolderUp className="w-5 h-5 text-[#1e3a8a] flex-shrink-0" />
+              )}
+              <span>Seleccionar archivo</span>
+            </label>
+            <p className="text-[11px] text-slate-500 text-center">
+              Acepta .xlsx, .xls, .csv y backup .json
+            </p>
+          </div>
 
           {/* Botón Descargar Plantilla CSV */}
           <button
             onClick={downloadCsvTemplate}
-            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20 cursor-pointer"
+            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
             title="Descargar plantilla CSV (.csv) universal para Google Sheets y Excel"
           >
             <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />

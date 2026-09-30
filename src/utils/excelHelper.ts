@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx';
 import type { UserMount, SpeciesType, FertilityStatus, SpecialCapacity } from '../types/mount';
 import { ALL_MOUNTS_DATA, findMountByBreedAndSpecies } from '../data/allMounts';
-import { calculateLevelFromXp, calculateXpForLevel } from '../data/fuelData';
+import { calculateLevelFromXp, calculateXpForLevel, MAX_MOUNT_XP } from '../data/fuelData';
+import { sanitizeMount, getDefaultMaxReproductions } from './mountRules';
 
 export const CSV_TEMPLATE_COLUMNS = [
   'Nombre de la montura',
@@ -73,17 +74,18 @@ export function downloadExcelTemplate() {
     { wch: 14 }, // Madurez
     { wch: 14 }, // Resistencia
   ];
+
   XLSX.utils.book_append_sheet(wb, ws1, 'Registro_Monturas');
 
   const guideHeaders = ['Columna', 'Valores Aceptados', 'Reglas y Consejos'];
   const guideRows = [
     ['Nombre de la montura', 'Texto libre (ej. AquaDrak, Rayito)', 'Apodo personalizado de tu montura'],
     ['Especie', 'Dragopavo, Mulagua, Vueloceronte', 'Especie oficial de la montura'],
-    ['Color / Raza', 'Cualquier color oficial (ej. Almendrado, Marfil)', 'Revisa la hoja "Catalogo_Razas" para la lista completa'],
+    ['Color / Raza', 'Cualquier color oficial (ej. Almendrada, Marfil)', 'Revisa la hoja "Catalogo_Razas" para la lista completa'],
     ['Generación', '1 al 10', 'Número de generación correspondiente a la raza'],
     ['Sexo', 'Macho, Hembra (o M, F)', 'Sexo de la montura'],
     ['Nivel de la montura', '1 al 200', 'Nivel actual en el juego (si se omite, se calcula con la XP)'],
-    ['XP de la montura', '0 a 867582', 'Puntos de experiencia acumulados (867582 = Nivel 200)'],
+    ['XP de la montura', `0 a ${MAX_MOUNT_XP}`, `Puntos de experiencia acumulados (${MAX_MOUNT_XP} = Nivel 200)`],
     ['Fertilidad', 'Fertil, Fecunda, Esteril, Senil', 'Estado de fecundidad actual'],
     ['Capacidad', 'Ninguna, Sabia, Enamoradiza, Resistente, Precoz, Reproductora, Camaleón', 'Capacidad genética especial'],
     ['Serenidad', '-10000 a 10000', 'Negativo = Machos/Resistencia; Positivo = Hembras/Amor'],
@@ -119,7 +121,7 @@ export function exportMountsToExcel(mounts: UserMount[]) {
     'Color / Raza': m.breed,
     Generación: m.generation,
     Sexo: m.gender === 'M' ? 'Macho' : 'Hembra',
-    'Nivel de la montura': m.currentXp >= 867582 ? 200 : (m.currentLevel || calculateLevelFromXp(m.currentXp)),
+    'Nivel de la montura': m.currentXp >= MAX_MOUNT_XP ? 200 : (m.currentLevel || calculateLevelFromXp(m.currentXp)),
     'XP de la montura': m.currentXp,
     Fertilidad:
       m.fertility === 'fertil'
@@ -135,6 +137,8 @@ export function exportMountsToExcel(mounts: UserMount[]) {
     Madurez: m.maturity,
     Resistencia: m.stamina,
     'Notas / Observaciones': m.notes || '',
+    Reproducciones: m.reproductionCount ?? 0,
+    'Máx. reproducciones': m.maxReproductions ?? getDefaultMaxReproductions(m.species),
   }));
 
   const ws = XLSX.utils.json_to_sheet(rows);
@@ -152,6 +156,54 @@ export function exportMountsToJson(mounts: UserMount[]) {
   a.download = `backup_monturas_${new Date().toISOString().split('T')[0]}.json`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Lee y valida un archivo de copia de seguridad JSON (.json).
+ * Acepta un array directo o un objeto con la propiedad { mounts: [...] }.
+ */
+export async function parseBackupFile(file: File): Promise<{ mounts: UserMount[]; invalid: number }> {
+  let text: string;
+  try {
+    text = await file.text();
+  } catch {
+    throw new Error('No se pudo leer el archivo de copia de seguridad.');
+  }
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error('El archivo no es un JSON válido');
+  }
+
+  const rawList: any[] = Array.isArray(parsed)
+    ? parsed
+    : (parsed && Array.isArray(parsed.mounts))
+    ? parsed.mounts
+    : [];
+
+  if (!Array.isArray(rawList) || rawList.length === 0) {
+    throw new Error('El archivo no contiene ninguna montura.');
+  }
+
+  const mounts: UserMount[] = [];
+  let invalid = 0;
+
+  for (const item of rawList) {
+    const sanitized = sanitizeMount(item);
+    if (sanitized) {
+      mounts.push(sanitized);
+    } else {
+      invalid++;
+    }
+  }
+
+  if (mounts.length === 0) {
+    throw new Error('No se encontró ninguna montura válida en el archivo.');
+  }
+
+  return { mounts, invalid };
 }
 
 export async function parseExcelFile(file: File): Promise<UserMount[]> {
@@ -198,10 +250,10 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     const gender: 'M' | 'F' = rawGender.startsWith('F') || rawGender.startsWith('H') ? 'F' : 'M';
 
     let currentLevel = Math.min(200, Math.max(1, Number(row[5]) || 1));
-    let currentXp = Math.min(867582, Math.max(0, Number(row[6]) || 0));
+    let currentXp = Math.min(MAX_MOUNT_XP, Math.max(0, Number(row[6]) || 0));
 
     // Sincronizar nivel y XP automáticamente
-    if (currentXp >= 867582) {
+    if (currentXp >= MAX_MOUNT_XP) {
       currentLevel = 200;
     } else if (currentXp > 0) {
       currentLevel = calculateLevelFromXp(currentXp);
@@ -225,11 +277,19 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     else if (rawCapacity.includes('camele') || rawCapacity.includes('camale')) capacity = 'camaleon';
 
     const isEsterilOrSenil = fertility === 'esteril' || fertility === 'senil';
-    const serenity = isEsterilOrSenil ? 0 : (Number(row[9]) || 0);
+    const serenity = isEsterilOrSenil ? 0 : Math.min(10000, Math.max(-10000, Number(row[9]) || 0));
     const love = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(row[10]) || 0));
     const maturity = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(row[11]) || 0));
     const stamina = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(row[12]) || 0));
     const notes = row[13] ? String(row[13]).trim() : '';
+
+    // Columnas opcionales row[14] (reproductionCount) y row[15] (maxReproductions)
+    const rawRepro = Number(row[14]);
+    const reproductionCount = !isNaN(rawRepro) && rawRepro >= 0 ? Math.floor(rawRepro) : 0;
+
+    const defaultMax = getDefaultMaxReproductions(species);
+    const rawMaxRepro = Number(row[15]);
+    const maxReproductions = !isNaN(rawMaxRepro) && rawMaxRepro > 0 ? Math.floor(rawMaxRepro) : defaultMax;
 
     parsedMounts.push({
       id: `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -243,6 +303,8 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
       currentXp,
       fertility,
       capacity,
+      reproductionCount,
+      maxReproductions,
       serenity,
       love,
       maturity,
