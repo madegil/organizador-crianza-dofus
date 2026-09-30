@@ -81,7 +81,7 @@ export function downloadExcelTemplate() {
   const guideRows = [
     ['Nombre de la montura', 'Texto libre (ej. AquaDrak, Rayito)', 'Apodo personalizado de tu montura'],
     ['Especie', 'Dragopavo, Mulagua, Vueloceronte', 'Especie oficial de la montura'],
-    ['Color / Raza', 'Cualquier color oficial (ej. Almendrada, Marfil)', 'Revisa la hoja "Catalogo_Razas" para la lista completa'],
+    ['Color / Raza', 'Cualquier color oficial (ej. Almendrado, Marfil)', 'Revisa la hoja "Catalogo_Razas" para la lista completa'],
     ['Generación', '1 al 10', 'Número de generación correspondiente a la raza'],
     ['Sexo', 'Macho, Hembra (o M, F)', 'Sexo de la montura'],
     ['Nivel de la montura', '1 al 200', 'Nivel actual en el juego (si se omite, se calcula con la XP)'],

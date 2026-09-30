@@ -140,18 +140,34 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
       if (duplicates.length > 0) {
         const importOnlyNew = window.confirm(
-          `${duplicates.length} de ${parsedMounts.length} filas parecen ya existir. Aceptar = importar solo las nuevas; Cancelar = importar todas.`
+          `${duplicates.length} de ${parsedMounts.length} filas parecen ya existir. ¿Importar solo las nuevas?`
         );
         if (importOnlyNew) {
           toImport = parsedMounts.filter((m) => !currentFingerprints.has(getFingerprint(m)));
           duplicatesOmitted = duplicates.length;
+        } else {
+          const importAll = window.confirm(
+            '¿Importar todas de todos modos? Se crearán duplicados.'
+          );
+          if (importAll) {
+            toImport = parsedMounts;
+            duplicatesOmitted = 0;
+          } else {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            setStatusMessage({
+              type: 'error',
+              text: 'Importación cancelada',
+            });
+            return;
+          }
         }
       }
 
       await db.mounts.bulkPut(toImport);
       setStatusMessage({
         type: 'success',
-        text: `Se importaron ${toImport.length} monturas, ${duplicatesOmitted} omitidas por duplicadas y 0 inválidas.`,
+        text: `Se importaron ${toImport.length} monturas, ${duplicatesOmitted} omitidas por duplicadas.`,
       });
       onDataChanged();
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -237,7 +253,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, speciesFilter, fertilityFilter, genderFilter, genFilter, capacityFilter]);
+  }, [searchTerm, speciesFilter, fertilityFilter, genderFilter, genFilter, capacityFilter, sortField, sortDirection]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const handleSort = (field: keyof UserMount | 'name') => {
     if (sortField === field) {
@@ -664,11 +686,20 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                         <div className="flex items-center gap-2.5">
                           <div className="relative w-9 h-9 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-400 text-xs flex-shrink-0 overflow-hidden">
                             {mount.imageUrl ? (
-                              <img
-                                src={mount.imageUrl}
-                                alt={mount.breed}
-                                className="w-full h-full object-contain p-0.5"
-                              />
+                              <>
+                                <img
+                                  src={mount.imageUrl}
+                                  alt=""
+                                  loading="lazy"
+                                  className="w-full h-full object-contain p-0.5"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                    if (fallback) fallback.style.display = 'inline';
+                                  }}
+                                />
+                                <span style={{ display: 'none' }}>🐴</span>
+                              </>
                             ) : (
                               <span>🐴</span>
                             )}
@@ -679,6 +710,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                                 {mount.nickname}
                               </span>
                               <span
+                                aria-label={mount.gender === 'M' ? 'Macho' : 'Hembra'}
                                 className={`text-[10px] font-bold ${
                                   mount.gender === 'M' ? 'text-blue-600' : 'text-rose-500'
                                 }`}
