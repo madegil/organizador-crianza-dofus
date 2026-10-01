@@ -171,7 +171,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
       {/* Indicador de Generación si está disponible */}
       {generation && (
         <span
-          className="absolute -bottom-1 -right-1 bg-slate-900 text-amber-300 font-bold border border-slate-700 rounded-md px-1 py-0.2 text-[9px] shadow-sm leading-tight z-20"
+          className="absolute -bottom-1 -right-1 bg-slate-900 text-amber-300 font-bold border border-slate-700 rounded-md px-1 text-[9px] shadow-sm leading-tight z-20"
           title={`Generación ${generation}`}
         >
           G{generation}

@@ -74,7 +74,7 @@ export function sanitizeMount(raw: unknown): UserMount | null {
     ? r.definitionId.trim()
     : `${species}_custom`;
   const generation = genNum || (matchedDef ? matchedDef.generation : 1);
-  const imageUrl = matchedDef?.imageUrl || (typeof r.imageUrl === 'string' ? r.imageUrl : '');
+  const imageUrl = matchedDef?.imageUrl || (typeof r.imageUrl === 'string' && r.imageUrl.startsWith('https://') ? r.imageUrl : '');
 
   // id (conserva si es string no vacío, si no genera uno)
   const id =
@@ -86,13 +86,20 @@ export function sanitizeMount(raw: unknown): UserMount | null {
   const rawGender = String(r.gender || 'M').toUpperCase().trim();
   const gender: 'M' | 'F' = rawGender.startsWith('F') || rawGender.startsWith('H') ? 'F' : 'M';
 
-  // fertility y capacity solo valores válidos (si no, 'fertil' / 'ninguna')
-  const cleanFert = String(r.fertility || '').toLowerCase().trim();
+  // fertility y capacity normalizados (trim, minúsculas, sin tildes)
+  const normalizeText = (text: unknown): string =>
+    String(text || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '');
+
+  const cleanFert = normalizeText(r.fertility);
   const fertility: FertilityStatus = VALID_FERTILITIES.includes(cleanFert as FertilityStatus)
     ? (cleanFert as FertilityStatus)
     : 'fertil';
 
-  const cleanCap = String(r.capacity || '').toLowerCase().trim();
+  const cleanCap = normalizeText(r.capacity);
   const capacity: SpecialCapacity = VALID_CAPACITIES.includes(cleanCap as SpecialCapacity)
     ? (cleanCap as SpecialCapacity)
     : 'ninguna';

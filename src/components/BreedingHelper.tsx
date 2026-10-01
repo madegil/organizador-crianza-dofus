@@ -49,8 +49,10 @@ export const BreedingHelper: React.FC = () => {
               Catálogo Completo de Cruces ({catalog.length} Razas)
             </h2>
             {/* Pestañas simétricas en mobile, compactas en desktop */}
-            <div className="grid grid-cols-3 w-full sm:w-auto sm:flex gap-1 bg-slate-200/60 p-1 rounded-xl border border-slate-200">
+            <div role="group" aria-label="Especie" className="grid grid-cols-3 w-full sm:w-auto sm:flex gap-1 bg-slate-200/60 p-1 rounded-xl border border-slate-200">
               <button
+                type="button"
+                aria-pressed={species === 'dragopavo'}
                 onClick={() => setSpecies('dragopavo')}
                 className={`py-1.5 px-2 sm:px-3.5 rounded-lg text-[11px] sm:text-xs font-bold transition text-center cursor-pointer ${
                   species === 'dragopavo'
@@ -61,6 +63,8 @@ export const BreedingHelper: React.FC = () => {
                 Dragopavos
               </button>
               <button
+                type="button"
+                aria-pressed={species === 'muluaga'}
                 onClick={() => setSpecies('muluaga')}
                 className={`py-1.5 px-2 sm:px-3.5 rounded-lg text-[11px] sm:text-xs font-bold transition text-center cursor-pointer ${
                   species === 'muluaga'
@@ -71,6 +75,8 @@ export const BreedingHelper: React.FC = () => {
                 Mulaguas
               </button>
               <button
+                type="button"
+                aria-pressed={species === 'vueloceronte'}
                 onClick={() => setSpecies('vueloceronte')}
                 className={`py-1.5 px-2 sm:px-3.5 rounded-lg text-[11px] sm:text-xs font-bold transition text-center cursor-pointer ${
                   species === 'vueloceronte'
@@ -88,7 +94,7 @@ export const BreedingHelper: React.FC = () => {
             {catalog.map((m) => (
               <div
                 key={m.id}
-                className="p-3 sm:p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200 hover:border-slate-300 hover:bg-white transition space-y-2.5 shadow-xs hover:shadow-md flex flex-col justify-between"
+                className="p-3 sm:p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200 hover:border-slate-300 hover:bg-white transition space-y-2.5 hover:shadow-md flex flex-col justify-between"
               >
                 <div className="space-y-2">
                   <div className="flex items-center gap-2.5">
@@ -104,7 +110,7 @@ export const BreedingHelper: React.FC = () => {
                         <span className="font-extrabold text-xs text-slate-900 truncate">
                           {m.name}
                         </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 font-bold border border-slate-300/60 flex-shrink-0">
+                        <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 font-bold border border-slate-300/60 flex-shrink-0">
                           G{m.generation}
                         </span>
                       </div>
@@ -113,15 +119,15 @@ export const BreedingHelper: React.FC = () => {
 
                   {m.parents && (
                     <div className="p-2 bg-blue-50/90 border border-blue-200/80 rounded-xl text-blue-950 space-y-1">
-                      <span className="font-semibold text-slate-500 block text-[10px] uppercase tracking-wider">
+                      <span className="font-semibold text-slate-500 block text-[11px] uppercase tracking-wider">
                         Cruce requerido:
                       </span>
                       <div className="flex flex-wrap items-center gap-1 text-[11px]">
-                        <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200 shadow-2xs">
+                        <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">
                           {getParentName(m.parents[0])}
                         </span>
-                        <span className="text-slate-400 font-bold">×</span>
-                        <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200 shadow-2xs">
+                        <span className="text-slate-600 font-bold">×</span>
+                        <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">
                           {getParentName(m.parents[1])}
                         </span>
                       </div>
@@ -129,7 +135,7 @@ export const BreedingHelper: React.FC = () => {
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-slate-200/60 text-[10px] text-slate-500 space-y-0.5 font-medium">
+                <div className="pt-2 border-t border-slate-200/60 text-[11px] text-slate-500 space-y-0.5 font-medium">
                   {m.bonuses.map((b, idx) => (
                     <p key={idx} className="truncate">• {b}</p>
                   ))}

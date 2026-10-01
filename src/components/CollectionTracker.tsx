@@ -158,7 +158,7 @@ export const CollectionTracker: React.FC = () => {
               onClick={() => setActiveSpecies('dragopavo')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 activeSpecies === 'dragopavo'
-                  ? 'bg-[#1e3a8a] text-white shadow-xs'
+                  ? 'bg-[#1e3a8a] text-white'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -168,7 +168,7 @@ export const CollectionTracker: React.FC = () => {
               onClick={() => setActiveSpecies('muluaga')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 activeSpecies === 'muluaga'
-                  ? 'bg-[#1e3a8a] text-white shadow-xs'
+                  ? 'bg-[#1e3a8a] text-white'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -178,7 +178,7 @@ export const CollectionTracker: React.FC = () => {
               onClick={() => setActiveSpecies('vueloceronte')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 activeSpecies === 'vueloceronte'
-                  ? 'bg-[#1e3a8a] text-white shadow-xs'
+                  ? 'bg-[#1e3a8a] text-white'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -229,7 +229,7 @@ export const CollectionTracker: React.FC = () => {
             onClick={() => setSelectedGen('all')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
               selectedGen === 'all'
-                ? 'bg-[#1e3a8a] text-white shadow-xs'
+                ? 'bg-[#1e3a8a] text-white'
                 : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
           >
@@ -242,7 +242,7 @@ export const CollectionTracker: React.FC = () => {
                 onClick={() => setSelectedGen(g)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
                   selectedGen === g
-                    ? 'bg-[#1e3a8a] text-white shadow-xs'
+                    ? 'bg-[#1e3a8a] text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -266,10 +266,10 @@ export const CollectionTracker: React.FC = () => {
                 key={def.id}
                 className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex flex-col justify-between space-y-2.5 ${
                   hasLvl200
-                    ? 'bg-emerald-50/50 border-emerald-300/80 shadow-xs'
+                    ? 'bg-emerald-50/50 border-emerald-300/80'
                     : isOwned
-                    ? 'bg-blue-50/40 border-blue-200 shadow-xs'
-                    : 'bg-white border-slate-200/90 shadow-2xs hover:border-slate-300'
+                    ? 'bg-blue-50/40 border-blue-200'
+                    : 'bg-white border-slate-200/90 hover:border-slate-300'
                 }`}
               >
                 {/* Cabecera de la Tarjeta */}
