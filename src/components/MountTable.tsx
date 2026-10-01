@@ -1,5 +1,5 @@
 import { getDefaultMaxReproductions } from '../utils/mountRules';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import {
   FolderUp,
   Download,
@@ -66,6 +66,28 @@ interface MountTableProps {
 
 export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+  const lastActiveElementRef = useRef<HTMLElement | null>(null);
+  const firstFieldRef = useRef<HTMLSelectElement | null>(null);
+
+  const fileInputId = useId();
+  const searchInputId = useId();
+  const modalTitleId = useId();
+  const speciesId = useId();
+  const breedId = useId();
+  const nicknameId = useId();
+  const genderLabelId = useId();
+  const genderMachoId = useId();
+  const levelId = useId();
+  const xpId = useId();
+  const fertilityId = useId();
+  const capacityId = useId();
+  const serenityId = useId();
+  const loveId = useId();
+  const maturityId = useId();
+  const staminaId = useId();
+  const notesId = useId();
+
   const [isUploading, setIsUploading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -89,6 +111,57 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const [editingMount, setEditingMount] = useState<MountDraft | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const getAriaSort = (field: keyof UserMount | 'name'): 'ascending' | 'descending' | 'none' => {
+    if (sortField === field) {
+      return sortDirection === 'asc' ? 'ascending' : 'descending';
+    }
+    return 'none';
+  };
+
+  // Accesibilidad Modal: Foco al primer campo al abrir y devolverlo al botón que lo abrió
+  useEffect(() => {
+    if (isEditModalOpen) {
+      firstFieldRef.current?.focus();
+    } else if (lastActiveElementRef.current) {
+      lastActiveElementRef.current.focus();
+      lastActiveElementRef.current = null;
+    }
+  }, [isEditModalOpen]);
+
+  // Accesibilidad Modal: Cerrar con Escape
+  useEffect(() => {
+    if (!isEditModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsEditModalOpen(false);
+        setEditingMount(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditModalOpen]);
+
+  // Accesibilidad Menú Exportar: Cerrar con Escape y al hacer clic fuera
+  useEffect(() => {
+    if (!showExportMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showExportMenu]);
 
   // Importar Excel / CSV / JSON
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -358,7 +431,10 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
     }
   };
 
-  const handleOpenNewMountModal = () => {
+  const handleOpenNewMountModal = (triggerEl?: HTMLElement) => {
+    if (triggerEl) {
+      lastActiveElementRef.current = triggerEl;
+    }
     const defaultSpecies: SpeciesType = 'dragopavo';
     const first = ALL_MOUNTS_DATA.find((m) => m.species === defaultSpecies);
     setEditingMount({
@@ -391,8 +467,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
           {/* Botón Seleccionar Archivo */}
           <div className="flex flex-col gap-1">
-            <label className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
+            <label htmlFor={fileInputId} className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
               <input
+                id={fileInputId}
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileUpload}
@@ -436,32 +513,39 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             )}
           </div>
 
-          <div className="relative">
+          <div ref={exportMenuRef} className="relative">
             <button
+              type="button"
               onClick={() => setShowExportMenu(!showExportMenu)}
+              aria-expanded={showExportMenu}
+              aria-haspopup="menu"
               className="font-bold text-[#1e3a8a] hover:underline flex items-center gap-1 cursor-pointer"
             >
               Exportar datos
             </button>
 
             {showExportMenu && (
-              <div className="absolute right-0 bottom-full mb-2 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 w-44 z-30">
+              <div role="menu" className="absolute right-0 bottom-full mb-2 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 w-44 z-30">
                 <button
+                  type="button"
+                  role="menuitem"
                   onClick={() => {
                     exportMountsToExcel(mounts);
                     setShowExportMenu(false);
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 flex items-center gap-2 font-medium"
+                  className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 flex items-center gap-2 font-medium cursor-pointer"
                 >
                   <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
                   <span>Excel (.xlsx)</span>
                 </button>
                 <button
+                  type="button"
+                  role="menuitem"
                   onClick={() => {
                     exportMountsToJson(mounts);
                     setShowExportMenu(false);
                   }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 flex items-center gap-2 font-medium"
+                  className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 flex items-center gap-2 font-medium cursor-pointer"
                 >
                   <FileJson className="w-4 h-4 text-blue-600" />
                   <span>JSON (.json)</span>
@@ -473,6 +557,8 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
         {statusMessage && (
           <div
+            role={statusMessage.type === 'error' ? 'alert' : 'status'}
+            aria-live="polite"
             className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between ${
               statusMessage.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
@@ -480,7 +566,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             }`}
           >
             <span>{statusMessage.text}</span>
-            <button onClick={() => setStatusMessage(null)}>
+            <button type="button" onClick={() => setStatusMessage(null)} aria-label="Cerrar">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -493,17 +579,20 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
+            id={searchInputId}
             type="text"
+            aria-label="Buscar por apodo, color, raza o notas"
             placeholder="Buscar por apodo, color, raza o notas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium shadow-xs"
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium shadow-sm"
           />
         </div>
 
         {/* Botón Añadir Montura */}
         <button
-          onClick={handleOpenNewMountModal}
+          type="button"
+          onClick={(e) => handleOpenNewMountModal(e.currentTarget)}
           className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1e3a8a] hover:bg-[#172554] text-white rounded-2xl text-xs font-extrabold transition shadow-sm cursor-pointer flex-shrink-0"
         >
           <Plus className="w-4 h-4" />
@@ -512,7 +601,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       </div>
 
       {/* 3. BARRA DE FILTROS */}
-      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/90 shadow-xs space-y-2.5">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/90 shadow-sm space-y-2.5">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
             <Filter className="w-3.5 h-3.5 text-slate-400" /> Filtros Activos:
@@ -524,6 +613,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             capacityFilter !== 'all' ||
             searchTerm !== '') && (
             <button
+              type="button"
               onClick={() => {
                 setSpeciesFilter('all');
                 setFertilityFilter('all');
@@ -542,11 +632,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
           {/* Especie */}
           <select
+            aria-label="Filtrar por especie"
             value={speciesFilter}
-            onChange={(e) => {
-              setSpeciesFilter(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setSpeciesFilter(e.target.value)}
             className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todas</option>
@@ -559,11 +647,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
           {/* Fertilidad */}
           <select
+            aria-label="Filtrar por fertilidad"
             value={fertilityFilter}
-            onChange={(e) => {
-              setFertilityFilter(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setFertilityFilter(e.target.value)}
             className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todas</option>
@@ -576,11 +662,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
           {/* Sexo */}
           <select
+            aria-label="Filtrar por sexo"
             value={genderFilter}
-            onChange={(e) => {
-              setGenderFilter(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setGenderFilter(e.target.value)}
             className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todos</option>
@@ -590,11 +674,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
           {/* Generación */}
           <select
+            aria-label="Filtrar por generación"
             value={genFilter}
-            onChange={(e) => {
-              setGenFilter(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setGenFilter(e.target.value)}
             className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todas</option>
@@ -607,11 +689,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
           {/* Capacidad */}
           <select
+            aria-label="Filtrar por capacidad"
             value={capacityFilter}
-            onChange={(e) => {
-              setCapacityFilter(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => setCapacityFilter(e.target.value)}
             className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todas</option>
@@ -630,7 +710,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
           <span>Tienes monturas de ejemplo en tu establo</span>
           <button
             onClick={handleRemoveSampleMounts}
-            className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition shadow-xs cursor-pointer flex-shrink-0"
+            className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition shadow-sm cursor-pointer flex-shrink-0"
           >
             Quitar ejemplos
           </button>
@@ -644,40 +724,56 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             <thead className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
               <tr>
                 <th
-                  onClick={() => handleSort('nickname')}
-                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 transition"
+                  aria-sort={getAriaSort('nickname')}
+                  className="py-3 px-3.5 text-left"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSort('nickname')}
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                  >
                     <span>Nombre / Raza</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
+                  </button>
                 </th>
                 <th
-                  onClick={() => handleSort('generation')}
-                  className="py-3 px-3 cursor-pointer hover:text-slate-800 transition"
+                  aria-sort={getAriaSort('generation')}
+                  className="py-3 px-3 text-left"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSort('generation')}
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                  >
                     <span>Gen</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
+                  </button>
                 </th>
                 <th
-                  onClick={() => handleSort('currentLevel')}
-                  className="py-3 px-3 cursor-pointer hover:text-slate-800 transition"
+                  aria-sort={getAriaSort('currentLevel')}
+                  className="py-3 px-3 text-left"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSort('currentLevel')}
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                  >
                     <span>Nivel / XP</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
+                  </button>
                 </th>
                 <th
-                  onClick={() => handleSort('fertility')}
-                  className="py-3 px-3 cursor-pointer hover:text-slate-800 transition"
+                  aria-sort={getAriaSort('fertility')}
+                  className="py-3 px-3 text-left"
                 >
-                  <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSort('fertility')}
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                  >
                     <span>Fertilidad</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
+                  </button>
                 </th>
                 <th className="py-3 px-3">Medidores</th>
                 <th className="py-3 px-3">Notas</th>
@@ -687,7 +783,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             <tbody className="divide-y divide-slate-100 text-xs">
               {paginatedMounts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={7} className="py-12 text-center text-slate-600 text-sm">
                     {mounts.length === 0
                       ? 'Tu establo está vacío. Importa un archivo o pulsa «Añadir montura».'
                       : 'No se encontraron monturas que coincidan con los filtros.'}
@@ -775,7 +871,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                             <Sparkles className="w-3 h-3 text-emerald-500 flex-shrink-0" />
                           )}
                         </div>
-                        <span className="text-[10px] text-slate-400 font-mono block">
+                        <span className="text-xs text-slate-600 font-mono block">
                           {mount.currentXp.toLocaleString()} XP
                         </span>
                       </td>
@@ -798,13 +894,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                           </span>
 
                           {mount.capacity !== 'ninguna' && (
-                            <span className="block text-[10px] text-purple-700 font-semibold truncate">
+                            <span className="block text-xs text-purple-700 font-semibold truncate">
                               ✨ {CAPACITY_LABELS[mount.capacity]}
                             </span>
                           )}
 
                           {isReadyToBreed && (
-                            <span className="block text-[9px] text-pink-600 font-bold animate-pulse">
+                            <span className="block text-xs text-pink-600 font-bold animate-pulse">
                               ❤️ Lista p/ cruzar
                             </span>
                           )}
@@ -814,11 +910,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                       {/* Medidores de Cría */}
                       <td className="py-2.5 px-3">
                         {mount.fertility === 'esteril' || mount.fertility === 'senil' ? (
-                          <span className="text-[10px] text-slate-400 italic">No aplicable</span>
+                          <span className="text-xs text-slate-600 italic">No aplicable</span>
                         ) : (
                           <div className="space-y-1 w-28">
                             {/* Serenidad */}
-                            <div className="flex items-center justify-between text-[9px] text-slate-500 font-mono">
+                            <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
                               <span>Serenidad:</span>
                               <span
                                 className={`font-bold ${
@@ -835,7 +931,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                             {/* Amor */}
                             <div>
-                              <div className="flex justify-between text-[8px] text-slate-400 font-medium">
+                              <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Amor</span>
                                 <span>{mount.love}/20k</span>
                               </div>
@@ -849,7 +945,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                             {/* Madurez */}
                             <div>
-                              <div className="flex justify-between text-[8px] text-slate-400 font-medium">
+                              <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Madurez</span>
                                 <span>{mount.maturity}/20k</span>
                               </div>
@@ -863,7 +959,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                             {/* Resistencia */}
                             <div>
-                              <div className="flex justify-between text-[8px] text-slate-400 font-medium">
+                              <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Resistencia</span>
                                 <span>{mount.stamina}/20k</span>
                               </div>
@@ -889,18 +985,23 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                       <td className="py-2.5 px-3 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-90 group-hover:opacity-100">
                           <button
-                            onClick={() => {
+                            type="button"
+                            onClick={(e) => {
+                              lastActiveElementRef.current = e.currentTarget;
                               setEditingMount({ ...mount });
                               setIsEditModalOpen(true);
                             }}
-                            className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-700 rounded-lg transition"
+                            aria-label={`Editar ${mount.nickname}`}
+                            className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-700 rounded-lg transition cursor-pointer"
                             title="Editar montura"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDeleteMount(mount.id)}
-                            className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition"
+                            aria-label={`Eliminar ${mount.nickname}`}
+                            className="p-1.5 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-lg transition cursor-pointer"
                             title="Eliminar montura"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -943,18 +1044,25 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
       {/* MODAL DE EDICIÓN / CREACIÓN MANUAL */}
       {isEditModalOpen && editingMount && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={modalTitleId}
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+        >
           <div className="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95">
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
+              <h3 id={modalTitleId} className="font-extrabold text-sm sm:text-base text-slate-900">
                 {editingMount.id ? 'Editar Montura' : 'Añadir Nueva Montura'}
               </h3>
               <button
+                type="button"
                 onClick={() => {
                   setIsEditModalOpen(false);
                   setEditingMount(null);
                 }}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition"
+                aria-label="Cerrar"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -962,9 +1070,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
             <form onSubmit={handleSaveMount} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
               {statusMessage && statusMessage.type === 'error' && (
-                <div className="p-3 rounded-xl text-xs font-semibold flex items-center justify-between bg-rose-50 text-rose-800 border border-rose-200">
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className="p-3 rounded-xl text-xs font-semibold flex items-center justify-between bg-rose-50 text-rose-800 border border-rose-200"
+                >
                   <span>{statusMessage.text}</span>
-                  <button type="button" onClick={() => setStatusMessage(null)}>
+                  <button type="button" onClick={() => setStatusMessage(null)} aria-label="Cerrar">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -972,10 +1084,12 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Especie */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={speciesId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                     Especie
                   </label>
                   <select
+                    ref={firstFieldRef}
+                    id={speciesId}
                     value={editingMount.species || 'dragopavo'}
                     onChange={(e) => {
                       const newSp = e.target.value as SpeciesType;
@@ -1000,10 +1114,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Raza / Color */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={breedId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                     Raza
                   </label>
                   <select
+                    id={breedId}
                     value={editingMount.breed || ''}
                     onChange={(e) => {
                       const selectedName = e.target.value;
@@ -1029,10 +1144,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Apodo */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={nicknameId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                     Apodo / Nombre
                   </label>
                   <input
+                    id={nicknameId}
                     type="text"
                     required
                     value={editingMount.nickname || ''}
@@ -1044,14 +1160,15 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Sexo */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label id={genderLabelId} htmlFor={genderMachoId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                     Sexo
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div role="group" aria-labelledby={genderLabelId} className="grid grid-cols-2 gap-2">
                     <button
+                      id={genderMachoId}
                       type="button"
                       onClick={() => setEditingMount({ ...editingMount, gender: 'M' })}
-                      className={`py-2 text-xs font-bold rounded-xl border transition ${
+                      className={`py-2 text-xs font-bold rounded-xl border transition cursor-pointer ${
                         editingMount.gender === 'M'
                           ? 'bg-blue-50 border-blue-500 text-blue-700'
                           : 'bg-slate-50 border-slate-200 text-slate-600'
@@ -1062,7 +1179,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                     <button
                       type="button"
                       onClick={() => setEditingMount({ ...editingMount, gender: 'F' })}
-                      className={`py-2 text-xs font-bold rounded-xl border transition ${
+                      className={`py-2 text-xs font-bold rounded-xl border transition cursor-pointer ${
                         editingMount.gender === 'F'
                           ? 'bg-rose-50 border-rose-500 text-rose-700'
                           : 'bg-slate-50 border-slate-200 text-slate-600'
@@ -1075,10 +1192,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Nivel Actual */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={levelId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                     Nivel (1 - 200)
                   </label>
                   <input
+                    id={levelId}
                     type="number"
                     min={1}
                     max={200}
@@ -1104,10 +1222,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* XP Actual */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={xpId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                     XP Actual
                   </label>
                   <input
+                    id={xpId}
                     type="number"
                     min={0}
                     max={MAX_MOUNT_XP}
@@ -1133,10 +1252,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Fertilidad */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={fertilityId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                     Fertilidad
                   </label>
                   <select
+                    id={fertilityId}
                     value={editingMount.fertility || 'fertil'}
                     onChange={(e) => setEditingMount({ ...editingMount, fertility: e.target.value as FertilityStatus })}
                     className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1151,10 +1271,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Capacidad Especial */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={capacityId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                     Capacidad
                   </label>
                   <select
+                    id={capacityId}
                     value={editingMount.capacity || 'ninguna'}
                     onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as SpecialCapacity })}
                     className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1176,8 +1297,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div>
-                    <label className="block text-[10px] text-slate-500 font-medium mb-1">Serenidad</label>
+                    <label htmlFor={serenityId} className="block text-xs text-slate-600 font-medium mb-1">Serenidad</label>
                     <input
+                      id={serenityId}
                       type="number"
                       min={-10000}
                       max={10000}
@@ -1201,8 +1323,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label className="block text-[10px] text-slate-500 font-medium mb-1">Amor (0-20k)</label>
+                    <label htmlFor={loveId} className="block text-xs text-slate-600 font-medium mb-1">Amor (0-20k)</label>
                     <input
+                      id={loveId}
                       type="number"
                       min={0}
                       max={20000}
@@ -1226,8 +1349,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label className="block text-[10px] text-slate-500 font-medium mb-1">Madurez (0-20k)</label>
+                    <label htmlFor={maturityId} className="block text-xs text-slate-600 font-medium mb-1">Madurez (0-20k)</label>
                     <input
+                      id={maturityId}
                       type="number"
                       min={0}
                       max={20000}
@@ -1251,8 +1375,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label className="block text-[10px] text-slate-500 font-medium mb-1">Resist. (0-20k)</label>
+                    <label htmlFor={staminaId} className="block text-xs text-slate-600 font-medium mb-1">Resist. (0-20k)</label>
                     <input
+                      id={staminaId}
                       type="number"
                       min={0}
                       max={20000}
@@ -1279,10 +1404,11 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
               {/* Notas */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                <label htmlFor={notesId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
                   Notas u Observaciones
                 </label>
                 <textarea
+                  id={notesId}
                   value={editingMount.notes || ''}
                   onChange={(e) => setEditingMount({ ...editingMount, notes: e.target.value })}
                   rows={2}
@@ -1299,13 +1425,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                     setIsEditModalOpen(false);
                     setEditingMount(null);
                   }}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-extrabold bg-[#1e3a8a] hover:bg-[#172554] text-white shadow-sm transition"
+                  className="px-5 py-2 rounded-xl text-xs font-extrabold bg-[#1e3a8a] hover:bg-[#172554] text-white shadow-sm transition cursor-pointer"
                 >
                   Guardar Montura
                 </button>
