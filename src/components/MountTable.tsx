@@ -59,6 +59,166 @@ export type MountDraft = Omit<
 
 const toNum = (val?: NumField): number => (val === '' || val === undefined ? 0 : Number(val));
 
+/** ¿La montura cumple los requisitos para cruzarse? (misma regla en tabla y tarjetas) */
+const isMountReadyToBreed = (m: UserMount): boolean =>
+  m.fertility !== 'esteril' &&
+  m.fertility !== 'senil' &&
+  m.love >= 7500 &&
+  m.maturity >= 10000 &&
+  m.stamina >= 7500 &&
+  m.serenity >= -2000 &&
+  m.serenity <= 2000;
+
+/** Tarjeta de montura para pantallas pequeñas (< md) */
+function MountCard({
+  mount,
+  onEdit,
+  onDelete,
+}: {
+  mount: UserMount;
+  onEdit: (mount: UserMount, trigger: HTMLElement) => void;
+  onDelete: (id: string) => void;
+}) {
+  const infertile = mount.fertility === 'esteril' || mount.fertility === 'senil';
+  const ready = isMountReadyToBreed(mount);
+  const bars = [
+    { label: 'Amor', value: mount.love, color: 'bg-pink-500' },
+    { label: 'Madurez', value: mount.maturity, color: 'bg-purple-500' },
+    { label: 'Resistencia', value: mount.stamina, color: 'bg-amber-500' },
+  ];
+
+  return (
+    <div className="p-3.5 space-y-3 text-slate-700">
+      {/* Identidad y acciones */}
+      <div className="flex items-start gap-3">
+        <div className="relative w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-lg flex-shrink-0 overflow-hidden">
+          {mount.imageUrl ? (
+            <>
+              <img
+                src={mount.imageUrl}
+                alt=""
+                loading="lazy"
+                className="w-full h-full object-contain p-0.5"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                  if (fallback) fallback.style.display = 'inline';
+                }}
+              />
+              <span style={{ display: 'none' }}>🐴</span>
+            </>
+          ) : (
+            <span>🐴</span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="font-extrabold text-slate-900 text-sm truncate">{mount.nickname}</span>
+            <span
+              role="img"
+              aria-label={mount.gender === 'M' ? 'Macho' : 'Hembra'}
+              className={`text-xs font-bold ${mount.gender === 'M' ? 'text-blue-600' : 'text-rose-500'}`}
+            >
+              {mount.gender === 'M' ? '♂' : '♀'}
+            </span>
+          </div>
+          <p className="text-xs text-slate-600 truncate">
+            {mount.breed} · <span className="font-mono">G{mount.generation}</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-1 flex-shrink-0 -mr-1.5">
+          <button
+            type="button"
+            onClick={(e) => onEdit(mount, e.currentTarget)}
+            aria-label={`Editar ${mount.nickname}`}
+            title="Editar montura"
+            className="w-11 h-11 flex items-center justify-center rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition cursor-pointer"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(mount.id)}
+            aria-label={`Eliminar ${mount.nickname}`}
+            title="Eliminar montura"
+            className="w-11 h-11 flex items-center justify-center rounded-xl text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition cursor-pointer"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Nivel, fertilidad y capacidad */}
+      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+        <span
+          className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 font-mono font-bold ${
+            mount.currentLevel >= 200 ? 'text-emerald-700' : 'text-slate-800'
+          }`}
+        >
+          Nvl {mount.currentLevel}
+          {mount.currentLevel >= 200 && <Sparkles className="w-3 h-3 text-emerald-500" />}
+          <span className="font-normal text-slate-600">· {mount.currentXp.toLocaleString()} XP</span>
+        </span>
+        <span
+          className={`inline-block text-[11px] px-2 py-1 rounded-full font-bold uppercase tracking-wider ${
+            mount.fertility === 'fecunda'
+              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+              : mount.fertility === 'esteril'
+              ? 'bg-slate-200 text-slate-600'
+              : mount.fertility === 'senil'
+              ? 'bg-rose-100 text-rose-700'
+              : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+          }`}
+        >
+          {FERTILITY_LABELS[mount.fertility]}
+        </span>
+        {mount.capacity !== 'ninguna' && (
+          <span className="text-purple-700 font-semibold">✨ {CAPACITY_LABELS[mount.capacity]}</span>
+        )}
+        {ready && <span className="text-pink-600 font-bold">❤️ Lista p/ cruzar</span>}
+      </div>
+
+      {/* Indicadores */}
+      {infertile ? (
+        <p className="text-xs text-slate-600 italic">Indicadores: no aplicable</p>
+      ) : (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs font-mono text-slate-600">
+            <span>Serenidad</span>
+            <span
+              className={`font-bold ${
+                mount.serenity > 0 ? 'text-sky-600' : mount.serenity < 0 ? 'text-amber-600' : 'text-slate-600'
+              }`}
+            >
+              {mount.serenity > 0 ? `+${mount.serenity}` : mount.serenity}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {bars.map((b) => (
+              <div key={b.label}>
+                <div className="flex justify-between gap-1 text-[11px] text-slate-600 font-medium">
+                  <span className="truncate">{b.label}</span>
+                  <span className="font-mono">{Math.round(b.value / 1000)}k</span>
+                </div>
+                <div
+                  role="progressbar"
+                  aria-label={b.label}
+                  aria-valuemin={0}
+                  aria-valuemax={20000}
+                  aria-valuenow={b.value}
+                  className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1"
+                >
+                  <div className={`h-full ${b.color}`} style={{ width: `${Math.min(100, (b.value / 20000) * 100)}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface MountTableProps {
   mounts: UserMount[];
   onDataChanged: () => void;
@@ -73,6 +233,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
   const fileInputId = useId();
   const searchInputId = useId();
+  const mobileSortId = useId();
   const modalTitleId = useId();
   const speciesId = useId();
   const breedId = useId();
@@ -743,7 +904,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
       {/* 4. TABLA PRINCIPAL DE MONTURAS */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[760px]">
             <thead className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
               <tr>
@@ -814,14 +975,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                 </tr>
               ) : (
                 paginatedMounts.map((mount) => {
-                  const isReadyToBreed =
-                    mount.fertility !== 'esteril' &&
-                    mount.fertility !== 'senil' &&
-                    mount.love >= 7500 &&
-                    mount.maturity >= 10000 &&
-                    mount.stamina >= 7500 &&
-                    mount.serenity >= -2000 &&
-                    mount.serenity <= 2000;
+                  const isReadyToBreed = isMountReadyToBreed(mount);
 
                   return (
                     <tr
@@ -1032,8 +1186,60 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
           </table>
         </div>
 
+        {/* Vista móvil: tarjetas */}
+        <div className="md:hidden">
+          <div className="flex items-center gap-2 px-3.5 py-2.5 border-b border-slate-100 bg-slate-50/80">
+            <label htmlFor={mobileSortId} className="text-xs font-bold text-slate-600 whitespace-nowrap">
+              Ordenar por
+            </label>
+            <select
+              id={mobileSortId}
+              value={sortField as string}
+              onChange={(e) => setSortField(e.target.value as keyof UserMount)}
+              className="flex-1 min-w-0 h-11 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="nickname">Nombre</option>
+              <option value="generation">Generación</option>
+              <option value="currentLevel">Nivel</option>
+              <option value="fertility">Fertilidad</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'))}
+              aria-label={sortDirection === 'asc' ? 'Orden ascendente; cambiar a descendente' : 'Orden descendente; cambiar a ascendente'}
+              className="w-11 h-11 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 font-bold hover:bg-slate-100 cursor-pointer"
+            >
+              <span aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+            </button>
+          </div>
+
+          {paginatedMounts.length === 0 ? (
+            <p className="py-12 px-4 text-center text-slate-600 text-sm">
+              {mounts.length === 0
+                ? 'Tu establo está vacío. Importa un archivo o pulsa «Añadir montura».'
+                : 'No se encontraron monturas que coincidan con los filtros.'}
+            </p>
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {paginatedMounts.map((mount) => (
+                <li key={mount.id}>
+                  <MountCard
+                    mount={mount}
+                    onEdit={(m, trigger) => {
+                      lastActiveElementRef.current = trigger;
+                      setEditingMount({ ...m });
+                      setIsEditModalOpen(true);
+                    }}
+                    onDelete={handleDeleteMount}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {/* 5. BARRA DE PAGINACIÓN */}
-        <div className="p-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50">
+        <div className="p-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50/50">
           <span>
             Página <strong className="text-slate-800">{currentPage}</strong> de{' '}
             <strong className="text-slate-800">{totalPages}</strong> ({filteredMounts.length} monturas)
@@ -1041,16 +1247,20 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
           <div className="flex items-center gap-1">
             <button
+              type="button"
+              aria-label="Página anterior"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              className="p-2.5 md:p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
+              type="button"
+              aria-label="Página siguiente"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              className="p-2.5 md:p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
