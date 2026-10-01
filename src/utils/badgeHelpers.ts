@@ -1,6 +1,7 @@
 export function getFertilityLabel(fertility?: string): string {
   if (!fertility) return 'Fértil';
-  const f = fertility.toLowerCase().trim();
+  // Ignora tildes para reconocer también 'fértil' / 'estéril' guardados con acento
+  const f = fertility.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (f.includes('fecond') || f.includes('fecund')) return 'Fecunda';
   if (f.includes('steril') || f.includes('esteril')) return 'Estéril';
   if (f.includes('senil')) return 'Senil';
