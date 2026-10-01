@@ -17,7 +17,7 @@ export class BreedingDatabase extends Dexie {
 
 export const db = new BreedingDatabase();
 
-const NORMALIZATION_KEY = 'dofus_breeding_normalized_v4';
+const NORMALIZATION_KEY = 'dofus_breeding_normalized_v5';
 
 export async function normalizeStoredMounts() {
   const count = await db.mounts.count();
@@ -42,7 +42,11 @@ export async function normalizeStoredMounts() {
   const all = await db.mounts.toArray();
   for (const m of all) {
     let changed = false;
-    const actualFert = getFertilityLabel(m.fertility).toLowerCase();
+    // Clave canónica sin tildes (fertil | fecunda | esteril | senil), igual que FERTILITY_LABELS
+    const actualFert = getFertilityLabel(m.fertility)
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
     if (actualFert !== m.fertility) {
       m.fertility = actualFert as any;
       changed = true;
