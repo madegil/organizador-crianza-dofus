@@ -35,16 +35,24 @@ export const FuelCalculator: React.FC = () => {
   const [mounts, setMounts] = useState<UserMount[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMountId, setSelectedMountId] = useState<string | null>(null);
-  const customXpLabelId = useId();
 
   // Opciones de cálculo
   const [isSage, setIsSage] = useState<boolean>(false);
   const [selectedVariant, setSelectedVariant] = useState<FuelVariant>('gigantesco');
   const [targetMode, setTargetMode] = useState<CalculationTarget>('nextLevel');
   const [customXp, setCustomXp] = useState<number | ''>(80000);
+  const manualLabelId = useId();
   const [strategy, setStrategy] = useState<TrainingStrategy>('cascade');
 
   const [loadError, setLoadError] = useState(false);
+  const [showMaxLevel, setShowMaxLevel] = useState<boolean>(() => {
+    try { return localStorage.getItem('dofus_calc_show_max') === 'true'; } catch { return false; }
+  });
+  const visibleMounts = useMemo(() => (showMaxLevel ? mounts : mounts.filter((m) => m.currentLevel < 200)), [mounts, showMaxLevel]);
+  const maxLevelCount = useMemo(() => mounts.filter((m) => m.currentLevel >= 200).length, [mounts]);
+  useEffect(() => {
+    try { localStorage.setItem('dofus_calc_show_max', String(showMaxLevel)); } catch {}
+  }, [showMaxLevel]);
 
   // Cargar monturas de Dexie
   const loadMounts = async () => {
@@ -53,10 +61,6 @@ export const FuelCalculator: React.FC = () => {
       await normalizeStoredMounts();
       const all = await db.mounts.toArray();
       setMounts(all);
-      if (all.length > 0 && !selectedMountId) {
-        setSelectedMountId(all[0].id);
-        setIsSage(all[0].capacity === 'sabia');
-      }
     } catch (err) {
       console.error(err);
       setLoadError(true);
@@ -71,8 +75,21 @@ export const FuelCalculator: React.FC = () => {
 
   // Montura actualmente seleccionada
   const selectedMount = useMemo(() => {
-    return mounts.find((m) => m.id === selectedMountId) || mounts[0] || null;
+    return mounts.find((m) => m.id === selectedMountId) || null;
   }, [mounts, selectedMountId]);
+
+  useEffect(() => {
+    if (visibleMounts.length === 0) {
+      if (selectedMountId !== null) setSelectedMountId(null);
+      return;
+    }
+    const isCurrentHidden = selectedMount && !visibleMounts.some((m) => m.id === selectedMount.id);
+    if (!selectedMount || isCurrentHidden) {
+      const first = visibleMounts[0];
+      setSelectedMountId(first.id);
+      setIsSage(first.capacity === 'sabia');
+    }
+  }, [visibleMounts, selectedMount]);
 
   // Al cambiar de montura, sincronizar estado de « Sabia » si corresponde
   const handleSelectMount = (mount: UserMount) => {
@@ -189,9 +206,24 @@ export const FuelCalculator: React.FC = () => {
           </span>
         </div>
 
-        {/* Cuadrícula interactiva del Establo con estilo unificado al index */}
-        <div role="group" aria-label="Monturas" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
-          {mounts.map((m) => {
+        {maxLevelCount > 0 && (
+          <div className="flex items-center justify-end">
+            <button type="button" role="switch" aria-checked={showMaxLevel} onClick={() => setShowMaxLevel((prev) => !prev)} className="h-11 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 border border-slate-200 bg-white hover:bg-slate-50 transition cursor-pointer flex items-center gap-2">
+              Mostrar monturas nivel 200 ({maxLevelCount})
+            </button>
+          </div>
+        )}
+
+        {visibleMounts.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 text-center space-y-3">
+            <p className="text-sm sm:text-base font-semibold text-slate-700">¡Todas tus monturas ya están en nivel 200! No necesitan más combustible.</p>
+            <button type="button" onClick={() => setShowMaxLevel(true)} className="h-11 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs border border-slate-200 transition cursor-pointer">
+              Mostrar monturas nivel 200
+            </button>
+          </div>
+        ) : (
+          <div role="group" aria-label="Monturas" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
+            {visibleMounts.map((m) => {
             const isSelected = selectedMount?.id === m.id;
             const lvl =
               m.currentXp >= MAX_MOUNT_XP
@@ -256,11 +288,13 @@ export const FuelCalculator: React.FC = () => {
               </button>
             );
           })}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* 2. SECCIÓN INFERIOR: MEDIDOR XP Y PANEL DE INFORMACIÓN UNIFICADO */}
-      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
+      {selectedMount && (
+        <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
         {/* Cabecera del cálculo para la montura activa */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
           <div className="flex items-center gap-3">
@@ -367,13 +401,13 @@ export const FuelCalculator: React.FC = () => {
                 {/* Input personalizado si está en modo Manual */}
                 {targetMode === 'custom' && (
                   <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
-                    <label id={customXpLabelId} className="block text-xs font-bold text-slate-700">
+                    <label id={manualLabelId} className="block text-xs font-bold text-slate-700">
                       XP a calcular en el medidor (1.000 a 200.000 XP):
                     </label>
                     <div className="flex items-center gap-3">
                       <input
                         type="range"
-                        aria-labelledby={customXpLabelId}
+                        aria-labelledby={manualLabelId}
                         min={1000}
                         max={200000}
                         step={1000}
@@ -383,7 +417,7 @@ export const FuelCalculator: React.FC = () => {
                       />
                       <input
                         type="number"
-                        aria-labelledby={customXpLabelId}
+                        aria-labelledby={manualLabelId}
                         min={1000}
                         max={200000}
                         value={customXp}
@@ -483,7 +517,7 @@ export const FuelCalculator: React.FC = () => {
                             <button
                               key={t}
                               type="button"
-                              aria-pressed={strategy === stratKey}
+                              aria-pressed={isTierActive}
                               onClick={() => setStrategy(stratKey)}
                               className={`px-1.5 py-1 rounded-xl text-[11px] font-extrabold text-center transition flex flex-col items-center cursor-pointer ${
                                 isTierActive
@@ -613,16 +647,7 @@ export const FuelCalculator: React.FC = () => {
                       return (
                         <div
                           key={t.tier}
-                          role="button"
-                          tabIndex={0}
-                          aria-pressed={isThisTierSelected}
                           onClick={() => setStrategy(stratKey)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              setStrategy(stratKey);
-                            }
-                          }}
                           className={`p-3.5 rounded-2xl border transition cursor-pointer flex flex-col justify-between gap-2 relative ${
                             isThisTierSelected
                               ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-400/30 text-slate-900 shadow-sm'
@@ -708,6 +733,7 @@ export const FuelCalculator: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
