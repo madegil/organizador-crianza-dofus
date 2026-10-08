@@ -491,10 +491,10 @@ export const FuelCalculator: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
                       <Zap className="w-4 h-4 text-amber-500" />
-                      Estrategia de Entrenamiento en Pesebre
+                      Estrategia de Entrenamiento de Experiencia
                     </span>
                     <span className="text-[11px] text-slate-500 font-medium">
-                      ¿Cómo mantienes el pesebre?
+                      ¿Cómo mantienes el medidor de experiencia?
                     </span>
                   </div>
 
@@ -517,7 +517,7 @@ export const FuelCalculator: React.FC = () => {
                           <span className="text-[11px] px-1.5 rounded-md bg-slate-200 text-slate-700 font-mono font-bold">Cascada</span>
                         </div>
                         <p className="text-[11px] text-slate-500 mt-0.5 leading-tight font-medium">
-                          Llenas el pesebre y dejas que se vacíe solo (Nivel 4 → 3 → 2 → 1). Total: 35h 39m.
+                          Llenas el medidor de experiencia y dejas que se vacíe solo (Nivel 4 → 3 → 2 → 1). Total: 35h 39m.
                         </p>
                       </div>
                     </button>
@@ -605,7 +605,7 @@ export const FuelCalculator: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Tarjeta 2: Tiempo de vaciado físico del carburante (Autonomía del Pesebre) */}
+                  {/* Tarjeta 2: Tiempo de vaciado físico del carburante (Autonomía del medidor de experiencia) */}
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-indigo-50/30 border border-blue-200 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between text-xs text-blue-900/80 mb-1">
@@ -614,7 +614,7 @@ export const FuelCalculator: React.FC = () => {
                           Vaciado del Carburante
                         </span>
                         <span className="font-mono text-blue-800 font-bold text-[11px]">
-                          Autonomía Pesebre
+                          Autonomía de experiencia
                         </span>
                       </div>
 
@@ -632,7 +632,7 @@ export const FuelCalculator: React.FC = () => {
                         </span>
                       ) : (
                         <span>
-                          Duración del tramo de pesebre antes de recargar.
+                          Duración del tramo de experiencia antes de recargar.
                         </span>
                       )}
                     </div>
