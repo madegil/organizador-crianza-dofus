@@ -458,7 +458,6 @@ export const FuelCalculator: React.FC = () => {
                 <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                     <span>Tramos del Medidor (200.000 XP)</span>
-                    <span className="text-[11px] font-medium text-slate-500 font-mono">Pesebre</span>
                   </div>
                   <div className="w-full h-3 rounded-full bg-slate-100 flex overflow-hidden border border-slate-200" role="img" aria-label="Tramos del medidor de 200.000 XP">
                     <div style={{ width: '40%' }} className={`h-full border-r border-white/60 transition ${strategy === 'tier1' ? 'bg-purple-700' : 'bg-purple-400'}`} />
@@ -798,7 +797,6 @@ export const FuelCalculator: React.FC = () => {
                               <strong className="font-mono">{breakdown.tiers.find(t => t.itemsNeeded > 0)?.tierName || 'Ninguno'}</strong>
                             </div>
                           </div>
-                          <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-100 font-medium">La preparación llena los tramos inferiores y no se consume.</p>
                         </div>
                       </div>
                     </div>
