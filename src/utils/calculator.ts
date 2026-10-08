@@ -70,6 +70,11 @@ export interface TierFuelBreakdown {
   effectiveXpAdded: number;
   timeToTargetIfMaintainedSeconds: number;
   formattedTimeIfMaintained: string;
+  baseItemsByTier?: Record<FuelTier, number>;
+  baseDurability?: number;
+  baseItems?: number;
+  refills?: number;
+  capacityPerRefill?: number;
 }
 
 export interface FuelBreakdownResult {
@@ -96,13 +101,21 @@ export interface FuelBreakdownResult {
   // Referencia general del medidor
   fullCascadeDrainSeconds: number;
   formattedFullCascadeDrainTime: string;
+  baseItemsByTier?: Record<FuelTier, number>;
+  baseDurability?: number;
+  refills?: number;
+  capacityPerRefill?: number;
+  maintenanceUnits?: number;
+  baseUnitsTotal?: number;
+  includeBase?: boolean;
 }
 
 export function calculateFuelBreakdown(
   xpNeeded: number,
   variant: FuelVariant = 'gigantesco',
   isSage: boolean = false,
-  strategy: TrainingStrategy = 'cascade'
+  strategy: TrainingStrategy = 'cascade',
+  includeBase: boolean = true
 ): FuelBreakdownResult {
   const safeXp = Math.max(0, Math.round(xpNeeded));
   const variantInfo = FUEL_VARIANTS[variant] || FUEL_VARIANTS.gigantesco;
@@ -122,9 +135,9 @@ export function calculateFuelBreakdown(
 
   const rangeLabels: Record<FuelTier, string> = {
     1: '0 - 80.000',
-    2: '80.000 - 140.000',
-    3: '140.000 - 180.000',
-    4: '180.000 - 200.000',
+    2: '80.001 - 140.000',
+    3: '140.001 - 180.000',
+    4: '180.001 - 200.000',
   };
 
   const drainTexts: Record<FuelTier, string> = {
@@ -137,6 +150,20 @@ export function calculateFuelBreakdown(
   // 1. Cálculo si se mantiene un tier específico (tier4, tier3, tier2 o tier1)
   const selectedFixedTier: FuelTier | null =
     strategy === 'tier4' ? 4 : strategy === 'tier3' ? 3 : strategy === 'tier2' ? 2 : strategy === 'tier1' ? 1 : null;
+
+  const baseItemsByTier: Record<FuelTier, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  let baseDurability = 0, baseUnitsTotal = 0, refills = 0, capacityPerRefill = 0, maintenanceUnits = 0;
+  if (selectedFixedTier !== null) {
+    capacityPerRefill = tierCapacities[selectedFixedTier];
+    if (safeXp > 0) {
+      for (let t = 1; t < selectedFixedTier; t++) {
+        const cap = tierCapacities[t as FuelTier], units = Math.ceil(cap / variantVal);
+        baseItemsByTier[t as FuelTier] = units; baseDurability += cap; baseUnitsTotal += units;
+      }
+      refills = Math.ceil(durabilityNeededTotal / capacityPerRefill);
+      maintenanceUnits = Math.ceil(durabilityNeededTotal / variantVal);
+    }
+  }
 
   // 2. Reparto en cascada de la durabilidad (por si se usa cascade o como referencia)
   const fullCycles = Math.floor(durabilityNeededTotal / MAX_ENCLOS_GAUGE);
@@ -164,16 +191,16 @@ export function calculateFuelBreakdown(
     // Tiempo si mantienes exclusivamente este tier
     const timeToTargetIfMaintainedSeconds = safeXp > 0 ? safeXp / effectiveXpPerSec : 0;
 
-    // Durabilidad asignada según la estrategia
-    let durabilityForThisTier = 0;
+    let durabilityForThisTier = 0, items = 0, tierRefills: number | undefined;
     if (selectedFixedTier !== null) {
-      durabilityForThisTier = tier === selectedFixedTier ? durabilityNeededTotal : 0;
+      if (tier === selectedFixedTier) {
+        durabilityForThisTier = durabilityNeededTotal; items = maintenanceUnits; tierRefills = refills;
+      }
     } else {
       durabilityForThisTier = tierCascadeDurMap[tier];
+      items = durabilityForThisTier > 0 ? Math.ceil(durabilityForThisTier / variantVal) : 0;
     }
-
     const xpForThisTier = isSage ? durabilityForThisTier * 2 : durabilityForThisTier;
-    const items = durabilityForThisTier > 0 ? Math.ceil(durabilityForThisTier / variantVal) : 0;
 
     return {
       tier,
@@ -193,10 +220,17 @@ export function calculateFuelBreakdown(
       effectiveXpAdded: items * variantVal * (isSage ? 2 : 1),
       timeToTargetIfMaintainedSeconds,
       formattedTimeIfMaintained: formatDurationSpanish(timeToTargetIfMaintainedSeconds),
+      baseItemsByTier: selectedFixedTier ? baseItemsByTier : undefined,
+      baseDurability: selectedFixedTier && tier < selectedFixedTier ? (safeXp > 0 ? tierCapacities[tier] : 0) : undefined,
+      baseItems: selectedFixedTier && tier < selectedFixedTier ? baseItemsByTier[tier] : undefined,
+      refills: tierRefills,
+      capacityPerRefill: tierCapacities[tier],
     };
   });
 
-  const totalItemsNeeded = tiers.reduce((acc, t) => acc + t.itemsNeeded, 0);
+  const totalItemsNeeded = selectedFixedTier !== null
+    ? maintenanceUnits + (includeBase ? baseUnitsTotal : 0)
+    : tiers.reduce((acc, t) => acc + t.itemsNeeded, 0);
 
   // Cálculo del tiempo de subida de la montura y de vaciado de carburante
   let mountTrainingSeconds = 0;
@@ -237,6 +271,13 @@ export function calculateFuelBreakdown(
     totalDurabilityNeeded: durabilityNeededTotal,
     fullCascadeDrainSeconds: TOTAL_CONTINUOUS_DRAIN_SECONDS,
     formattedFullCascadeDrainTime: '35 horas y 39 minutos',
+    baseItemsByTier: selectedFixedTier ? baseItemsByTier : undefined,
+    baseDurability: selectedFixedTier ? baseDurability : undefined,
+    refills: selectedFixedTier ? refills : undefined,
+    capacityPerRefill: selectedFixedTier ? capacityPerRefill : undefined,
+    maintenanceUnits: selectedFixedTier ? maintenanceUnits : undefined,
+    baseUnitsTotal: selectedFixedTier ? baseUnitsTotal : undefined,
+    includeBase,
   };
 }
 
@@ -274,12 +315,12 @@ export interface BatchCalculationResult {
   totalFuelUnitsConsumed: number;
   itemsNeeded: number;
   dustCostTotal: number;
-  mountsBreakdown: Array<{
+  mountsBreakdown: {
     mount: UserMount;
     xpNeeded: number;
     individualSeconds: number;
     individualFormattedTime: string;
-  }>;
+  }[];
 }
 
 export function calculateEnclosBatch(

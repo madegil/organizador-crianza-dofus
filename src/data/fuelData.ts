@@ -5,6 +5,13 @@ export const LEVEL_100_XP = 172668;
 export const MAX_ENCLOS_GAUGE = 200000;
 export const MAX_MOUNT_BREEDING_STAT = 20000;
 
+export const FUEL_RANGE_LABELS: Record<FuelTier, string> = {
+  1: '0 - 80.000',
+  2: '80.001 - 140.000',
+  3: '140.001 - 180.000',
+  4: '180.001 - 200.000',
+};
+
 export const FUEL_TIERS: Record<FuelTier, FuelInfo> = {
   1: {
     tier: 1,

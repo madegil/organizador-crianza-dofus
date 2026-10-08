@@ -43,6 +43,7 @@ export const FuelCalculator: React.FC = () => {
   const [customXp, setCustomXp] = useState<number | ''>(80000);
   const manualLabelId = useId();
   const [strategy, setStrategy] = useState<TrainingStrategy>('cascade');
+  const [includeBase, setIncludeBase] = useState<boolean>(true);
 
   const [loadError, setLoadError] = useState(false);
   const [showMaxLevel, setShowMaxLevel] = useState<boolean>(() => {
@@ -132,8 +133,8 @@ export const FuelCalculator: React.FC = () => {
 
   // Cálculo principal de carburante y tiempo diferenciando vaciado vs subida de montura
   const breakdown = useMemo(() => {
-    return calculateFuelBreakdown(xpNeeded, selectedVariant, isSage, strategy);
-  }, [xpNeeded, selectedVariant, isSage, strategy]);
+    return calculateFuelBreakdown(xpNeeded, selectedVariant, isSage, strategy, includeBase);
+  }, [xpNeeded, selectedVariant, isSage, strategy, includeBase]);
 
   // XP que se muestra en el medidor físico (tope 200.000)
   const gaugeDisplayXp = useMemo(() => {
@@ -453,6 +454,39 @@ export const FuelCalculator: React.FC = () => {
                   </div>
                 </label>
 
+                {/* Barra horizontal de tramos de 200.000 XP */}
+                <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                    <span>Tramos del Medidor (200.000 XP)</span>
+                    <span className="text-[11px] font-medium text-slate-500 font-mono">Pesebre</span>
+                  </div>
+                  <div className="w-full h-3 rounded-full bg-slate-100 flex overflow-hidden border border-slate-200" role="img" aria-label="Tramos del medidor de 200.000 XP">
+                    <div style={{ width: '40%' }} className={`h-full border-r border-white/60 transition ${strategy === 'tier1' ? 'bg-purple-700' : 'bg-purple-400'}`} />
+                    <div style={{ width: '30%' }} className={`h-full border-r border-white/60 transition ${strategy === 'tier2' ? 'bg-blue-700' : 'bg-blue-400'}`} />
+                    <div style={{ width: '20%' }} className={`h-full border-r border-white/60 transition ${strategy === 'tier3' ? 'bg-amber-700' : 'bg-amber-400'}`} />
+                    <div style={{ width: '10%' }} className={`h-full transition ${strategy === 'tier4' ? 'bg-rose-700' : 'bg-rose-400'}`} />
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px]">
+                    {[
+                      { tier: 1, name: 'Extracto', range: '0 - 80.000', strat: 'tier1' },
+                      { tier: 2, name: 'Filtro', range: '80.001 - 140.000', strat: 'tier2' },
+                      { tier: 3, name: 'Pócima', range: '140.001 - 180.000', strat: 'tier3' },
+                      { tier: 4, name: 'Elixir', range: '180.001 - 200.000', strat: 'tier4' },
+                    ].map((item) => {
+                      const isChosen = strategy === item.strat;
+                      return (
+                        <div key={item.tier} className={`p-2 rounded-xl border transition ${isChosen ? 'bg-slate-900 text-white border-slate-900 font-bold shadow-xs' : 'bg-slate-50 text-slate-700 border-slate-200'}`}>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold">{item.name}</span>
+                            {isChosen && <span className="text-[10px] bg-blue-500 text-white px-1 rounded">Elegido</span>}
+                          </div>
+                          <p className={`text-[11px] font-mono mt-0.5 ${isChosen ? 'text-slate-200' : 'text-slate-600'}`}>{item.range}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* B. SELECTOR DE ESTRATEGIA: MANTENER NIVEL FIJO VS VACIADO CONTINUO (CASCADA) */}
                 <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
                   <div className="flex items-center justify-between">
@@ -675,6 +709,7 @@ export const FuelCalculator: React.FC = () => {
                                 {t.rangeLabel}
                               </span>
                             </div>
+                            <p className="text-[11px] text-slate-500 font-medium">Capacidad por recarga: <strong className="text-slate-700 font-mono">{t.maxTierCapacity.toLocaleString()}</strong></p>
 
                             {/* Velocidad y Consumo */}
                             <div className="flex items-center justify-between text-xs mt-1.5">
@@ -717,6 +752,57 @@ export const FuelCalculator: React.FC = () => {
                       );
                     })}
                   </div>
+
+                  {strategy !== 'cascade' && (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200">
+                        <span className="text-xs font-bold text-slate-800">Incluir carburante de preparación en el total</span>
+                        <button type="button" role="switch" aria-checked={includeBase} onClick={() => setIncludeBase((prev) => !prev)} className={`h-11 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1.5 ${includeBase ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>
+                          {includeBase ? 'Incluido ✓' : 'Omitido'}
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1">
+                          <div className="flex justify-between items-center border-b border-slate-100 pb-1">
+                            <span className="text-xs font-bold text-slate-900">Preparación (una vez)</span>
+                            <span className="text-[11px] font-mono font-bold text-purple-700">{breakdown.baseUnitsTotal || 0} {(breakdown.baseUnitsTotal || 0) === 1 ? 'unidad' : 'unidades'}</span>
+                          </div>
+                          {(breakdown.baseUnitsTotal || 0) > 0 ? (
+                            <div className="space-y-0.5 text-[11px] text-slate-700 font-medium">
+                              {breakdown.tiers.filter((t) => (t.baseItems || 0) > 0).map((t) => (
+                                <div key={t.tier} className="flex justify-between">
+                                  <span>{t.tierName} ({t.rangeLabel}):</span>
+                                  <strong className="font-mono">{t.baseItems} u.</strong>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-slate-500 italic">No requiere carburante de base.</p>
+                          )}
+                          <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-100 font-medium">La preparación llena los tramos inferiores y no se consume.</p>
+                        </div>
+
+                        <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1">
+                          <div className="flex justify-between items-center border-b border-slate-100 pb-1">
+                            <span className="text-xs font-bold text-slate-900">Mantenimiento</span>
+                            <span className="text-[11px] font-mono font-bold text-blue-700">{breakdown.maintenanceUnits || 0} {(breakdown.maintenanceUnits || 0) === 1 ? 'unidad' : 'unidades'}</span>
+                          </div>
+                          <div className="space-y-0.5 text-[11px] text-slate-700 font-medium">
+                            <div className="flex justify-between">
+                              <span>Recargas necesarias:</span>
+                              <strong className="font-mono">{breakdown.refills || 0} {(breakdown.refills || 0) === 1 ? 'recarga' : 'recargas'}</strong>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Carburante del tramo:</span>
+                              <strong className="font-mono">{breakdown.tiers.find(t => t.itemsNeeded > 0)?.tierName || 'Ninguno'}</strong>
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-100 font-medium">La preparación llena los tramos inferiores y no se consume.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Resumen total de unidades de la estrategia activa */}
                   <div className="p-3.5 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm">
