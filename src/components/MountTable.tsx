@@ -26,35 +26,25 @@ import {
   parseBackupFile,
 } from '../utils/excelHelper';
 import { db } from '../db/mountsDb';
-import { ALL_MOUNTS_DATA, getMountsBySpecies } from '../data/allMounts';
+import { ALL_MOUNTS_DATA, findMountByBreedAndSpecies } from '../data/allMounts';
 import { calculateLevelFromXp, calculateXpForLevel, MAX_MOUNT_XP } from '../data/fuelData';
+import { MountAvatar } from './MountAvatar';
 
-import { FERTILITY_LABELS, CAPACITY_LABELS, SPECIES_LABELS } from '../data/labels';
-export { FERTILITY_LABELS, CAPACITY_LABELS, SPECIES_LABELS } from '../data/labels';
-
-export type NumField = number | '';
+type NumField = number | '';
 
 export type MountDraft = Omit<
-  Partial<UserMount>,
-  | 'generation'
-  | 'currentLevel'
-  | 'currentXp'
-  | 'reproductionCount'
-  | 'maxReproductions'
-  | 'serenity'
-  | 'love'
-  | 'maturity'
-  | 'stamina'
+  UserMount,
+  'generation' | 'currentLevel' | 'currentXp' | 'serenity' | 'love' | 'maturity' | 'stamina' | 'reproductionCount' | 'maxReproductions'
 > & {
   generation?: NumField;
   currentLevel?: NumField;
   currentXp?: NumField;
-  reproductionCount?: NumField;
-  maxReproductions?: NumField;
   serenity?: NumField;
   love?: NumField;
   maturity?: NumField;
   stamina?: NumField;
+  reproductionCount?: NumField;
+  maxReproductions?: NumField;
 };
 
 const toNum = (val?: NumField): number => (val === '' || val === undefined ? 0 : Number(val));
@@ -98,6 +88,7 @@ function MountCard({
                 src={mount.imageUrl}
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="w-full h-full object-contain p-0.5"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -224,12 +215,32 @@ interface MountTableProps {
   onDataChanged: () => void;
 }
 
+const FERTILITY_LABELS: Record<FertilityStatus, string> = {
+  fertil: 'Fértil',
+  fecunda: 'Fecunda',
+  esteril: 'Estéril',
+  senil: 'Senil',
+};
+
+const CAPACITY_LABELS: Record<SpecialCapacity, string> = {
+  ninguna: 'Ninguna',
+  sabia: 'Sabia',
+  enamoradiza: 'Enamoradiza',
+  resistente: 'Resistente',
+  precoz: 'Precoz',
+  reproductora: 'Reproductora',
+  camaleon: 'Camaleón',
+};
+
 export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged }) => {
+  const [editingMount, setEditingMount] = useState<MountDraft | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
   const firstFieldRef = useRef<HTMLSelectElement | null>(null);
-  const modalRef = useRef<HTMLDivElement | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const fileInputId = useId();
   const searchInputId = useId();
@@ -251,6 +262,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const notesId = useId();
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Estados de Filtros y Búsqueda
@@ -269,130 +281,162 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Estado del modal de edición / creación manual
-  const [editingMount, setEditingMount] = useState<MountDraft | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  const handleModalKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Tab') return;
+    if (!modalRef.current) return;
 
-  const getAriaSort = (field: keyof UserMount | 'name'): 'ascending' | 'descending' | 'none' => {
-    if (sortField === field) {
-      return sortDirection === 'asc' ? 'ascending' : 'descending';
+    const focusable = Array.from(
+      modalRef.current.querySelectorAll<HTMLElement>(
+        'button, input, select, textarea, [href]'
+      )
+    ).filter((el) => !el.hasAttribute('disabled') && el.getAttribute('tabindex') !== '-1');
+
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first || !modalRef.current.contains(document.activeElement)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last || !modalRef.current.contains(document.activeElement)) {
+        e.preventDefault();
+        first.focus();
+      }
     }
-    return 'none';
   };
 
-  // Accesibilidad Modal: Foco al primer campo al abrir y devolverlo al botón que lo abrió
+  // Accesibilidad Modal: Foco al primer campo al abrir y restaurar al cerrar
   useEffect(() => {
     if (isEditModalOpen) {
-      firstFieldRef.current?.focus();
+      setTimeout(() => {
+        firstFieldRef.current?.focus();
+      }, 50);
     } else if (lastActiveElementRef.current) {
       lastActiveElementRef.current.focus();
       lastActiveElementRef.current = null;
     }
   }, [isEditModalOpen]);
 
-  // Accesibilidad Modal: Cerrar con Escape
+  // Accesibilidad: Cerrar menú exportar con click fuera
   useEffect(() => {
-    if (!isEditModalOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
+
+  // Accesibilidad: Cerrar modal con tecla Escape
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setIsEditModalOpen(false);
-        setEditingMount(null);
+        if (isEditModalOpen) {
+          setIsEditModalOpen(false);
+          setEditingMount(null);
+        }
+        if (showExportMenu) {
+          setShowExportMenu(false);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isEditModalOpen]);
+  }, [isEditModalOpen, showExportMenu]);
 
+  // Filtrado reactivo de monturas
+  const filteredMounts = mounts.filter((m) => {
+    const matchesSearch =
+      m.nickname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.breed.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSpecies = speciesFilter === 'all' || m.species === speciesFilter;
+    const matchesFertility = fertilityFilter === 'all' || m.fertility === fertilityFilter;
+    const matchesGender = genderFilter === 'all' || m.gender === genderFilter;
+    const matchesGen = genFilter === 'all' || m.generation.toString() === genFilter;
+    const matchesCapacity = capacityFilter === 'all' || m.capacity === capacityFilter;
 
-  // Accesibilidad Modal: atrapar el foco con Tab / Shift+Tab dentro del diálogo
-  const handleModalKeyDown = (e: { key: string; shiftKey: boolean; preventDefault: () => void }) => {
-    if (e.key !== 'Tab' || !modalRef.current) return;
-    const focusable = Array.from(
-      modalRef.current.querySelectorAll<HTMLElement>(
-        'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
-      )
-    ).filter((el) => !(el as HTMLButtonElement).disabled && el.offsetParent !== null);
-    if (focusable.length === 0) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = document.activeElement as HTMLElement | null;
-    const outside = !active || !modalRef.current.contains(active);
-    if (e.shiftKey && (active === first || outside)) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && (active === last || outside)) {
-      e.preventDefault();
-      first.focus();
+    return matchesSearch && matchesSpecies && matchesFertility && matchesGender && matchesGen && matchesCapacity;
+  });
+
+  // Ordenación de monturas
+  const sortedMounts = [...filteredMounts].sort((a, b) => {
+    let aVal = a[sortField as keyof UserMount];
+    let bVal = b[sortField as keyof UserMount];
+
+    if (sortField === 'name') {
+      aVal = a.nickname;
+      bVal = b.nickname;
+    }
+
+    if (typeof aVal === 'string') {
+      return sortDirection === 'asc'
+        ? (aVal as string).localeCompare(bVal as string)
+        : (bVal as string).localeCompare(aVal as string);
+    }
+
+    return sortDirection === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
+  });
+
+  // Paginación
+  const totalPages = Math.max(1, Math.ceil(sortedMounts.length / itemsPerPage));
+  const paginatedMounts = sortedMounts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, speciesFilter, fertilityFilter, genderFilter, genFilter, capacityFilter, sortField, sortDirection]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const handleSort = (field: keyof UserMount | 'name') => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
     }
   };
 
-  // Accesibilidad Menú Exportar: Cerrar con Escape y al hacer clic fuera
-  useEffect(() => {
-    if (!showExportMenu) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
-        setShowExportMenu(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowExportMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [showExportMenu]);
+  const getFingerprint = (m: Partial<UserMount>) =>
+    `${(m.nickname || '').trim().toLowerCase()}|${m.species}|${(m.breed || '').trim().toLowerCase()}|${m.gender}|${m.generation}`;
 
-  // Importar Excel / CSV / JSON
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // Manejo de Importación de Archivo (CSV, Excel .xlsx / .xls, o Copia de seguridad JSON)
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
     setStatusMessage(null);
 
+    const isJson = file.name.toLowerCase().endsWith('.json');
+
     try {
-      const isJson = file.name.toLowerCase().endsWith('.json');
+      let parsedMounts: UserMount[] = [];
+      let invalidCount = 0;
 
       if (isJson) {
-        const { mounts: backupMounts, invalid } = await parseBackupFile(file);
-        const currentIds = new Set(mounts.map((m) => m.id));
-        const existingCount = backupMounts.filter((m) => currentIds.has(m.id)).length;
-
-        if (existingCount > 0) {
-          const confirmed = window.confirm(
-            `Se restaurarán ${backupMounts.length} monturas; las que ya existen con el mismo id se sobrescribirán. ¿Continuar?`
-          );
-          if (!confirmed) {
-            setIsUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            return;
-          }
-        }
-
-        await db.mounts.bulkPut(backupMounts);
-        setStatusMessage({
-          type: 'success',
-          text: `Se importaron ${backupMounts.length} monturas, 0 omitidas por duplicadas y ${invalid} inválidas.`,
-        });
-        onDataChanged();
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return;
+        const result = await parseBackupFile(file);
+        parsedMounts = result.mounts;
+        invalidCount = result.invalid;
+      } else {
+        parsedMounts = await parseExcelFile(file);
       }
-
-      // Si es hoja de cálculo (.xlsx, .xls, .csv)
-      const parsedMounts = await parseExcelFile(file);
-
-      const getFingerprint = (m: { nickname: string; species: string; breed: string; generation: number; gender: string }) =>
-        `${m.nickname}|${m.species}|${m.breed}|${m.generation}|${m.gender}`.toLowerCase();
 
       const currentFingerprints = new Set(mounts.map(getFingerprint));
       const duplicates = parsedMounts.filter((m) => currentFingerprints.has(getFingerprint(m)));
+
       let toImport = parsedMounts;
       let duplicatesOmitted = 0;
 
@@ -423,484 +467,370 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       }
 
       await db.mounts.bulkPut(toImport);
+      const invalidSuffix = invalidCount > 0 ? `, ${invalidCount} inválidas omitidas` : '';
       setStatusMessage({
         type: 'success',
-        text: `Se importaron ${toImport.length} monturas, ${duplicatesOmitted} omitidas por duplicadas.`,
+        text: `Se importaron ${toImport.length} monturas, ${duplicatesOmitted} omitidas por duplicadas${invalidSuffix}.`,
       });
       onDataChanged();
-      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err: any) {
       setStatusMessage({
         type: 'error',
-        text: err?.message || 'Error al procesar el archivo. Revisa el formato e inténtalo de nuevo.',
+        text: err.message || 'Error al procesar el archivo. Revisa el formato.',
       });
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  // Limpiar establo completo
-  const handleClearAll = async () => {
-    if (!window.confirm('¿Seguro que deseas eliminar TODAS las monturas del establo? Esta acción es irreversible.')) return;
-    try {
-      await db.mounts.clear();
-      onDataChanged();
-    } catch (err: any) {
-      setStatusMessage({
-        type: 'error',
-        text: err?.message || 'Error al vaciar el establo.',
-      });
-    }
-  };
-
-  const handleRemoveSampleMounts = async () => {
-    const sampleMounts = mounts.filter((m) => m.id.startsWith('sample-'));
-    if (sampleMounts.length === 0) return;
-
-    const nicknames = sampleMounts.map((m) => m.nickname || m.breed || 'Sin Nombre').join(', ');
-    const confirmed = window.confirm(
-      `Se eliminarán las siguientes monturas de ejemplo:\n${nicknames}\n\nSi editaste alguna para usarla como real, cancela y renómbrala primero.`
-    );
-    if (!confirmed) return;
-
-    try {
-      await db.mounts.bulkDelete(sampleMounts.map((m) => m.id));
-      onDataChanged();
-    } catch (err: any) {
-      setStatusMessage({
-        type: 'error',
-        text: err?.message || 'Error al eliminar las monturas de ejemplo.',
-      });
-    }
-  };
-
+  // Eliminación individual
   const handleDeleteMount = async (id: string) => {
-    const mountToDelete = mounts.find((m) => m.id === id);
-    const mountName = mountToDelete?.nickname || mountToDelete?.breed || 'esta montura';
-
-    if (!window.confirm(`¿Seguro que deseas eliminar a "${mountName}" de tu establo?`)) return;
-
-    try {
+    if (window.confirm('¿Seguro que deseas eliminar esta montura?')) {
       await db.mounts.delete(id);
+      setStatusMessage({ type: 'success', text: 'Montura eliminada con éxito.' });
       onDataChanged();
-    } catch (err: any) {
-      setStatusMessage({
-        type: 'error',
-        text: err?.message || 'Error al eliminar la montura.',
-      });
     }
   };
 
-  // Filtrado
-  const filteredMounts = mounts.filter((m) => {
-    if (speciesFilter !== 'all' && m.species !== speciesFilter) return false;
-    if (fertilityFilter !== 'all' && m.fertility !== fertilityFilter) return false;
-    if (genderFilter !== 'all' && m.gender !== genderFilter) return false;
-    if (genFilter !== 'all' && m.generation !== Number(genFilter)) return false;
-    if (capacityFilter !== 'all' && m.capacity !== capacityFilter) return false;
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      const matchNick = m.nickname.toLowerCase().includes(term);
-      const matchBreed = m.breed.toLowerCase().includes(term);
-      const matchNotes = (m.notes || '').toLowerCase().includes(term);
-      if (!matchNick && !matchBreed && !matchNotes) return false;
-    }
-
-    return true;
-  });
-
-  // Ordenado
-  const sortedMounts = [...filteredMounts].sort((a, b) => {
-    let aVal = a[sortField as keyof UserMount];
-    let bVal = b[sortField as keyof UserMount];
-
-    if (typeof aVal === 'string') {
-      return sortDirection === 'asc'
-        ? (aVal as string).localeCompare(bVal as string)
-        : (bVal as string).localeCompare(aVal as string);
-    }
-
-    return sortDirection === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
-  });
-
-  const totalPages = Math.ceil(sortedMounts.length / itemsPerPage) || 1;
-  const paginatedMounts = sortedMounts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, speciesFilter, fertilityFilter, genderFilter, genFilter, capacityFilter, sortField, sortDirection]);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
-
-  const handleSort = (field: keyof UserMount | 'name') => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
-  };
-
+  // Guardado de Creación / Edición
   const handleSaveMount = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingMount || !editingMount.breed) return;
+    if (!editingMount) return;
 
-    const breedDef = ALL_MOUNTS_DATA.find(
-      (d) => d.name === editingMount.breed && d.species === editingMount.species
-    );
+    if (!editingMount.nickname.trim()) {
+      setStatusMessage({ type: 'error', text: 'El nombre de la montura es obligatorio.' });
+      return;
+    }
+
+    const matchedDef = findMountByBreedAndSpecies(editingMount.breed, editingMount.species);
+    const resolvedGeneration = matchedDef ? matchedDef.generation : toNum(editingMount.generation) || 1;
+    const resolvedImageUrl = matchedDef ? matchedDef.imageUrl : '';
+
+    const xp = Math.min(MAX_MOUNT_XP, Math.max(0, toNum(editingMount.currentXp)));
+    const calculatedLevel = xp >= MAX_MOUNT_XP ? 200 : calculateLevelFromXp(xp);
 
     const isEsterilOrSenil = editingMount.fertility === 'esteril' || editingMount.fertility === 'senil';
 
-    const currentXp = Math.min(MAX_MOUNT_XP, Math.max(0, toNum(editingMount.currentXp)));
-    const currentLevel = Math.min(200, Math.max(1, toNum(editingMount.currentLevel) || calculateLevelFromXp(currentXp)));
-
-    const isNew = !editingMount.id;
     const defaultMaxRepro = getDefaultMaxReproductions(editingMount.species);
+    const parsedRepro = toNum(editingMount.reproductionCount);
+    const reproductionCount = Math.max(0, Math.floor(parsedRepro));
 
-    const isSample = typeof editingMount.id === 'string' && editingMount.id.startsWith('sample-');
-    const oldId = editingMount.id;
-    const newId = isSample
-      ? `mount_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
-      : (editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+    const parsedMaxRepro = toNum(editingMount.maxReproductions);
+    const maxReproductions = parsedMaxRepro > 0 ? Math.floor(parsedMaxRepro) : defaultMaxRepro;
 
-    const mountData: UserMount = {
-      ...editingMount,
-      id: newId,
-      nickname: (editingMount.nickname?.trim()) || editingMount.breed,
-      definitionId: breedDef ? breedDef.id : `${editingMount.species}_custom`,
-      species: editingMount.species as SpeciesType,
+    const mountToSave: UserMount = {
+      id: editingMount.id,
+      nickname: editingMount.nickname.trim(),
+      species: editingMount.species,
       breed: editingMount.breed,
-      generation: toNum(editingMount.generation) || (breedDef ? breedDef.generation : 1),
-      gender: (editingMount.gender as 'M' | 'F') || 'M',
-      currentLevel,
-      currentXp,
-      fertility: (editingMount.fertility as FertilityStatus) || 'fertil',
-      capacity: (editingMount.capacity as SpecialCapacity) || 'ninguna',
-      reproductionCount: isNew ? 0 : toNum(editingMount.reproductionCount),
-      maxReproductions: isNew ? defaultMaxRepro : (toNum(editingMount.maxReproductions) || defaultMaxRepro),
+      generation: resolvedGeneration,
+      imageUrl: resolvedImageUrl,
+      gender: editingMount.gender,
+      currentLevel: calculatedLevel,
+      currentXp: xp,
+      fertility: editingMount.fertility,
+      capacity: editingMount.capacity,
+      reproductionCount,
+      maxReproductions,
       serenity: isEsterilOrSenil ? 0 : Math.min(10000, Math.max(-10000, toNum(editingMount.serenity))),
       love: isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, toNum(editingMount.love))),
       maturity: isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, toNum(editingMount.maturity))),
       stamina: isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, toNum(editingMount.stamina))),
-      imageUrl: breedDef?.imageUrl || editingMount.imageUrl || '',
-      notes: editingMount.notes || '',
-      createdAt: editingMount.createdAt || Date.now(),
-      updatedAt: Date.now(),
+      notes: (editingMount.notes || '').trim(),
     };
 
     try {
-      if (isSample && oldId) {
-        await db.transaction('rw', db.mounts, async () => {
-          await db.mounts.delete(oldId);
-          await db.mounts.put(mountData);
-        });
-      } else {
-        await db.mounts.put(mountData);
-      }
+      await db.mounts.put(mountToSave);
       setIsEditModalOpen(false);
       setEditingMount(null);
+      setStatusMessage({ type: 'success', text: 'Montura guardada con éxito.' });
       onDataChanged();
     } catch (err: any) {
-      setStatusMessage({
-        type: 'error',
-        text: err?.message || 'Error al guardar la montura en la base de datos.',
-      });
+      setStatusMessage({ type: 'error', text: 'No se pudo guardar la montura.' });
     }
   };
 
-  const handleOpenNewMountModal = (triggerEl?: HTMLElement) => {
-    if (triggerEl) {
-      lastActiveElementRef.current = triggerEl;
-    }
+  // Abrir Modal para crear nueva montura
+  const handleAddNew = (e: React.MouseEvent<HTMLElement>) => {
+    lastActiveElementRef.current = e.currentTarget;
     const defaultSpecies: SpeciesType = 'dragopavo';
-    const first = ALL_MOUNTS_DATA.find((m) => m.species === defaultSpecies);
+    const firstBreed = ALL_MOUNTS_DATA.find((m) => m.species === defaultSpecies)?.breed || 'Pelirrojo';
+    const matched = findMountByBreedAndSpecies(firstBreed, defaultSpecies);
+
     setEditingMount({
+      id: `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      nickname: '',
       species: defaultSpecies,
-      breed: first?.name || 'Pelirroja',
-      generation: first?.generation || 1,
+      breed: firstBreed,
+      generation: matched ? matched.generation : 1,
       gender: 'M',
       currentLevel: 1,
       currentXp: 0,
       fertility: 'fertil',
       capacity: 'ninguna',
       reproductionCount: 0,
-      maxReproductions: 5,
-      serenity: 2000,
-      love: 20000,
-      maturity: 20000,
-      stamina: 20000,
-      imageUrl: first?.imageUrl || '',
+      maxReproductions: getDefaultMaxReproductions(defaultSpecies),
+      serenity: 0,
+      love: 0,
+      maturity: 0,
+      stamina: 0,
       notes: '',
     });
     setIsEditModalOpen(true);
   };
 
-  const isEditingEsterilOrSenil = editingMount?.fertility === 'esteril' || editingMount?.fertility === 'senil';
+  // Monturas disponibles para el select según la especie seleccionada en el modal
+  const availableBreeds = editingMount
+    ? ALL_MOUNTS_DATA.filter((m) => m.species === editingMount.species)
+    : [];
 
   return (
-    <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
-      {/* 1. SECCIÓN SUPERIOR: Botón Seleccionar Archivo y Botón Descargar Plantilla CSV */}
-      <div className="space-y-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-          {/* Botón Seleccionar Archivo */}
-          <div className="flex flex-col gap-1">
-            <label htmlFor={fileInputId} className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
-              <input
-                id={fileInputId}
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept=".xlsx,.xls,.csv,.json"
-                className="sr-only"
-              />
-              {isUploading ? (
-                <RefreshCw className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />
-              ) : (
-                <FolderUp className="w-5 h-5 text-[#1e3a8a] flex-shrink-0" />
-              )}
-              <span>Seleccionar archivo</span>
-            </label>
-            <p className="text-[11px] text-slate-500 text-center">
-              Acepta .xlsx, .xls, .csv y backup .json
-            </p>
-          </div>
+    <div className="space-y-4">
+      {/* 1. BARRA SUPERIOR DE ACCIONES */}
+      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-4 sm:p-5 shadow-2xl border border-slate-200/90 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+            <span>Establo Oficial</span>
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+              {filteredMounts.length} {filteredMounts.length === 1 ? 'ejemplar' : 'ejemplares'}
+            </span>
+          </h2>
+          <p className="text-xs text-slate-600 mt-0.5">
+            Gestiona tus monturas, sincroniza niveles y exporta tus registros.
+          </p>
+        </div>
 
-          {/* Botón Descargar Plantilla CSV */}
+        {/* Botonera de Importar, Descargar Plantilla y Añadir */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Input oculto para subir archivo */}
+          <input
+            id={fileInputId}
+            ref={fileInputRef}
+            type="file"
+            accept=".csv, .xlsx, .xls, .json"
+            onChange={handleFileUpload}
+            disabled={isUploading}
+            className="hidden"
+          />
+
           <button
-            onClick={downloadCsvTemplate}
-            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
-            title="Descargar plantilla CSV (.csv) universal para Google Sheets y Excel"
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            aria-label="Importar archivo CSV o Excel"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold flex items-center gap-2 shadow-xs transition cursor-pointer disabled:opacity-50"
           >
-            <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />
-            <span>Descargar plantilla CSV</span>
+            {isUploading ? (
+              <RefreshCw className="w-4 h-4 text-blue-600 animate-spin" />
+            ) : (
+              <FolderUp className="w-4 h-4 text-blue-600" />
+            )}
+            <span>{isUploading ? 'Importando...' : 'Importar Archivo'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={downloadCsvTemplate}
+            aria-label="Descargar plantilla CSV"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold flex items-center gap-2 shadow-xs transition cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-slate-600" />
+            <span>Plantilla CSV</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleAddNew}
+            aria-label="Añadir nueva montura al establo"
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-2 shadow-md shadow-blue-900/20 transition cursor-pointer"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Añadir Montura</span>
           </button>
         </div>
+      </div>
 
-        {/* Acciones de respaldo y exportación discretas */}
-        <div className="flex items-center justify-between text-xs text-slate-500 pt-1 px-1">
-          <div className="flex items-center gap-2">
-            <span>Plantilla compatible con Google Sheets y Excel.</span>
-            {mounts.length > 0 && (
-              <button
-                onClick={handleClearAll}
-                className="text-rose-600 hover:text-rose-700 hover:underline font-semibold transition"
-              >
-                Vaciar establo
-              </button>
-            )}
-          </div>
-
-          <div ref={exportMenuRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              aria-expanded={showExportMenu}
-              aria-haspopup="menu"
-              className="font-bold text-[#1e3a8a] hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              Exportar datos
-            </button>
-
-            {showExportMenu && (
-              <div role="menu" className="absolute right-0 bottom-full mb-2 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 w-44 z-30">
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    exportMountsToExcel(mounts);
-                    setShowExportMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 flex items-center gap-2 font-medium cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                  <span>Excel (.xlsx)</span>
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    exportMountsToJson(mounts);
-                    setShowExportMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 flex items-center gap-2 font-medium cursor-pointer"
-                >
-                  <FileJson className="w-4 h-4 text-blue-600" />
-                  <span>JSON (.json)</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
+      {/* 2. MENSAJES DE ESTADO ACCESIBLES (ARIA-LIVE) */}
+      <div className="min-h-[1.5rem]" aria-atomic="true">
         {statusMessage && (
           <div
             role={statusMessage.type === 'error' ? 'alert' : 'status'}
-            aria-live={statusMessage.type === 'error' ? undefined : 'polite'}
-            className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between ${
+            aria-live={statusMessage.type !== 'error' ? 'polite' : undefined}
+            className={`p-3 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-xs transition-all ${
               statusMessage.type === 'success'
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                : 'bg-rose-50 text-rose-800 border border-rose-200'
+                ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+                : 'bg-rose-50 text-rose-900 border border-rose-200'
             }`}
           >
             <span>{statusMessage.text}</span>
-            <button type="button" onClick={() => setStatusMessage(null)} aria-label="Cerrar">
+            <button
+              type="button"
+              onClick={() => setStatusMessage(null)}
+              aria-label="Cerrar notificación"
+              className="p-1 hover:bg-black/5 rounded-lg transition"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
         )}
       </div>
 
-      {/* 2. ACCIONES RÁPIDAS Y BÚSQUEDA */}
-      <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center justify-between pt-1">
-        {/* Barra de Búsqueda */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            id={searchInputId}
-            type="text"
-            aria-label="Buscar por apodo, color, raza o notas"
-            placeholder="Buscar por apodo, color, raza o notas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium shadow-sm"
-          />
-        </div>
+      {/* 3. BARRA DE FILTROS, BÚSQUEDA Y EXPORTACIÓN */}
+      <div className="bg-white rounded-3xl p-3 sm:p-4 border border-slate-200/90 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        <div className="flex flex-1 flex-wrap items-center gap-2.5">
+          {/* Búsqueda por texto */}
+          <div className="relative min-w-[200px] flex-1">
+            <label htmlFor={searchInputId} className="sr-only">
+              Buscar por nombre o raza
+            </label>
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              id={searchInputId}
+              type="text"
+              placeholder="Buscar por nombre o raza..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                aria-label="Limpiar búsqueda"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
 
-        {/* Botón Añadir Montura */}
-        <button
-          type="button"
-          onClick={(e) => handleOpenNewMountModal(e.currentTarget)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1e3a8a] hover:bg-[#172554] text-white rounded-2xl text-xs font-extrabold transition shadow-sm cursor-pointer flex-shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Añadir montura</span>
-        </button>
-      </div>
-
-      {/* 3. BARRA DE FILTROS */}
-      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/90 shadow-sm space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-slate-400" /> Filtros Activos:
-          </span>
-          {(speciesFilter !== 'all' ||
-            fertilityFilter !== 'all' ||
-            genderFilter !== 'all' ||
-            genFilter !== 'all' ||
-            capacityFilter !== 'all' ||
-            searchTerm !== '') && (
-            <button
-              type="button"
-              onClick={() => {
-                setSpeciesFilter('all');
-                setFertilityFilter('all');
-                setGenderFilter('all');
-                setGenFilter('all');
-                setCapacityFilter('all');
-                setSearchTerm('');
-              }}
-              className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
-            >
-              Restablecer
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-          {/* Especie */}
+          {/* Filtro Especie */}
           <select
-            aria-label="Filtrar por especie"
             value={speciesFilter}
             onChange={(e) => setSpeciesFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            aria-label="Filtrar por especie"
+            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
-            <option value="all">Todas</option>
-            {(Object.keys(SPECIES_LABELS) as SpeciesType[]).map((sp) => (
-              <option key={sp} value={sp}>
-                {SPECIES_LABELS[sp]}
-              </option>
-            ))}
+            <option value="all">Todas las especies</option>
+            <option value="dragopavo">Dragopavos</option>
+            <option value="muluaga">Mulaguas</option>
+            <option value="vueloceronte">Vuelocerontes</option>
           </select>
 
-          {/* Fertilidad */}
+          {/* Filtro Fertilidad */}
           <select
-            aria-label="Filtrar por fertilidad"
             value={fertilityFilter}
             onChange={(e) => setFertilityFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            aria-label="Filtrar por fertilidad"
+            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
-            <option value="all">Todas</option>
-            {(Object.keys(FERTILITY_LABELS) as FertilityStatus[]).map((fert) => (
-              <option key={fert} value={fert}>
-                {FERTILITY_LABELS[fert]}
-              </option>
-            ))}
+            <option value="all">Cualquier fertilidad</option>
+            <option value="fertil">Fértil</option>
+            <option value="fecunda">Fecunda</option>
+            <option value="esteril">Estéril</option>
+            <option value="senil">Senil</option>
           </select>
 
-          {/* Sexo */}
+          {/* Filtro Sexo */}
           <select
-            aria-label="Filtrar por sexo"
             value={genderFilter}
             onChange={(e) => setGenderFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            aria-label="Filtrar por sexo"
+            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
-            <option value="all">Todos</option>
+            <option value="all">Ambos sexos</option>
             <option value="M">Macho (♂)</option>
             <option value="F">Hembra (♀)</option>
           </select>
 
-          {/* Generación */}
+          {/* Filtro Generación */}
           <select
-            aria-label="Filtrar por generación"
             value={genFilter}
             onChange={(e) => setGenFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            aria-label="Filtrar por generación"
+            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
-            <option value="all">Todas</option>
+            <option value="all">Cualquier Gen</option>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((g) => (
-              <option key={g} value={g}>
+              <option key={g} value={g.toString()}>
                 Gen {g}
               </option>
             ))}
           </select>
 
-          {/* Capacidad */}
+          {/* Filtro Capacidad */}
           <select
-            aria-label="Filtrar por capacidad"
             value={capacityFilter}
             onChange={(e) => setCapacityFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            aria-label="Filtrar por capacidad genética"
+            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
-            <option value="all">Todas</option>
-            {(Object.keys(CAPACITY_LABELS) as SpecialCapacity[]).map((cap) => (
-              <option key={cap} value={cap}>
-                {CAPACITY_LABELS[cap]}
-              </option>
-            ))}
+            <option value="all">Todas las capacidades</option>
+            <option value="ninguna">Sin capacidad</option>
+            <option value="sabia">Sabia (XP x2)</option>
+            <option value="enamoradiza">Enamoradiza</option>
+            <option value="resistente">Resistente</option>
+            <option value="precoz">Precoz</option>
+            <option value="reproductora">Reproductora</option>
+            <option value="camaleon">Camaleón</option>
           </select>
         </div>
-      </div>
 
-      {/* Aviso de monturas de ejemplo */}
-      {mounts.some((m) => m.id.startsWith('sample-')) && (
-        <div className="p-3 rounded-xl text-xs font-semibold flex items-center justify-between gap-2 bg-amber-50 text-amber-800 border border-amber-200">
-          <span>Tienes monturas de ejemplo en tu establo</span>
+        {/* Menú Desplegable de Exportación */}
+        <div className="relative flex-shrink-0" ref={exportMenuRef}>
           <button
-            onClick={handleRemoveSampleMounts}
-            className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition shadow-sm cursor-pointer flex-shrink-0"
+            type="button"
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            aria-haspopup="menu"
+            aria-expanded={showExportMenu}
+            className="w-full sm:w-auto px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
           >
-            Quitar ejemplos
+            <Download className="w-4 h-4 text-emerald-600" />
+            <span>Exportar Establo</span>
           </button>
+
+          {showExportMenu && (
+            <div role="menu" className="absolute right-0 bottom-full mb-2 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 w-44 z-30">
+              <button
+                type="button"
+                role="menuitem"
+                disabled={isExportingExcel}
+                onClick={async () => {
+                  setIsExportingExcel(true);
+                  try {
+                    await exportMountsToExcel(mounts);
+                  } catch (err: any) {
+                    setStatusMessage({
+                      type: 'error',
+                      text: err?.message || 'Error al exportar a Excel.',
+                    });
+                  } finally {
+                    setIsExportingExcel(false);
+                    setShowExportMenu(false);
+                  }
+                }}
+                className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 flex items-center gap-2 font-medium cursor-pointer disabled:opacity-50"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                <span>{isExportingExcel ? 'Cargando…' : 'Excel (.xlsx)'}</span>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  exportMountsToJson(mounts);
+                  setShowExportMenu(false);
+                }}
+                className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 flex items-center gap-2 font-medium cursor-pointer"
+              >
+                <FileJson className="w-4 h-4 text-amber-600" />
+                <span>JSON (.json)</span>
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* 4. TABLA PRINCIPAL DE MONTURAS */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
@@ -908,69 +838,72 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
           <table className="w-full text-left border-collapse min-w-[760px]">
             <thead className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
               <tr>
-                <th
-                  aria-sort={getAriaSort('nickname')}
-                  className="py-3 px-3.5 text-left"
-                >
+                <th scope="col" className="py-2.5 px-3.5">
                   <button
                     type="button"
-                    onClick={() => handleSort('nickname')}
-                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                    onClick={() => handleSort('name')}
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition cursor-pointer"
                   >
-                    <span>Nombre / Raza</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <span>Montura / Raza</span>
+                    <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th
-                  aria-sort={getAriaSort('generation')}
-                  className="py-3 px-3 text-left"
-                >
+                <th scope="col" className="py-2.5 px-2 text-center">
                   <button
                     type="button"
                     onClick={() => handleSort('generation')}
-                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                    className="inline-flex items-center gap-1 hover:text-slate-800 transition cursor-pointer"
                   >
                     <span>Gen</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th
-                  aria-sort={getAriaSort('currentLevel')}
-                  className="py-3 px-3 text-left"
-                >
+                <th scope="col" className="py-2.5 px-3 text-center">
                   <button
                     type="button"
                     onClick={() => handleSort('currentLevel')}
-                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                    className="inline-flex items-center gap-1 hover:text-slate-800 transition cursor-pointer"
                   >
                     <span>Nivel / XP</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th
-                  aria-sort={getAriaSort('fertility')}
-                  className="py-3 px-3 text-left"
-                >
+                <th scope="col" className="py-2.5 px-3 text-center">
                   <button
                     type="button"
                     onClick={() => handleSort('fertility')}
-                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                    className="inline-flex items-center gap-1 hover:text-slate-800 transition cursor-pointer"
                   >
                     <span>Fertilidad</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th className="py-3 px-3">Indicadores</th>
-                <th className="py-3 px-3 text-right">Acciones</th>
+                <th scope="col" className="py-2.5 px-3 text-center">
+                  <button
+                    type="button"
+                    onClick={() => handleSort('capacity')}
+                    className="inline-flex items-center gap-1 hover:text-slate-800 transition cursor-pointer"
+                  >
+                    <span>Capacidad</span>
+                    <ArrowUpDown className="w-3 h-3" />
+                  </button>
+                </th>
+                <th scope="col" className="py-2.5 px-3.5 text-center min-w-[210px] w-60">
+                  <span title="Barras de estadísticas de Amor, Madurez y Resistencia">Indicadores (A · M · R)</span>
+                </th>
+                <th scope="col" className="py-2.5 px-3.5 text-right">
+                  <span>Acciones</span>
+                </th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-slate-100 text-xs">
               {paginatedMounts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-600 text-sm">
+                  <td colSpan={7} className="py-12 text-center text-slate-600 font-medium">
                     {mounts.length === 0
                       ? 'Tu establo está vacío. Importa un archivo o pulsa «Añadir montura».'
-                      : 'No se encontraron monturas que coincidan con los filtros.'}
+                      : 'No se encontraron monturas que coincidan con los filtros aplicados.'}
                   </td>
                 </tr>
               ) : (
@@ -980,7 +913,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   return (
                     <tr
                       key={mount.id}
-                      className="hover:bg-slate-50/80 transition-colors group text-slate-700"
+                      className="hover:bg-slate-50/80 transition-colors group"
                     >
                       {/* Nombre, Raza y Sexo */}
                       <td className="py-2.5 px-3.5">
@@ -992,6 +925,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                                   src={mount.imageUrl}
                                   alt=""
                                   loading="lazy"
+                                  decoding="async"
                                   className="w-full h-full object-contain p-0.5"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
@@ -1011,7 +945,6 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                                 {mount.nickname}
                               </span>
                               <span
-                                role="img"
                                 aria-label={mount.gender === 'M' ? 'Macho' : 'Hembra'}
                                 className={`text-[10px] font-bold ${
                                   mount.gender === 'M' ? 'text-blue-600' : 'text-rose-500'
@@ -1020,7 +953,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                                 {mount.gender === 'M' ? '♂' : '♀'}
                               </span>
                             </div>
-                            <span className="text-[11px] text-slate-500 block truncate">
+                            <span className="text-[11px] text-slate-600 font-medium truncate block">
                               {mount.breed}
                             </span>
                           </div>
@@ -1028,71 +961,71 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                       </td>
 
                       {/* Generación */}
-                      <td className="py-2.5 px-3 font-semibold text-slate-600">
-                        <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-mono text-[11px]">
-                          G{mount.generation}
-                        </span>
+                      <td className="py-2.5 px-2 text-center font-mono font-bold text-slate-600 text-[11px]">
+                        G{mount.generation}
                       </td>
 
                       {/* Nivel y XP */}
-                      <td className="py-2.5 px-3">
-                        <div className="flex items-center gap-1.5">
+                      <td className="py-2.5 px-3 text-center">
+                        <div className="inline-flex flex-col items-center">
                           <span
-                            className={`font-bold font-mono ${
-                              mount.currentLevel >= 200 ? 'text-emerald-600 font-extrabold' : 'text-slate-800'
+                            className={`font-mono font-bold ${
+                              mount.currentLevel >= 200 ? 'text-emerald-700' : 'text-slate-800'
                             }`}
                           >
                             Nvl {mount.currentLevel}
+                            {mount.currentLevel >= 200 && (
+                              <Sparkles className="w-3 h-3 inline text-emerald-500 ml-0.5" />
+                            )}
                           </span>
-                          {mount.currentLevel >= 200 && (
-                            <Sparkles className="w-3 h-3 text-emerald-500 flex-shrink-0" />
-                          )}
+                          <span className="text-[10px] font-mono text-slate-600">
+                            {mount.currentXp.toLocaleString()} XP
+                          </span>
                         </div>
-                        <span className="text-xs text-slate-600 font-mono block">
-                          {mount.currentXp.toLocaleString()} XP
+                      </td>
+
+                      {/* Fertilidad */}
+                      <td className="py-2.5 px-3 text-center">
+                        <span
+                          className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                            mount.fertility === 'fecunda'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : mount.fertility === 'esteril'
+                              ? 'bg-slate-200 text-slate-600'
+                              : mount.fertility === 'senil'
+                              ? 'bg-rose-100 text-rose-700'
+                              : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          }`}
+                        >
+                          {FERTILITY_LABELS[mount.fertility]}
                         </span>
-                      </td>
-
-                      {/* Fertilidad y Capacidad */}
-                      <td className="py-2.5 px-3">
-                        <div className="space-y-1">
-                          <span
-                            className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                              mount.fertility === 'fecunda'
-                                ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                                : mount.fertility === 'esteril'
-                                ? 'bg-slate-200 text-slate-600'
-                                : mount.fertility === 'senil'
-                                ? 'bg-rose-100 text-rose-700'
-                                : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                            }`}
-                          >
-                            {FERTILITY_LABELS[mount.fertility]}
+                        {isReadyToBreed && (
+                          <span className="block text-[9px] font-bold text-pink-600 mt-0.5">
+                            ❤️ Lista p/ cruzar
                           </span>
-
-                          {mount.capacity !== 'ninguna' && (
-                            <span className="block text-xs text-purple-700 font-semibold truncate">
-                              ✨ {CAPACITY_LABELS[mount.capacity]}
-                            </span>
-                          )}
-
-                          {isReadyToBreed && (
-                            <span className="block text-xs text-pink-600 font-bold animate-pulse">
-                              ❤️ Lista p/ cruzar
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </td>
 
-                      {/* Indicadores */}
-                      <td className="py-2.5 px-3">
-                        {mount.fertility === 'esteril' || mount.fertility === 'senil' ? (
-                          <span className="text-xs text-slate-600 italic">No aplicable</span>
+                      {/* Capacidad */}
+                      <td className="py-2.5 px-3 text-center">
+                        {mount.capacity === 'ninguna' ? (
+                          <span className="text-slate-600">—</span>
                         ) : (
-                          <div className="space-y-1 w-40 sm:w-48">
-                            {/* Serenidad */}
-                            <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
-                              <span>Serenidad:</span>
+                          <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                            {CAPACITY_LABELS[mount.capacity]}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Barras de Estadísticas: Amor, Madurez, Resistencia */}
+                      <td className="py-2.5 px-3.5 text-center min-w-[210px] w-60">
+                        {mount.fertility === 'esteril' || mount.fertility === 'senil' ? (
+                          <span className="text-slate-600 text-[11px] italic">No aplicable</span>
+                        ) : (
+                          <div className="space-y-1.5 max-w-[220px] mx-auto">
+                            {/* Serenidad resumida */}
+                            <div className="flex items-center justify-between text-[10px] font-mono text-slate-600">
+                              <span>Serenidad</span>
                               <span
                                 className={`font-bold ${
                                   mount.serenity > 0
@@ -1106,45 +1039,66 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                               </span>
                             </div>
 
-                            {/* Amor */}
-                            <div>
-                              <div className="flex justify-between text-xs text-slate-600 font-medium">
-                                <span>Amor</span>
-                                <span>{mount.love}/20k</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                            {/* 3 mini barras horizontales (Amor, Madurez, Resistencia) */}
+                            <div className="grid grid-cols-3 gap-1.5">
+                              <div>
+                                <div className="flex justify-between text-[9px] text-slate-600">
+                                  <span>Amor</span>
+                                  <span>{Math.round(mount.love / 1000)}k</span>
+                                </div>
                                 <div
-                                  className="h-full bg-pink-500"
-                                  style={{ width: `${Math.min(100, (mount.love / 20000) * 100)}%` }}
-                                />
+                                  role="progressbar"
+                                  aria-label="Amor"
+                                  aria-valuemin={0}
+                                  aria-valuemax={20000}
+                                  aria-valuenow={mount.love}
+                                  className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"
+                                >
+                                  <div
+                                    className="bg-pink-500 h-full"
+                                    style={{ width: `${Math.min(100, (mount.love / 20000) * 100)}%` }}
+                                  />
+                                </div>
                               </div>
-                            </div>
 
-                            {/* Madurez */}
-                            <div>
-                              <div className="flex justify-between text-xs text-slate-600 font-medium">
-                                <span>Madurez</span>
-                                <span>{mount.maturity}/20k</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                              <div>
+                                <div className="flex justify-between text-[9px] text-slate-600">
+                                  <span>Mad.</span>
+                                  <span>{Math.round(mount.maturity / 1000)}k</span>
+                                </div>
                                 <div
-                                  className="h-full bg-purple-500"
-                                  style={{ width: `${Math.min(100, (mount.maturity / 20000) * 100)}%` }}
-                                />
+                                  role="progressbar"
+                                  aria-label="Madurez"
+                                  aria-valuemin={0}
+                                  aria-valuemax={20000}
+                                  aria-valuenow={mount.maturity}
+                                  className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"
+                                >
+                                  <div
+                                    className="bg-purple-500 h-full"
+                                    style={{ width: `${Math.min(100, (mount.maturity / 20000) * 100)}%` }}
+                                  />
+                                </div>
                               </div>
-                            </div>
 
-                            {/* Resistencia */}
-                            <div>
-                              <div className="flex justify-between text-xs text-slate-600 font-medium">
-                                <span>Resistencia</span>
-                                <span>{mount.stamina}/20k</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                              <div>
+                                <div className="flex justify-between text-[9px] text-slate-600">
+                                  <span>Res.</span>
+                                  <span>{Math.round(mount.stamina / 1000)}k</span>
+                                </div>
                                 <div
-                                  className="h-full bg-amber-500"
-                                  style={{ width: `${Math.min(100, (mount.stamina / 20000) * 100)}%` }}
-                                />
+                                  role="progressbar"
+                                  aria-label="Resistencia"
+                                  aria-valuemin={0}
+                                  aria-valuemax={20000}
+                                  aria-valuenow={mount.stamina}
+                                  className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"
+                                >
+                                  <div
+                                    className="bg-amber-500 h-full"
+                                    style={{ width: `${Math.min(100, (mount.stamina / 20000) * 100)}%` }}
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1152,8 +1106,8 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                       </td>
 
                       {/* Acciones */}
-                      <td className="py-2.5 px-3 text-right">
-                        <div className="flex items-center justify-end gap-1 opacity-90 group-hover:opacity-100">
+                      <td className="py-2.5 px-3.5 text-right">
+                        <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
                             onClick={(e) => {
@@ -1163,18 +1117,16 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                             }}
                             aria-label={`Editar ${mount.nickname}`}
                             className="p-1.5 hover:bg-blue-50 text-slate-600 hover:text-blue-700 rounded-lg transition cursor-pointer"
-                            title="Editar montura"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteMount(mount.id)}
                             aria-label={`Eliminar ${mount.nickname}`}
                             className="p-1.5 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-lg transition cursor-pointer"
-                            title="Eliminar montura"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -1278,10 +1230,10 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
           aria-labelledby={modalTitleId}
           className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
         >
-          <div className="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-              <h3 id={modalTitleId} className="font-extrabold text-sm sm:text-base text-slate-900">
-                {editingMount.id ? 'Editar Montura' : 'Añadir Nueva Montura'}
+          <div className="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 id={modalTitleId} className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <span>{editingMount.nickname ? `Editar: ${editingMount.nickname}` : 'Nueva Montura'}</span>
               </h3>
               <button
                 type="button"
@@ -1290,375 +1242,337 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   setEditingMount(null);
                 }}
                 aria-label="Cerrar"
-                className="p-1 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                className="p-1 text-slate-600 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveMount} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-              {statusMessage && statusMessage.type === 'error' && (
-                <div
-                  role="alert"
-                  className="p-3 rounded-xl text-xs font-semibold flex items-center justify-between bg-rose-50 text-rose-800 border border-rose-200"
-                >
-                  <span>{statusMessage.text}</span>
-                  <button type="button" onClick={() => setStatusMessage(null)} aria-label="Cerrar">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+            {statusMessage && statusMessage.type === 'error' && (
+              <div
+                role="alert"
+                className="p-3 rounded-xl text-xs font-semibold flex items-center justify-between bg-rose-50 text-rose-800 border border-rose-200"
+              >
+                <span>{statusMessage.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveMount} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Especie */}
                 <div>
-                  <label htmlFor={speciesId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={speciesId} className="block font-bold text-slate-700 mb-1">
                     Especie
                   </label>
                   <select
-                    ref={firstFieldRef}
                     id={speciesId}
-                    value={editingMount.species || 'dragopavo'}
+                    ref={firstFieldRef}
+                    value={editingMount.species}
                     onChange={(e) => {
-                      const newSp = e.target.value as SpeciesType;
-                      const list = getMountsBySpecies(newSp);
+                      const sp = e.target.value as SpeciesType;
+                      const firstB = ALL_MOUNTS_DATA.find((m) => m.species === sp)?.breed || '';
+                      const mDef = findMountByBreedAndSpecies(firstB, sp);
+                      const defaultMax = getDefaultMaxReproductions(sp);
                       setEditingMount({
                         ...editingMount,
-                        species: newSp,
-                        breed: list[0]?.name || '',
-                        generation: list[0]?.generation || 1,
-                        imageUrl: list[0]?.imageUrl || '',
+                        species: sp,
+                        breed: firstB,
+                        generation: mDef ? mDef.generation : 1,
+                        maxReproductions: defaultMax,
                       });
                     }}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-blue-500"
                   >
-                    {(Object.keys(SPECIES_LABELS) as SpeciesType[]).map((sp) => (
-                      <option key={sp} value={sp}>
-                        {SPECIES_LABELS[sp]}
-                      </option>
-                    ))}
+                    <option value="dragopavo">Dragopavo</option>
+                    <option value="muluaga">Mulagua</option>
+                    <option value="vueloceronte">Vueloceronte</option>
                   </select>
                 </div>
 
-                {/* Raza / Color */}
+                {/* Color / Raza */}
                 <div>
-                  <label htmlFor={breedId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                    Raza
+                  <label htmlFor={breedId} className="block font-bold text-slate-700 mb-1">
+                    Raza / Color
                   </label>
                   <select
                     id={breedId}
-                    value={editingMount.breed || ''}
+                    value={editingMount.breed}
                     onChange={(e) => {
-                      const selectedName = e.target.value;
-                      const def = ALL_MOUNTS_DATA.find(
-                        (m) => m.name === selectedName && m.species === editingMount.species
-                      );
+                      const b = e.target.value;
+                      const mDef = findMountByBreedAndSpecies(b, editingMount.species);
                       setEditingMount({
                         ...editingMount,
-                        breed: selectedName,
-                        generation: def?.generation || editingMount.generation,
-                        imageUrl: def?.imageUrl || editingMount.imageUrl,
+                        breed: b,
+                        generation: mDef ? mDef.generation : editingMount.generation,
                       });
                     }}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-blue-500"
                   >
-                    {getMountsBySpecies(editingMount.species || 'dragopavo').map((m) => (
-                      <option key={m.id} value={m.name}>
-                        {m.name} (G{m.generation})
+                    {availableBreeds.map((b) => (
+                      <option key={b.breed} value={b.breed}>
+                        {b.breed} (Gen {b.generation})
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
 
-                {/* Apodo */}
-                <div>
-                  <label htmlFor={nicknameId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                    Apodo / Nombre
+              {/* Nombre y Sexo */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label htmlFor={nicknameId} className="block font-bold text-slate-700 mb-1">
+                    Nombre / Apodo
                   </label>
                   <input
                     id={nicknameId}
                     type="text"
                     required
-                    value={editingMount.nickname || ''}
+                    placeholder="Ej. RayoVeloz"
+                    value={editingMount.nickname}
                     onChange={(e) => setEditingMount({ ...editingMount, nickname: e.target.value })}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ej. Flamito"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
-                {/* Sexo */}
                 <div>
-                  <label id={genderLabelId} htmlFor={genderMachoId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <span id={genderLabelId} className="block font-bold text-slate-700 mb-1">
                     Sexo
-                  </label>
-                  <div role="group" aria-labelledby={genderLabelId} className="grid grid-cols-2 gap-2">
+                  </span>
+                  <div role="radiogroup" aria-labelledby={genderLabelId} className="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-xl">
                     <button
                       id={genderMachoId}
                       type="button"
+                      role="radio"
+                      aria-checked={editingMount.gender === 'M'}
                       onClick={() => setEditingMount({ ...editingMount, gender: 'M' })}
-                      className={`py-2 text-xs font-bold rounded-xl border transition cursor-pointer ${
+                      className={`py-1 rounded-lg font-bold transition ${
                         editingMount.gender === 'M'
-                          ? 'bg-blue-50 border-blue-500 text-blue-700'
-                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      ♂ Macho
+                      ♂ M
                     </button>
                     <button
                       type="button"
+                      role="radio"
+                      aria-checked={editingMount.gender === 'F'}
                       onClick={() => setEditingMount({ ...editingMount, gender: 'F' })}
-                      className={`py-2 text-xs font-bold rounded-xl border transition cursor-pointer ${
+                      className={`py-1 rounded-lg font-bold transition ${
                         editingMount.gender === 'F'
-                          ? 'bg-rose-50 border-rose-500 text-rose-700'
-                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                          ? 'bg-rose-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      ♀ Hembra
+                      ♀ H
                     </button>
                   </div>
                 </div>
+              </div>
 
-                {/* Nivel Actual */}
+              {/* Sincronización Automática: Nivel y Experiencia */}
+              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
                 <div>
-                  <label htmlFor={levelId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                    Nivel (1 - 200)
+                  <label htmlFor={levelId} className="block font-bold text-slate-700 mb-1">
+                    Nivel (1–200)
                   </label>
                   <input
                     id={levelId}
                     type="number"
                     min={1}
                     max={200}
-                    value={editingMount.currentLevel ?? 1}
+                    value={editingMount.currentLevel ?? ''}
                     onChange={(e) => {
-                      const val = e.target.value;
+                      const val = e.target.value === '' ? '' : Math.min(200, Math.max(1, Number(e.target.value)));
+                      const autoXp = val === '' ? '' : calculateXpForLevel(val);
                       setEditingMount({
                         ...editingMount,
-                        currentLevel: val === '' ? '' : Number(val),
+                        currentLevel: val,
+                        currentXp: autoXp,
                       });
                     }}
-                    onBlur={() => {
-                      const lvl = Math.min(200, Math.max(1, toNum(editingMount.currentLevel) || 1));
-                      setEditingMount({
-                        ...editingMount,
-                        currentLevel: lvl,
-                        currentXp: calculateXpForLevel(lvl),
-                      });
-                    }}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-mono font-bold text-slate-800"
                   />
                 </div>
 
-                {/* XP Actual */}
                 <div>
-                  <label htmlFor={xpId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                    XP Actual
+                  <label htmlFor={xpId} className="block font-bold text-slate-700 mb-1">
+                    XP Acumulada
                   </label>
                   <input
                     id={xpId}
                     type="number"
                     min={0}
                     max={MAX_MOUNT_XP}
-                    value={editingMount.currentXp ?? 0}
+                    value={editingMount.currentXp ?? ''}
                     onChange={(e) => {
-                      const val = e.target.value;
+                      const val = e.target.value === '' ? '' : Math.min(MAX_MOUNT_XP, Math.max(0, Number(e.target.value)));
+                      const autoLvl = val === '' ? '' : val >= MAX_MOUNT_XP ? 200 : calculateLevelFromXp(val);
                       setEditingMount({
                         ...editingMount,
-                        currentXp: val === '' ? '' : Number(val),
+                        currentXp: val,
+                        currentLevel: autoLvl,
                       });
                     }}
-                    onBlur={() => {
-                      const xp = Math.min(MAX_MOUNT_XP, Math.max(0, toNum(editingMount.currentXp)));
-                      setEditingMount({
-                        ...editingMount,
-                        currentXp: xp,
-                        currentLevel: calculateLevelFromXp(xp),
-                      });
-                    }}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-mono font-bold text-slate-800"
                   />
                 </div>
+              </div>
 
-                {/* Fertilidad */}
+              {/* Fertilidad y Capacidad */}
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor={fertilityId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={fertilityId} className="block font-bold text-slate-700 mb-1">
                     Fertilidad
                   </label>
                   <select
                     id={fertilityId}
-                    value={editingMount.fertility || 'fertil'}
-                    onChange={(e) => setEditingMount({ ...editingMount, fertility: e.target.value as FertilityStatus })}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={editingMount.fertility}
+                    onChange={(e) => {
+                      const fert = e.target.value as FertilityStatus;
+                      setEditingMount({
+                        ...editingMount,
+                        fertility: fert,
+                      });
+                    }}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-blue-500"
                   >
-                    {(Object.keys(FERTILITY_LABELS) as FertilityStatus[]).map((fert) => (
-                      <option key={fert} value={fert}>
-                        {FERTILITY_LABELS[fert]}
-                      </option>
-                    ))}
+                    <option value="fertil">Fértil</option>
+                    <option value="fecunda">Fecunda</option>
+                    <option value="esteril">Estéril</option>
+                    <option value="senil">Senil</option>
                   </select>
                 </div>
 
-                {/* Capacidad Especial */}
                 <div>
-                  <label htmlFor={capacityId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                    Capacidad
+                  <label htmlFor={capacityId} className="block font-bold text-slate-700 mb-1">
+                    Capacidad Especial
                   </label>
                   <select
                     id={capacityId}
-                    value={editingMount.capacity || 'ninguna'}
-                    onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as SpecialCapacity })}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={editingMount.capacity}
+                    onChange={(e) =>
+                      setEditingMount({ ...editingMount, capacity: e.target.value as SpecialCapacity })
+                    }
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-blue-500"
                   >
-                    {(Object.keys(CAPACITY_LABELS) as SpecialCapacity[]).map((cap) => (
-                      <option key={cap} value={cap}>
-                        {CAPACITY_LABELS[cap]}
-                      </option>
-                    ))}
+                    <option value="ninguna">Ninguna</option>
+                    <option value="sabia">Sabia (XP x2)</option>
+                    <option value="enamoradiza">Enamoradiza</option>
+                    <option value="resistente">Resistente</option>
+                    <option value="precoz">Precoz</option>
+                    <option value="reproductora">Reproductora</option>
+                    <option value="camaleon">Camaleón</option>
                   </select>
                 </div>
               </div>
 
-              {/* Medidores de Cría */}
-              <div className="pt-2 border-t border-slate-100">
-                <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-                  Medidores Reproductivos {isEditingEsterilOrSenil && '(Bloqueados por estado infértil)'}
-                </span>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div>
-                    <label htmlFor={serenityId} className="block text-xs text-slate-600 font-medium mb-1">Serenidad</label>
-                    <input
-                      id={serenityId}
-                      type="number"
-                      min={-10000}
-                      max={10000}
-                      disabled={isEditingEsterilOrSenil}
-                      value={isEditingEsterilOrSenil ? 0 : (editingMount.serenity ?? 0)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingMount({
-                          ...editingMount,
-                          serenity: val === '' ? '' : Number(val),
-                        });
-                      }}
-                      onBlur={() => {
-                        setEditingMount({
-                          ...editingMount,
-                          serenity: Math.min(10000, Math.max(-10000, toNum(editingMount.serenity))),
-                        });
-                      }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"
-                    />
+              {/* Estadísticas de Cría (Serenidad, Amor, Madurez, Resistencia) */}
+              {editingMount.fertility !== 'esteril' && editingMount.fertility !== 'senil' && (
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                  <div className="font-extrabold text-slate-800 text-[11px] uppercase tracking-wider">
+                    Indicadores de Crianza
                   </div>
 
-                  <div>
-                    <label htmlFor={loveId} className="block text-xs text-slate-600 font-medium mb-1">Amor (0-20k)</label>
-                    <input
-                      id={loveId}
-                      type="number"
-                      min={0}
-                      max={20000}
-                      disabled={isEditingEsterilOrSenil}
-                      value={isEditingEsterilOrSenil ? 0 : (editingMount.love ?? 20000)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingMount({
-                          ...editingMount,
-                          love: val === '' ? '' : Number(val),
-                        });
-                      }}
-                      onBlur={() => {
-                        setEditingMount({
-                          ...editingMount,
-                          love: Math.min(20000, Math.max(0, toNum(editingMount.love))),
-                        });
-                      }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"
-                    />
-                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div>
+                      <label htmlFor={serenityId} className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                        Serenidad (-10k/10k)
+                      </label>
+                      <input
+                        id={serenityId}
+                        type="number"
+                        min={-10000}
+                        max={10000}
+                        value={editingMount.serenity ?? ''}
+                        onChange={(e) =>
+                          setEditingMount({
+                            ...editingMount,
+                            serenity: e.target.value === '' ? '' : Math.min(10000, Math.max(-10000, Number(e.target.value))),
+                          })
+                        }
+                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg font-mono text-center font-bold text-slate-800"
+                      />
+                    </div>
 
-                  <div>
-                    <label htmlFor={maturityId} className="block text-xs text-slate-600 font-medium mb-1">Madurez (0-20k)</label>
-                    <input
-                      id={maturityId}
-                      type="number"
-                      min={0}
-                      max={20000}
-                      disabled={isEditingEsterilOrSenil}
-                      value={isEditingEsterilOrSenil ? 0 : (editingMount.maturity ?? 20000)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingMount({
-                          ...editingMount,
-                          maturity: val === '' ? '' : Number(val),
-                        });
-                      }}
-                      onBlur={() => {
-                        setEditingMount({
-                          ...editingMount,
-                          maturity: Math.min(20000, Math.max(0, toNum(editingMount.maturity))),
-                        });
-                      }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"
-                    />
-                  </div>
+                    <div>
+                      <label htmlFor={loveId} className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                        Amor (0–20k)
+                      </label>
+                      <input
+                        id={loveId}
+                        type="number"
+                        min={0}
+                        max={20000}
+                        value={editingMount.love ?? ''}
+                        onChange={(e) =>
+                          setEditingMount({
+                            ...editingMount,
+                            love: e.target.value === '' ? '' : Math.min(20000, Math.max(0, Number(e.target.value))),
+                          })
+                        }
+                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg font-mono text-center font-bold text-slate-800"
+                      />
+                    </div>
 
-                  <div>
-                    <label htmlFor={staminaId} className="block text-xs text-slate-600 font-medium mb-1">Resist. (0-20k)</label>
-                    <input
-                      id={staminaId}
-                      type="number"
-                      min={0}
-                      max={20000}
-                      disabled={isEditingEsterilOrSenil}
-                      value={isEditingEsterilOrSenil ? 0 : (editingMount.stamina ?? 20000)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingMount({
-                          ...editingMount,
-                          stamina: val === '' ? '' : Number(val),
-                        });
-                      }}
-                      onBlur={() => {
-                        setEditingMount({
-                          ...editingMount,
-                          stamina: Math.min(20000, Math.max(0, toNum(editingMount.stamina))),
-                        });
-                      }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"
-                    />
+                    <div>
+                      <label htmlFor={maturityId} className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                        Madurez (0–20k)
+                      </label>
+                      <input
+                        id={maturityId}
+                        type="number"
+                        min={0}
+                        max={20000}
+                        value={editingMount.maturity ?? ''}
+                        onChange={(e) =>
+                          setEditingMount({
+                            ...editingMount,
+                            maturity: e.target.value === '' ? '' : Math.min(20000, Math.max(0, Number(e.target.value))),
+                          })
+                        }
+                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg font-mono text-center font-bold text-slate-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor={staminaId} className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                        Resistencia (0–20k)
+                      </label>
+                      <input
+                        id={staminaId}
+                        type="number"
+                        min={0}
+                        max={20000}
+                        value={editingMount.stamina ?? ''}
+                        onChange={(e) =>
+                          setEditingMount({
+                            ...editingMount,
+                            stamina: e.target.value === '' ? '' : Math.min(20000, Math.max(0, Number(e.target.value))),
+                          })
+                        }
+                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg font-mono text-center font-bold text-slate-800"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Notas */}
-              <div>
-                <label htmlFor={notesId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Notas u Observaciones
-                </label>
-                <textarea
-                  id={notesId}
-                  value={editingMount.notes || ''}
-                  onChange={(e) => setEditingMount({ ...editingMount, notes: e.target.value })}
-                  rows={2}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Detalles sobre cruces previstos, árbol genealógico, etc."
-                />
-              </div>
-
-              {/* Botones de acción */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+              {/* Botones de acción del Modal */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => {
                     setIsEditModalOpen(false);
                     setEditingMount(null);
                   }}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold transition cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-extrabold bg-[#1e3a8a] hover:bg-[#172554] text-white shadow-sm transition cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold shadow-md shadow-blue-900/20 transition cursor-pointer"
                 >
                   Guardar Montura
                 </button>

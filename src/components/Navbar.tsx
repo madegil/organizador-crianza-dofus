@@ -21,6 +21,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
           <img
             src="/Logo_gestor_montura.png"
             alt="Gestor de monturas"
+            width={320}
+            height={112}
             className="h-20 sm:h-24 md:h-28 w-auto object-contain drop-shadow-md"
           />
         </a>
