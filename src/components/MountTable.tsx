@@ -230,7 +230,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
   const firstFieldRef = useRef<HTMLSelectElement | null>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
 
   const fileInputId = useId();
   const searchInputId = useId();
@@ -283,31 +283,25 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
     return 'none';
   };
 
-  const handleModalKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== 'Tab') return;
-    if (!modalRef.current) return;
-
+  // Accesibilidad Modal: atrapar el foco con Tab / Shift+Tab dentro del diálogo
+  const handleModalKeyDown = (e: { key: string; shiftKey: boolean; preventDefault: () => void }) => {
+    if (e.key !== 'Tab' || !modalRef.current) return;
     const focusable = Array.from(
       modalRef.current.querySelectorAll<HTMLElement>(
-        'button, input, select, textarea, [href]'
+        'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
       )
-    ).filter((el) => !el.hasAttribute('disabled') && el.getAttribute('tabindex') !== '-1');
-
+    ).filter((el) => !(el as HTMLButtonElement).disabled && el.offsetParent !== null);
     if (focusable.length === 0) return;
-
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
-
-    if (e.shiftKey) {
-      if (document.activeElement === first || !modalRef.current.contains(document.activeElement)) {
-        e.preventDefault();
-        last.focus();
-      }
-    } else {
-      if (document.activeElement === last || !modalRef.current.contains(document.activeElement)) {
-        e.preventDefault();
-        first.focus();
-      }
+    const active = document.activeElement as HTMLElement | null;
+    const outside = !active || !modalRef.current.contains(active);
+    if (e.shiftKey && (active === first || outside)) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (active === last || outside)) {
+      e.preventDefault();
+      first.focus();
     }
   };
 
@@ -695,7 +689,8 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         <div className="flex items-center justify-between text-xs text-slate-500 pt-1 px-1">
           <div className="flex items-center gap-2">
             <span>Plantilla compatible con Google Sheets y Excel.</span>
-            {mounts.length > 0 && (\n              <button
+            {mounts.length > 0 && (
+              <button
                 onClick={handleClearAll}
                 className="text-rose-600 hover:text-rose-700 hover:underline font-semibold transition"
               >
@@ -760,7 +755,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         {statusMessage && (
           <div
             role={statusMessage.type === 'error' ? 'alert' : 'status'}
-            aria-live={statusMessage.type !== 'error' ? 'polite' : undefined}
+            aria-live={statusMessage.type === 'error' ? undefined : 'polite'}
             className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between ${
               statusMessage.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
@@ -922,7 +917,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       {/* 4. TABLA PRINCIPAL DE MONTURAS */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[820px]">
+          <table className="w-full text-left border-collapse min-w-[760px]">
             <thead className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
               <tr>
                 <th
@@ -1105,9 +1100,9 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                       {/* Indicadores de Cría */}
                       <td className="py-2.5 px-3">
                         {mount.fertility === 'esteril' || mount.fertility === 'senil' ? (
-                          <span className="text-[11px] text-slate-600 italic">No aplicable</span>
+                          <span className="text-xs text-slate-600 italic">No aplicable</span>
                         ) : (
-                          <div className="space-y-1 w-56 sm:w-64">
+                          <div className="space-y-1 w-40 sm:w-48">
                             {/* Serenidad */}
                             <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
                               <span>Serenidad:</span>
@@ -1308,7 +1303,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   setEditingMount(null);
                 }}
                 aria-label="Cerrar"
-                className="p-1 text-slate-600 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                className="p-1 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1534,7 +1529,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                 </div>
               </div>
 
-              {/* Indicadores de Cría */}
+              {/* Medidores de Cría */}
               <div className="pt-2 border-t border-slate-100">
                 <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
                   Medidores Reproductivos {isEditingEsterilOrSenil && '(Bloqueados por estado infértil)'}
