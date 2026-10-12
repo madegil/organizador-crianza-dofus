@@ -990,7 +990,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   const isReadyToBreed = isMountReadyToBreed(mount);
 
                   return (
-                    <tr
+                     <tr
                       key={mount.id}
                       className="hover:bg-slate-50/80 transition-colors group text-slate-700"
                     >
@@ -1104,7 +1104,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                         ) : (
                           <div className="space-y-1 w-40 sm:w-48">
                             {/* Serenidad */}
-                            <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                            <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
                               <span>Serenidad:</span>
                               <span
                                 className={`font-bold ${
@@ -1121,7 +1121,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                             {/* Amor */}
                             <div>
-                              <div className="flex justify-between text-[11px] text-slate-600 font-medium">
+                              <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Amor</span>
                                 <span>{mount.love}/20k</span>
                               </div>
@@ -1135,7 +1135,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                             {/* Madurez */}
                             <div>
-                              <div className="flex justify-between text-[11px] text-slate-600 font-medium">
+                              <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Madurez</span>
                                 <span>{mount.maturity}/20k</span>
                               </div>
@@ -1149,7 +1149,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                             {/* Resistencia */}
                             <div>
-                              <div className="flex justify-between text-[11px] text-slate-600 font-medium">
+                              <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Resistencia</span>
                                 <span>{mount.stamina}/20k</span>
                               </div>
