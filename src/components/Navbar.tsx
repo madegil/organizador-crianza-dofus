@@ -19,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
       <div className="flex flex-col items-center justify-center select-none">
         <a href="/" className="relative inline-flex flex-col items-center group cursor-pointer hover:scale-[1.01] transition-transform">
           <img
-            src="/Logo_gestor_montura.png"
+            src="/Logo_gestor_montura.svg"
             alt="Gestor de monturas"
             width={320}
             height={112}

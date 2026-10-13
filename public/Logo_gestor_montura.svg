@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 224" width="640" height="224">
+  <defs>
+    <filter id="drop-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#0a1d04" flood-opacity="0.6"/>
+    </filter>
+    <linearGradient id="top-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF9EA"/>
+      <stop offset="100%" stop-color="#F4DEB3"/>
+    </linearGradient>
+    <linearGradient id="bottom-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#B5F428"/>
+      <stop offset="50%" stop-color="#8AE010"/>
+      <stop offset="100%" stop-color="#5DA806"/>
+    </linearGradient>
+    <linearGradient id="blade-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5DA806"/>
+      <stop offset="50%" stop-color="#A2EB1E"/>
+      <stop offset="100%" stop-color="#5DA806"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#drop-shadow)">
+    <!-- Leaf accents left -->
+    <path d="M 90 70 C 65 50 70 20 95 30 C 120 40 115 70 90 70 Z" fill="#8AE010" stroke="#173305" stroke-width="4"/>
+    <path d="M 65 95 C 45 80 50 55 70 65 C 90 75 85 95 65 95 Z" fill="#B5F428" stroke="#173305" stroke-width="3.5"/>
+
+    <!-- Leaf accents right -->
+    <path d="M 550 70 C 575 50 570 20 545 30 C 520 40 525 70 550 70 Z" fill="#8AE010" stroke="#173305" stroke-width="4"/>
+    <path d="M 575 95 C 595 80 590 55 570 65 C 550 75 555 95 575 95 Z" fill="#B5F428" stroke="#173305" stroke-width="3.5"/>
+
+    <!-- Gestor de (Top Text Outline & Fill) -->
+    <text x="320" y="88" text-anchor="middle" font-family="'Arial Black', 'Impact', sans-serif" font-weight="900" font-size="76" fill="none" stroke="#173305" stroke-width="16" stroke-linejoin="round">Gestor de</text>
+    <text x="320" y="88" text-anchor="middle" font-family="'Arial Black', 'Impact', sans-serif" font-weight="900" font-size="76" fill="url(#top-grad)" stroke="#4A2E05" stroke-width="2" stroke-linejoin="round">Gestor de</text>
+
+    <!-- monturas (Bottom Text Outline & Fill) -->
+    <text x="320" y="174" text-anchor="middle" font-family="'Arial Black', 'Impact', sans-serif" font-weight="900" font-size="102" fill="none" stroke="#122A04" stroke-width="22" stroke-linejoin="round">monturas</text>
+    <text x="320" y="174" text-anchor="middle" font-family="'Arial Black', 'Impact', sans-serif" font-weight="900" font-size="102" fill="url(#bottom-grad)" stroke="#173305" stroke-width="4" stroke-linejoin="round">monturas</text>
+
+    <!-- Curved blade of grass underline -->
+    <path d="M 140 184 Q 320 208 500 184 Q 320 196 140 184 Z" fill="url(#blade-grad)" stroke="#122A04" stroke-width="3"/>
+  </g>
+</svg>
