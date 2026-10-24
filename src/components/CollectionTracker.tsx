@@ -10,6 +10,13 @@ import { db, normalizeStoredMounts } from '../db/mountsDb';
 import { MAX_MOUNT_XP } from '../data/fuelData';
 import { MountAvatar } from './MountAvatar';
 
+// \u00AD = guion opcional: solo se parte la palabra si no cabe (pantallas de ~320 px)
+const SPECIES_OPTIONS: { key: SpeciesType; label: string; count: number }[] = [
+  { key: 'dragopavo', label: 'Drago\u00ADpavos', count: DRAGODINDES_DATA.length },
+  { key: 'muluaga', label: 'Mula\u00ADguas', count: MULDOS_DATA.length },
+  { key: 'vueloceronte', label: 'Vuelo\u00ADcerontes', count: VOLKORNES_DATA.length },
+];
+
 export const CollectionTracker: React.FC = () => {
   const [activeSpecies, setActiveSpecies] = useState<SpeciesType>('dragopavo');
   const [selectedGen, setSelectedGen] = useState<number | 'all'>('all');
@@ -167,7 +174,7 @@ export const CollectionTracker: React.FC = () => {
     <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
       {/* Encabezado */}
       <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-100 flex-shrink-0">
               <Layers className="w-5 h-5" aria-hidden="true" />
@@ -182,57 +189,42 @@ export const CollectionTracker: React.FC = () => {
             </div>
           </div>
 
-          {/* Selector de Especie */}
+          {/* Selector de Especie: 3 columnas iguales en móvil, en línea desde sm */}
           <div
             role="group"
             aria-label="Especie"
-            className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto"
+            className="grid grid-cols-3 gap-1 w-full sm:w-auto sm:self-start lg:self-auto sm:flex sm:items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 flex-shrink-0"
           >
-            <button
-              type="button"
-              onClick={() => setActiveSpecies('dragopavo')}
-              aria-pressed={activeSpecies === 'dragopavo'}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
-                activeSpecies === 'dragopavo'
-                  ? 'bg-[#1e3a8a] text-white'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
-              }`}
-            >
-              <span aria-hidden="true">🐴</span> Dragopavos ({DRAGODINDES_DATA.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSpecies('muluaga')}
-              aria-pressed={activeSpecies === 'muluaga'}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
-                activeSpecies === 'muluaga'
-                  ? 'bg-[#1e3a8a] text-white'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
-              }`}
-            >
-              <span aria-hidden="true">🐟</span> Mulaguas ({MULDOS_DATA.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSpecies('vueloceronte')}
-              aria-pressed={activeSpecies === 'vueloceronte'}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
-                activeSpecies === 'vueloceronte'
-                  ? 'bg-[#1e3a8a] text-white'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
-              }`}
-            >
-              <span aria-hidden="true">🦏</span> Vuelocerontes ({VOLKORNES_DATA.length})
-            </button>
+            {SPECIES_OPTIONS.map((opt) => {
+              const isActive = activeSpecies === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setActiveSpecies(opt.key)}
+                  aria-pressed={isActive}
+                  className={`min-h-[44px] sm:min-h-0 px-1.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center sm:gap-1 leading-tight cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
+                    isActive
+                      ? 'bg-[#1e3a8a] text-white'
+                      : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
+                  }`}
+                >
+                  <span className="max-w-full text-center [hyphens:manual]">{opt.label}</span>
+                  <span className={`text-[10px] sm:text-xs font-semibold ${isActive ? 'text-blue-100' : 'text-slate-600'}`}>
+                    ({opt.count})
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Barras de Progreso Globales */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-5 pt-5 border-t border-slate-100">
           <div>
-            <div className="flex justify-between text-xs font-bold mb-1.5">
+            <div className="flex justify-between items-baseline gap-2 text-xs font-bold mb-1.5">
               <span className="text-slate-700">Razas Obtenidas</span>
-              <span className="text-[#1e3a8a] font-mono">
+              <span className="text-[#1e3a8a] font-mono whitespace-nowrap">
                 {ownedBreedsCount} / {totalSpeciesBreeds} ({percentageOwned}%)
               </span>
             </div>
@@ -253,9 +245,9 @@ export const CollectionTracker: React.FC = () => {
           </div>
 
           <div>
-            <div className="flex justify-between text-xs font-bold mb-1.5">
+            <div className="flex justify-between items-baseline gap-2 text-xs font-bold mb-1.5">
               <span className="text-slate-700">Meta Nivel 200 (867.582 XP)</span>
-              <span className="text-emerald-700 font-mono">
+              <span className="text-emerald-700 font-mono whitespace-nowrap">
                 {level200BreedsCount} / {totalSpeciesBreeds} ({percentage200}%)
               </span>
             </div>
