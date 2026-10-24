@@ -47,14 +47,10 @@ const SerenityChart: React.FC = () => {
 
     {/* Barra de serenidad con marcas en -2.000, 0 y +2.000 */}
     <div className="relative mt-3 h-3.5 rounded-full bg-black/70 border border-white/10 overflow-hidden" aria-hidden="true">
-      <div
-        className="absolute inset-y-0 left-0 bg-gradient-to-r from-fuchsia-600 to-fuchsia-400"
-        style={{ width: `${pos(0)}%` }}
-      />
       {[-2000, 0, 2000].map((v) => (
         <span
           key={v}
-          className={`absolute top-0.5 bottom-0.5 w-[3px] -translate-x-1/2 rounded-sm ${v === 0 ? 'bg-white' : 'bg-black/70'}`}
+          className={`absolute top-0.5 bottom-0.5 w-[3px] -translate-x-1/2 rounded-sm ${v === 0 ? 'bg-white' : 'bg-white/40'}`}
           style={{ left: `${pos(v)}%` }}
         />
       ))}
@@ -173,8 +169,7 @@ export const BreedingGuide: React.FC<BreedingGuideProps> = ({ defaultOpen = fals
               </h3>
               <p className="text-xs text-sky-900 mt-1 font-bold">Serenidad cerca de 0: de −2.000 a +2.000</p>
               <p className="text-[11px] text-sky-800 font-medium mt-0.5 leading-snug">
-                Es la zona neutra: los carburantes de madurez llenan este medidor. Al llegar a 20.000 la montura ya
-                puede montarse.
+                Es la zona neutra: los carburantes de madurez llenan este medidor.
               </p>
             </div>
 
