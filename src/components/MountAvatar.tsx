@@ -81,7 +81,7 @@ export const MountAvatar: React.FC<MountAvatarProps> = ({
       case 'muluaga':
         return (
           <svg viewBox="0 0 64 64" fill="none" className={`${iconSizes} drop-shadow-md z-10`}>
-            {/* Cuerpo acuático de Muluaga */}
+            {/* Cuerpo acuático de Mulagua */}
             <path
               d="M32 8C22 8 16 16 18 28C20 40 26 50 32 58C38 50 44 40 46 28C48 16 42 8 32 8Z"
               fill={primary}

@@ -23,7 +23,7 @@ const formatSerenity = (v: number) => {
 const ZONES = [
   { key: 'aguante', label: 'Aguante', from: -5000, to: -1, bar: 'bg-yellow-400', text: 'text-yellow-300' },
   { key: 'madurez', label: 'Madurez', from: -2000, to: 2000, bar: 'bg-sky-400', text: 'text-sky-300' },
-  { key: 'amor', label: 'Amor', from: 1, to: 5000, bar: 'bg-rose-500', text: 'text-rose-300' },
+  { key: 'amor', label: 'Amor', from: 0, to: 5000, bar: 'bg-rose-500', text: 'text-rose-300' },
 ];
 
 /** Gráfica de serenidad al estilo del juego: iconos arriba, barra de -5.000 a +5.000 y zonas debajo. */
@@ -93,7 +93,7 @@ const SerenityChart: React.FC = () => {
 
     <figcaption id={captionId} className="mt-3 text-[11px] text-slate-300 leading-snug">
       Barra de serenidad de −5.000 a +5.000, con 0 en el centro. Por debajo de 0 sube el Aguante, entre −2.000 y
-      +2.000 sube la Madurez y por encima de 0 sube el Amor.
+      +2.000 sube la Madurez y desde 0 hacia arriba sube el Amor.
     </figcaption>
   </figure>
   );
@@ -197,9 +197,9 @@ export const BreedingGuide: React.FC<BreedingGuideProps> = ({ defaultOpen = fals
               <h3 className="text-xs font-black text-rose-800 flex items-center gap-1.5">
                 <Heart className="w-4 h-4 flex-shrink-0 text-rose-500 fill-rose-500" aria-hidden="true" /> Amor
               </h3>
-              <p className="text-xs text-rose-900 mt-1 font-bold">Serenidad positiva: de +1 a +5.000</p>
+              <p className="text-xs text-rose-900 mt-1 font-bold">Serenidad positiva: de 0 a +5.000</p>
               <p className="text-[11px] text-rose-800 font-medium mt-0.5 leading-snug">
-                Con la serenidad por encima de 0, los carburantes de amor llenan este medidor. Entre +1 y +2.000
+                Con la serenidad en 0 o por encima, los carburantes de amor llenan este medidor. Entre 0 y +2.000
                 también sube la Madurez.
               </p>
             </div>
