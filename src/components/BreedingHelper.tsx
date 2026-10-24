@@ -48,7 +48,7 @@ export const BreedingHelper: React.FC = () => {
                 Árbol de Cruces &amp; Guía de Hibridaciones
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
-                Consulta cómo obtener cada generación a partir de cruces según Dofus 3.5.
+                Consulta cómo obtener cada generación a partir de cruces.
               </p>
             </div>
           </div>

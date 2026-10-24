@@ -1,5 +1,5 @@
-// Tabla oficial de experiencia acumulada para monturas en Dofus 3.5 (Niveles 1 a 200)
-// Fuente: Ankama Games / Dofus 3.5 Beta
+// Tabla oficial de experiencia acumulada para monturas en Dofus (Niveles 1 a 200)
+// Fuente: Ankama Games
 
 export const MAX_MOUNT_XP = 867582;
 

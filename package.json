@@ -2,7 +2,7 @@
   "name": "organizador-crianza-dofus",
   "type": "module",
   "version": "1.0.0",
-  "description": "Organizador Local-First para Crianza de Dragopavos, Muluagas y Vuelocerones en Dofus 3.5",
+  "description": "Organizador Local-First para Crianza de Dragopavos, Mulaguas y Vuelocerontes en Dofus",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",

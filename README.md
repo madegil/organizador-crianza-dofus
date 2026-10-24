@@ -1,8 +1,8 @@
-# 🐉 Gestor de monturas - Crianza & XP Dofus 3.5
+# 🐉 Gestor de monturas - Crianza & XP para Dofus
 
 Aplicación web **Local-First** moderna desarrollada con **Astro**, **React**, **Tailwind CSS** e **IndexedDB** (`Dexie.js`), optimizada para su despliegue instantáneo en **Vercel**.
 
-Permite organizar y gestionar el inventario de **Dragopavos**, **Muluagas** y **Vuelocerontes**, calcular la experiencia restante hasta el **nivel 200 (867.582 XP)** y planificar el consumo exacto de **carburantes de pesebre** en los cercados de Dofus 3.5.
+Permite organizar y gestionar el inventario de **Dragopavos**, **Mulaguas** y **Vuelocerontes**, calcular la experiencia restante hasta el **nivel 200 (867.582 XP)** y planificar el consumo exacto de **carburantes de pesebre** en los cercados de Dofus.
 
 ---
 

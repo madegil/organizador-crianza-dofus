@@ -16,6 +16,7 @@ import {
   FileSpreadsheet,
   FileJson,
   RefreshCw,
+  ChevronDown,
 } from 'lucide-react';
 import type { UserMount, SpeciesType, SpecialCapacity, FertilityStatus } from '../types/mount';
 import {
@@ -235,6 +236,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const fileInputId = useId();
   const searchInputId = useId();
   const mobileSortId = useId();
+  const filtersPanelId = useId();
   const modalTitleId = useId();
   const speciesId = useId();
   const breedId = useId();
@@ -262,6 +264,19 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const [genderFilter, setGenderFilter] = useState<string>('all');
   const [genFilter, setGenFilter] = useState<string>('all');
   const [capacityFilter, setCapacityFilter] = useState<string>('all');
+  // En móvil los filtros se pliegan para no ocupar media pantalla (en escritorio siempre visibles)
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilterCount = [speciesFilter, fertilityFilter, genderFilter, genFilter, capacityFilter].filter(
+    (f) => f !== 'all'
+  ).length;
+  const clearFilters = () => {
+    setSpeciesFilter('all');
+    setFertilityFilter('all');
+    setGenderFilter('all');
+    setGenFilter('all');
+    setCapacityFilter('all');
+    setSearchTerm('');
+  };
 
   // Ordenación
   const [sortField, setSortField] = useState<keyof UserMount | 'name'>('currentLevel');
@@ -692,7 +707,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             {mounts.length > 0 && (
               <button
                 onClick={handleClearAll}
-                className="text-rose-600 hover:text-rose-700 hover:underline font-semibold transition"
+                className="text-rose-700 hover:text-rose-800 hover:underline font-semibold transition"
               >
                 Vaciar establo
               </button>
@@ -797,107 +812,132 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         </button>
       </div>
 
-      {/* 3. BARRA DE FILTROS */}
+      {/* 3. BARRA DE FILTROS (plegable en móvil, siempre visible desde md) */}
       <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/90 shadow-sm space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-slate-400" /> Filtros Activos:
+        <div className="flex items-center justify-between gap-2">
+          {/* Móvil: botón para mostrar u ocultar los filtros */}
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((prev) => !prev)}
+            aria-expanded={filtersOpen}
+            aria-controls={filtersPanelId}
+            className="md:hidden flex items-center gap-2 min-h-[40px] -my-1 pr-2 text-xs font-bold text-slate-800 cursor-pointer rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            <Filter className="w-4 h-4 text-slate-500" aria-hidden="true" />
+            <span>Filtros</span>
+            {activeFilterCount > 0 && (
+              <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#1e3a8a] text-white text-[11px] font-extrabold inline-flex items-center justify-center">
+                {activeFilterCount}
+                <span className="sr-only"> activos</span>
+              </span>
+            )}
+            <ChevronDown
+              className={`w-4 h-4 text-slate-500 transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+          </button>
+          {/* Escritorio: título fijo */}
+          <span className="hidden md:flex text-[11px] font-bold text-slate-600 uppercase tracking-wider items-center gap-1.5">
+            <Filter className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" /> Filtros
+            {activeFilterCount > 0 && (
+              <span className="normal-case tracking-normal font-semibold text-slate-500">
+                ({activeFilterCount} {activeFilterCount === 1 ? 'activo' : 'activos'})
+              </span>
+            )}
           </span>
-          {(speciesFilter !== 'all' ||
-            fertilityFilter !== 'all' ||
-            genderFilter !== 'all' ||
-            genFilter !== 'all' ||
-            capacityFilter !== 'all' ||
-            searchTerm !== '') && (
+          {(activeFilterCount > 0 || searchTerm !== '') && (
             <button
               type="button"
-              onClick={() => {
-                setSpeciesFilter('all');
-                setFertilityFilter('all');
-                setGenderFilter('all');
-                setGenFilter('all');
-                setCapacityFilter('all');
-                setSearchTerm('');
-              }}
-              className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold cursor-pointer"
+              onClick={clearFilters}
+              className="min-h-[40px] md:min-h-0 -my-1 inline-flex items-center gap-1 text-[11px] text-blue-700 hover:text-blue-900 font-semibold cursor-pointer rounded-lg px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              Restablecer
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
+              Limpiar filtros
             </button>
           )}
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-          {/* Especie */}
-          <select
-            aria-label="Filtrar por especie"
-            value={speciesFilter}
-            onChange={(e) => setSpeciesFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="all">Todas</option>
-            {(Object.keys(SPECIES_LABELS) as SpeciesType[]).map((sp) => (
-              <option key={sp} value={sp}>
-                {SPECIES_LABELS[sp]}
-              </option>
-            ))}
-          </select>
-
-          {/* Fertilidad */}
-          <select
-            aria-label="Filtrar por fertilidad"
-            value={fertilityFilter}
-            onChange={(e) => setFertilityFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="all">Todas</option>
-            {(Object.keys(FERTILITY_LABELS) as FertilityStatus[]).map((fert) => (
-              <option key={fert} value={fert}>
-                {FERTILITY_LABELS[fert]}
-              </option>
-            ))}
-          </select>
-
-          {/* Sexo */}
-          <select
-            aria-label="Filtrar por sexo"
-            value={genderFilter}
-            onChange={(e) => setGenderFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="all">Todos</option>
-            <option value="M">Macho (♂)</option>
-            <option value="F">Hembra (♀)</option>
-          </select>
-
-          {/* Generación */}
-          <select
-            aria-label="Filtrar por generación"
-            value={genFilter}
-            onChange={(e) => setGenFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="all">Todas</option>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((g) => (
-              <option key={g} value={g}>
-                Gen {g}
-              </option>
-            ))}
-          </select>
-
-          {/* Capacidad */}
-          <select
-            aria-label="Filtrar por capacidad"
-            value={capacityFilter}
-            onChange={(e) => setCapacityFilter(e.target.value)}
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="all">Todas</option>
-            {(Object.keys(CAPACITY_LABELS) as SpecialCapacity[]).map((cap) => (
-              <option key={cap} value={cap}>
-                {CAPACITY_LABELS[cap]}
-              </option>
-            ))}
-          </select>
+        <div
+          id={filtersPanelId}
+          className={`${filtersOpen ? 'grid' : 'hidden'} md:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2`}
+        >
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold text-slate-600">Especie</span>
+              <select
+                aria-label="Filtrar por especie"
+                value={speciesFilter}
+                onChange={(e) => setSpeciesFilter(e.target.value)}
+                className="w-full min-h-[40px] md:min-h-0 text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Todas</option>
+                {(Object.keys(SPECIES_LABELS) as SpeciesType[]).map((sp) => (
+                  <option key={sp} value={sp}>
+                    {SPECIES_LABELS[sp]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold text-slate-600">Fertilidad</span>
+              <select
+                aria-label="Filtrar por fertilidad"
+                value={fertilityFilter}
+                onChange={(e) => setFertilityFilter(e.target.value)}
+                className="w-full min-h-[40px] md:min-h-0 text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Todas</option>
+                {(Object.keys(FERTILITY_LABELS) as FertilityStatus[]).map((fert) => (
+                  <option key={fert} value={fert}>
+                    {FERTILITY_LABELS[fert]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold text-slate-600">Sexo</span>
+              <select
+                aria-label="Filtrar por sexo"
+                value={genderFilter}
+                onChange={(e) => setGenderFilter(e.target.value)}
+                className="w-full min-h-[40px] md:min-h-0 text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Todos</option>
+                <option value="M">Macho (♂)</option>
+                <option value="F">Hembra (♀)</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold text-slate-600">Generación</span>
+              <select
+                aria-label="Filtrar por generación"
+                value={genFilter}
+                onChange={(e) => setGenFilter(e.target.value)}
+                className="w-full min-h-[40px] md:min-h-0 text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Todas</option>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((g) => (
+                  <option key={g} value={g}>
+                    Gen {g}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-semibold text-slate-600">Capacidad</span>
+              <select
+                aria-label="Filtrar por capacidad"
+                value={capacityFilter}
+                onChange={(e) => setCapacityFilter(e.target.value)}
+                className="w-full min-h-[40px] md:min-h-0 text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Todas</option>
+                {(Object.keys(CAPACITY_LABELS) as SpecialCapacity[]).map((cap) => (
+                  <option key={cap} value={cap}>
+                    {CAPACITY_LABELS[cap]}
+                  </option>
+                ))}
+              </select>
+            </label>
         </div>
       </div>
 

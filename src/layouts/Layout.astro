@@ -9,7 +9,7 @@ interface Props {
 
 const SITE_NAME = 'Gestor de monturas';
 const DEFAULT_DESCRIPTION =
-  'Organiza la crianza de tus monturas de Dofus 3.5: establo, calculadora de XP y carburantes, colección y árbol de cruces. Tus datos se guardan en tu navegador.';
+  'Organiza la crianza de tus monturas de Dofus: establo, calculadora de XP y carburantes, colección y árbol de cruces. Tus datos se guardan en tu navegador.';
 
 const { title, description = DEFAULT_DESCRIPTION } = Astro.props;
 const currentPath = Astro.url.pathname;
@@ -60,14 +60,16 @@ const ogImageUrl = new URL('/og-image.jpg', Astro.site ?? Astro.url).href;
     </a>
     <Navbar client:load currentPath={currentPath} />
     
-    <main id="contenido" tabindex="-1" class="flex-1 focus:outline-none max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-2 pb-24 md:pb-12">
+    <main id="contenido" tabindex="-1" class="flex-1 focus:outline-none max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-2 pb-8 md:pb-12">
       <slot />
     </main>
 
-    <footer class="bg-dofus-card/80 border-t border-dofus-border mt-auto py-6 text-center text-xs text-slate-400 hidden md:block">
-      <p>
-        Gestor de monturas • Basado en las reglas de crianza de Dofus 3.5 • Creado con Astro y Local-First
+    <footer class="bg-dofus-card/80 border-t border-dofus-border mt-auto pt-5 pb-24 md:py-6 px-4 text-center text-xs text-slate-400 space-y-1.5">
+      <p class="text-slate-300 font-medium">
+        Tus datos se guardan solo en este navegador. Exporta una copia de seguridad desde el Establo de vez en cuando:
+        si borras los datos del navegador o cambias de dispositivo, se pierden.
       </p>
+      <p>Gestor de monturas • Proyecto de fans, sin relación con Ankama</p>
     </footer>
   </body>
 </html>
