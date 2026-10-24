@@ -332,19 +332,7 @@ export const FuelCalculator: React.FC = () => {
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              Siguiente Nivel ({nextLevel})
-            </button>
-            <button
-              type="button"
-              aria-pressed={targetMode === 'gauge200k'}
-              onClick={() => setTargetMode('gauge200k')}
-              className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
-                targetMode === 'gauge200k'
-                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
-              }`}
-            >
-              Llenar Medidor (200k)
+              Siguiente nivel ({nextLevel})
             </button>
             <button
               type="button"
@@ -356,19 +344,33 @@ export const FuelCalculator: React.FC = () => {
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              Meta Nivel 200
+              Nivel 200
+            </button>
+            <button
+              type="button"
+              aria-pressed={targetMode === 'gauge200k'}
+              onClick={() => setTargetMode('gauge200k')}
+              title="Llenar el medidor completo (200.000 XP)"
+              className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
+                targetMode === 'gauge200k'
+                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
+              }`}
+            >
+              Medidor completo
             </button>
             <button
               type="button"
               aria-pressed={targetMode === 'custom'}
               onClick={() => setTargetMode('custom')}
+              title="Elegir manualmente cuánta XP cargar en el medidor"
               className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'custom'
                   ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              Manual
+              Medidor manual
             </button>
           </div>
         </div>
