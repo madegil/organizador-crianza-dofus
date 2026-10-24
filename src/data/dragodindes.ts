@@ -95,8 +95,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
       "120 Agilidad"
     ],
     "parents": [
-      "dd_amande_rousse",
-      "dd_amande_doree"
+      "dd_amande_doree",
+      "dd_doree_rousse"
     ],
     "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/3.png"
   },
@@ -110,8 +110,8 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
       "120 Suerte"
     ],
     "parents": [
-      "dd_doree_rousse",
-      "dd_amande_doree"
+      "dd_amande_doree",
+      "dd_amande_rousse"
     ],
     "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/17.png"
   },
@@ -444,7 +444,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     ],
     "parents": [
       "dd_orchidee_pourpre",
-      "dd_amande_rousse"
+      "dd_indigo_pourpre"
     ],
     "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/16.png"
   },
@@ -459,7 +459,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     ],
     "parents": [
       "dd_orchidee_pourpre",
-      "dd_doree_rousse"
+      "dd_ebene_orchidee"
     ],
     "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/15.png"
   },
@@ -714,7 +714,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     ],
     "parents": [
       "dd_ivoire_turquoise",
-      "dd_amande_rousse"
+      "dd_ivoire_pourpre"
     ],
     "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/21.png"
   },
@@ -729,7 +729,7 @@ export const DRAGODINDES_DATA: MountDefinition[] = [
     ],
     "parents": [
       "dd_ivoire_turquoise",
-      "dd_doree_rousse"
+      "dd_orchidee_turquoise"
     ],
     "imageUrl": "https://api.dofusdu.de/dofus2/img/mount/23.png"
   },
