@@ -1,0 +1,39 @@
+---
+interface Props {
+  head: string[];
+  rows: (string | number)[][];
+  /** Descripción breve para lectores de pantalla */
+  caption?: string;
+  /** Atributo data-* opcional por fila (p. ej. el mes en el Almanax) */
+  rowData?: (string | number)[];
+}
+const { head, rows, caption, rowData } = Astro.props;
+// Solo las tablas anchas necesitan desplazamiento horizontal en móvil
+const minWidth = head.length >= 4 ? 'min-w-[32rem]' : '';
+---
+
+<div class="overflow-x-auto -mx-1 px-1">
+  <table class={`w-full text-left text-[13px] border-collapse ${minWidth}`}>
+    {caption && <caption class="sr-only">{caption}</caption>}
+    <thead>
+      <tr class="border-b border-slate-200">
+        {head.map((h) => <th scope="col" class="py-2 pr-3 font-bold text-slate-900 align-bottom">{h}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((r, i) => (
+          <tr class="border-b border-slate-100 last:border-0 align-top" data-row={rowData?.[i]}>
+            {r.map((c, j) =>
+              j === 0 ? (
+                <th scope="row" class="py-2 pr-3 font-semibold text-slate-900 min-w-[7rem]">{c}</th>
+              ) : (
+                <td class="py-2 pr-3">{c}</td>
+              )
+            )}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

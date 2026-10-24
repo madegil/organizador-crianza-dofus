@@ -1,13 +1,699 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { BreedingGuide } from '../components/BreedingGuide';
+import GuideSection from '../components/guide/GuideSection.astro';
+import GuideTable from '../components/guide/GuideTable.astro';
+import ToolLink from '../components/guide/ToolLink.astro';
+import { SerenityChart } from '../components/BreedingGuide';
+import { TargetGenCalculator } from '../components/guide/TargetGenCalculator';
+
+// Índice: grupos y secciones en el orden de la página
+const toc = [
+  {
+    group: 'Las monturas',
+    items: [
+      { id: 'cronologia', label: 'Cronología' },
+      { id: 'caracteristicas', label: 'Características' },
+      { id: 'donde-capturar', label: 'Dónde encontrarlas' },
+      { id: 'redes', label: 'Captura y redes' },
+    ],
+  },
+  {
+    group: 'Herramientas del ganadero',
+    items: [
+      { id: 'carburantes', label: 'Carburantes' },
+      { id: 'makinas', label: 'Mákinas y capacidades' },
+      { id: 'cercados', label: 'Cercados' },
+      { id: 'interfaz', label: 'La interfaz de crianza' },
+    ],
+  },
+  {
+    group: 'Cómo se cría',
+    items: [
+      { id: 'como-se-cria', label: 'Resumen' },
+      { id: 'serenidad', label: '1. Ajusta la serenidad' },
+      { id: 'medidores', label: '2. Llena los medidores' },
+      { id: 'cruce', label: '3. Cruza' },
+      { id: 'colores', label: '4. De dónde salen los colores' },
+      { id: 'esteriles', label: '5. Las estériles' },
+      { id: 'experiencia', label: '6. Sube de nivel' },
+      { id: 'recompensas', label: 'Recompensas' },
+      { id: 'consejos', label: 'Consejos para empezar' },
+    ],
+  },
+];
+
+// Ruta rápida: lo que más se consulta
+const quickPath = [
+  { id: 'donde-capturar', step: '1', title: 'Captura', text: 'Dónde está cada montura y qué red usar' },
+  { id: 'serenidad', step: '2', title: 'Serenidad', text: 'Qué medidor sube en cada zona' },
+  { id: 'medidores', step: '3', title: 'Medidores', text: 'Tramos, gasto y tiempos del cercado' },
+  { id: 'cruce', step: '4', title: 'Cruce', text: 'Fecundas, mákinas y generación objetivo' },
+  { id: 'experiencia', step: '5', title: 'Nivel 200', text: 'Experiencia y carburante necesario' },
+];
+
+const almanax = [
+  ['10 de enero', 'Medidor de madurez al doble'],
+  ['10 de febrero', 'Los bebés nacen Resistentes'],
+  ['10 de marzo', 'Medidor de aguante al doble'],
+  ['10 de abril', 'Medidor de pérdida de serenidad al doble'],
+  ['10 de mayo', 'Los criadores ahorran un 15 % de ingredientes'],
+  ['10 de junio', 'Medidor de experiencia al doble'],
+  ['10 de julio', 'Los bebés nacen Enamoradizos'],
+  ['10 de agosto', '25 % de probabilidad de fabricar un objeto extra'],
+  ['10 de septiembre', 'Medidor de aumento de serenidad al doble'],
+  ['10 de octubre', 'Los bebés nacen Sabios'],
+  ['Fecha variable (12 de octubre en 2026)', '+20 % de generación objetivo'],
+  ['10 de noviembre', 'Los bebés nacen Precoces'],
+  ['10 de diciembre', 'Medidor de amor al doble'],
+];
+// Mes (1-12) de cada fila, para marcar el bono del mes actual; la fecha variable no se marca
+const almanaxMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '', 11, 12];
+
+const p = 'text-sm leading-relaxed';
 ---
 
 <Layout
-  title="Guía de serenidad y medidores"
-  description="Aprende a criar monturas en Dofus: cómo ajustar la serenidad (de −5.000 a +5.000) y llenar los medidores de Aguante, Madurez y Amor con carburantes especializados."
+  title="Guía de crianza de monturas"
+  description="Guía completa de crianza en Dofus: dónde capturar dragopavos, mulaguas y vuelocerontes, redes, carburantes, mákinas, cercados, serenidad, cruces y cómo subir tus monturas a nivel 200."
 >
-  <div class="max-w-7xl mx-auto">
-    <BreedingGuide client:load collapsible={false} />
+  <div class="max-w-7xl mx-auto space-y-4 sm:space-y-5">
+    <!-- Cabecera y ruta rápida -->
+    <header class="bg-white text-slate-700 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm p-4 sm:p-6 space-y-4">
+      <div class="space-y-1.5">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">Guía de crianza de monturas</h1>
+        <p class="text-sm leading-relaxed max-w-3xl">
+          Todo lo que necesitas para criar dragopavos, mulaguas y vuelocerontes desde la actualización 3.5: dónde
+          capturarlos, cómo funcionan los cercados y los carburantes, y cómo llegar a la generación 10.
+        </p>
+      </div>
+      <nav aria-label="Ruta rápida">
+        <ol class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          {
+            quickPath.map((q) => (
+              <li>
+                <a
+                  href={`#${q.id}`}
+                  class="h-full flex flex-col gap-0.5 p-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-300 hover:bg-blue-50/60 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                >
+                  <span class="text-[11px] font-bold text-blue-700">Paso {q.step}</span>
+                  <span class="text-sm font-extrabold text-slate-900">{q.title}</span>
+                  <span class="text-[12px] text-slate-600 leading-snug">{q.text}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+    </header>
+
+    <div class="lg:grid lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-5 items-start">
+      <!-- Índice: desplegable en móvil, fijo al lado en escritorio -->
+      <aside class="mb-4 lg:mb-0 lg:sticky lg:top-4">
+        <details class="toc lg:hidden bg-white text-slate-700 rounded-2xl border border-slate-200/90 shadow-sm">
+          <summary class="cursor-pointer select-none p-3.5 text-sm font-extrabold text-slate-900">Índice de la guía</summary>
+          <nav aria-label="Índice de la guía (móvil)" class="px-3.5 pb-3.5">
+            {
+              toc.map((g) => (
+                <div class="mt-2">
+                  <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">{g.group}</p>
+                  <ul class="mt-1 space-y-0.5">
+                    {g.items.map((i) => (
+                      <li><a href={`#${i.id}`} class="block py-1 text-sm text-slate-700 hover:text-blue-700">{i.label}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
+          </nav>
+        </details>
+        <nav
+          aria-label="Índice de la guía"
+          class="hidden lg:block bg-white text-slate-700 rounded-2xl border border-slate-200/90 shadow-sm p-3.5 max-h-[calc(100vh-2rem)] overflow-y-auto"
+        >
+          {
+            toc.map((g, gi) => (
+              <div class={gi > 0 ? 'mt-3' : ''}>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">{g.group}</p>
+                <ul class="mt-1 space-y-0.5">
+                  {g.items.map((i) => (
+                    <li>
+                      <a
+                        href={`#${i.id}`}
+                        data-toc-link={i.id}
+                        class="toc-link block px-2 py-1 rounded-lg text-[13px] text-slate-600 hover:text-blue-700 hover:bg-slate-50"
+                      >
+                        {i.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </nav>
+      </aside>
+
+      <div class="space-y-4 sm:space-y-5 min-w-0">
+        <!-- Las monturas -->
+        <GuideSection id="cronologia" title="Cronología de las monturas">
+          <p class={p}>
+            La crianza llegó a Dofus en septiembre de 2006 con los dragopavos, y casi veinte años después funciona con un
+            sistema rehecho en la actualización 3.5. Las mulaguas y los vuelocerontes se sumaron mucho más tarde, cada uno
+            con su propia actualización.
+          </p>
+          <ol class="relative border-l-2 border-slate-200 ml-2 space-y-4">
+            {
+              [
+                ['Actualización 3.7', 'Ajustes al sistema', 'La capacidad de cada medidor del cercado se duplicó, la Optimákina pasó a dar +20 % de probabilidad de generación objetivo, los carburantes cambiaron de nombre (no de precio ni efecto) y la interfaz marca las monturas que aún te faltan en los logros.'],
+                ['Actualización 3.5', 'Reforma completa de la crianza', 'Nace el oficio de criador, desaparecen los certificados y los cercados privados, las monturas ganan experiencia solo en el cercado, el nivel máximo sube a 200 y cada cruce da un único bebé. Todas las monturas anteriores quedan seniles. Las mulaguas ganan dos generaciones nuevas.'],
+                ['Junio de 2018', 'Llegan los vuelocerontes', 'Se introducen con la actualización de los Nimbos. Dan 1 PA desde el nivel 100.'],
+                ['Junio de 2016', 'Llegan las mulaguas', 'Se introducen con la actualización de los Abismos de Sufokia. Dan 1 PM desde el nivel 100.'],
+                ['Septiembre de 2006', 'Llegan los dragopavos', 'Aparecen con la Montaña de los Koalaks. Son la primera y única montura del juego durante diez años.'],
+              ].map(([date, title, text]) => (
+                <li class="pl-4 relative">
+                  <span class="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full bg-blue-600 ring-4 ring-white" aria-hidden="true" />
+                  <p class="text-[11px] font-bold uppercase tracking-wider text-blue-700">{date}</p>
+                  <p class="font-extrabold text-slate-900">{title}</p>
+                  <p class="text-[13px] leading-relaxed">{text}</p>
+                </li>
+              ))
+            }
+          </ol>
+          <p class="text-[13px] leading-relaxed p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-950">
+            Si jugabas antes de la 3.5, lo que más te afecta es esto: tus monturas antiguas siguen sirviendo para equiparlas y
+            subirlas de nivel, pero ya no se pueden cruzar ni clonar. Para avanzar en los logros de generaciones hay que empezar
+            de cero con monturas capturadas después del cambio.
+          </p>
+        </GuideSection>
+
+        <GuideSection id="caracteristicas" title="Características">
+          <p class={p}>
+            Hay tres tipos de montura y todos se crían igual; lo que cambia entre ellos es el bono fijo que dan y cuántos colores
+            se pueden obtener. Una montura se equipa en el mismo lugar de la mascota o mascotura, exige nivel 60 de personaje y te
+            deja moverte más rápido que a pie.
+          </p>
+          <GuideTable
+            caption="Comparación de los tres tipos de montura"
+            head={['Tipo', 'Bono común', 'Colores capturables (gen. 1)', 'Colores criables', 'Recurso al extraer']}
+            rows={[
+              ['Dragopavo', 'Vitalidad: 300 a nivel 100, 400 a nivel 200', '3: Almendrado, Dorado, Pelirrojo', '66 (+2 especiales que no se reproducen)', 'Neurona de dragopavo'],
+              ['Mulagua', '1 PM desde el nivel 100', '5: Ébano, Índigo, Púrpura, Orquídea, Dorada', '120', 'Ámbar de mulagua'],
+              ['Vueloceronte', '1 PA desde el nivel 100', '4: Ébano, Índigo, Púrpura, Orquídeo', '120', 'Cuerno de vueloceronte'],
+            ]}
+          />
+          <p class={p}>
+            Además del bonus común, cada color aporta su propia característica. Una montura de un solo color da el bonus común
+            más la característica de ese color. Una bicolor da el bono común más las dos características de sus colores, pero cada
+            una con un valor más bajo que en la monocolor.
+          </p>
+          <p class={p}>
+            Las monturas van del nivel 1 al 200. Sus estadísticas suben rápido hasta el 100 y a partir de ahí crecen despacio. Un
+            ejemplo: una Mulagua Dorada da 1 PM y 50 de potencia a nivel 100, y 1 PM y 70 de potencia a nivel 200.
+          </p>
+          <p class={p}>
+            Los dos dragopavos especiales (en armadura y de plumas) se compran a Gladiagob en la Feria del Trool, en [-11,-37], por
+            50 gladiatones cada uno. Solo pueden subir de nivel.
+          </p>
+          <ToolLink href="/coleccion" label="Colección">Mira los bonos de cada color y marca las que ya tienes.</ToolLink>
+        </GuideSection>
+
+        <GuideSection id="donde-capturar" title="Dónde encontrar cada montura salvaje">
+          <p class={p}>
+            Cada tipo vive en su propia zona y solo se puede capturar la generación 1; el resto de colores sale de los cruces. Las
+            salvajes son monstruos de nivel 62 a 70, fáciles para un personaje con buen nivel.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {
+              [
+                { name: 'Dragopavo', tone: 'border-orange-200 bg-orange-50/60', zone: 'Territorio de los dragopavos salvajes, Montaña de los Koalaks', how: 'El zaap más cercano es el del Pueblo de los Ganaderos, en [-16,1]', fight: 'Hasta 900 PV. Todas pueden quitarte los hechizos de mejora (desembrujar).' },
+                { name: 'Mulagua', tone: 'border-sky-200 bg-sky-50/60', zone: 'Cuenca de las mulaguas, Bahía de Sufokia', how: 'Tres entradas: la escafandra del taller de ganaderos de Sufokia en [19,23]; la escalera frente al submarino steamer en [22,19]; o la barca del Territorio de los Bandidos en [15,19] y luego la cuerda', fight: 'Hasta 1000 PV. Te quitan un 10 % de daño final durante 1 turno. El elemento de su golpe depende del color: Dorada neutro, Ébano aire, Índigo agua, Púrpura tierra, Orquídea fuego.' },
+                { name: 'Vueloceronte', tone: 'border-purple-200 bg-purple-50/60', zone: 'Acaballero de Brakmar, al sur de la ciudad', how: 'Salida sur de Brakmar, en [-25,40]', fight: 'Hasta 1000 PV. Atraen, empujan, quitan PA o PM; la Púrpura reduce un 30 % el daño final en zona durante 1 turno.' },
+              ].map((m) => (
+                <article class={`p-3.5 rounded-xl border ${m.tone} space-y-2 text-[13px] leading-relaxed`}>
+                  <h3 class="text-base font-extrabold text-slate-900">{m.name}</h3>
+                  <p><span class="font-bold text-slate-900">Zona:</span> {m.zone}</p>
+                  <p><span class="font-bold text-slate-900">Cómo llegar:</span> {m.how}</p>
+                  <p><span class="font-bold text-slate-900">En combate:</span> {m.fight}</p>
+                </article>
+              ))
+            }
+          </div>
+          <p class={p}>
+            Si vas con poco nivel, ten en cuenta que los vuelocerontes son los más molestos de los tres: el Ébano aplica Pesanteur
+            a todo el campo cada dos turnos y la Orquídea reduce a la mitad las curas que recibes.
+          </p>
+        </GuideSection>
+
+        <GuideSection id="redes" title="Tipos de captura y efecto de cada red">
+          <p class={p}>
+            Para capturar necesitas una red equipada en los consumibles de combate; la red te da el hechizo Domesticación de
+            montura, y lo que hace ese hechizo depende de la red. Las redes las fabrica el oficio de ganadero y solo puedes equipar
+            las de tu nivel de oficio o inferior.
+          </p>
+          <GuideTable
+            caption="Redes de captura"
+            head={['Red', 'Nivel de criador', 'Para qué tipo', 'Efecto del hechizo']}
+            rows={[
+              ['Red de captura universal', 1, 'Cualquier tipo', 'Captura la montura que apuntas.'],
+              ['Red multiplicadora', 100, 'Una por tipo', 'Captura la montura apuntada y te da una copia.'],
+              ['Red reforzada', 150, 'Una por tipo', 'Captura todas las monturas en un círculo de radio 3.'],
+              ['Red multiplicadora reforzada', 200, 'Una por tipo', 'Captura todo lo que hay en el círculo de radio 3 y duplica cada una.'],
+            ]}
+          />
+          <p class={p}>
+            En total hay 10 redes. La universal sirve para los tres tipos de montura. Cada una de las otras tres (multiplicadora,
+            reforzada y multiplicadora reforzada) tiene una versión para dragopavos, otra para mulaguas y otra para vuelocerontes,
+            y cada versión solo captura monturas de su tipo: por ejemplo, la Red multiplicadora de mulagua no sirve con un
+            vueloceronte. Por eso son 1 + 3 × 3 = 10. Las copias de las monturas que dan las redes multiplicadoras tienen el mismo
+            color pero no siempre el mismo sexo, lo que viene bien para formar parejas.
+          </p>
+          <p class={p}>El hechizo cuesta 1 PA, llega a 7 de alcance sin línea de visión y se lanza una vez por combate.</p>
+          <ol class="space-y-2 text-sm leading-relaxed">
+            {
+              [
+                'Equipa la red que corresponda al tipo de montura en tus consumibles de combate.',
+                'Entra en combate contra un grupo de monturas salvajes.',
+                'Lanza Domesticación de montura sobre la montura (o sobre el centro del grupo, si usas una red reforzada). Las afectadas muestran el estado Capturada encima de la cabeza.',
+                'Termina el combate cuando quieras. El estado no caduca, así que la captura está asegurada.',
+              ].map((s, i) => (
+                <li class="flex gap-3">
+                  <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">{i + 1}</span>
+                  <span>{s}</span>
+                </li>
+              ))
+            }
+          </ol>
+          <p class={p}>
+            Si hay varios jugadores en el combate, cada montura solo puede capturarla uno. Una vez marcada por alguien, nadie se la
+            quita, pero los demás pueden marcar las que queden libres.
+          </p>
+          <p class={p}>
+            Las monturas capturadas salen de nivel 1 y generación 1, y ya se pueden equipar. Cada captura da 30 de experiencia de
+            criador por montura.
+          </p>
+          <ToolLink href="/establo" label="Establo">Registra tus capturas para seguir su serenidad y sus medidores.</ToolLink>
+        </GuideSection>
+
+        <!-- Herramientas del ganadero -->
+        <GuideSection id="carburantes" title="Carburantes">
+          <p class={p}>
+            Los carburantes llenan los medidores del cercado y son lo que realmente cría a tus monturas. Hay seis medidores
+            (pérdida de serenidad, aumento de serenidad, resistencia, madurez, amor y experiencia de montura) y cada uno tiene sus
+            carburantes, que se diferencian por tipo y por tamaño.
+          </p>
+          <p class={p}>
+            El tipo decide hasta dónde puede llenar el medidor. Un carburante nunca pasa el tope de su tramo, pero uno superior sí
+            sirve para llenar los tramos de abajo.
+          </p>
+          <GuideTable
+            caption="Tipos de carburante"
+            head={['Tipo', 'Llena hasta', 'Tramo del medidor', 'Nivel de criador para fabricarlo', 'Precio del gigantesco en polvo de crianza']}
+            rows={[
+              ['Extracto', '80.000', 1, 5, 50],
+              ['Filtro', '140.000', 2, 55, 200],
+              ['Poción', '180.000', 3, 105, 800],
+              ['Elixir', '200.000', 4, 155, '3.200'],
+            ]}
+          />
+          <p class={p}>
+            El tamaño decide cuánto carga cada unidad: minúsculo 2.000, pequeño 4.000, normal 6.000, grande 8.000 y gigantesco
+            10.000. Cada diez niveles de criador se desbloquea un tamaño nuevo.
+          </p>
+          <p class={p}>
+            No hace falta tener el oficio para usarlos; puedes comprarlos en el mercadillo. El polvo de crianza se cambia por
+            carburantes gigantescos con Adela Gana en [-18,1]. Quien tenía objetos de crianza, pociones de experiencia o redes antes
+            de la 3.5 recibió 0,55 de polvo por cada punto de durabilidad que les quedaba.
+          </p>
+          <p class={p}>
+            Cómo se consumen y cuánto duran está en la sección <a href="#medidores" class="font-semibold text-blue-700 underline">Llena los medidores</a>.
+          </p>
+          <ToolLink href="/calculadora" label="Calculadora">Calcula cuánto carburante necesitas para llevar una montura al nivel que quieras.</ToolLink>
+        </GuideSection>
+
+        <GuideSection id="makinas" title="Mákinas y capacidades especiales">
+          <p class={p}>
+            Una mákina es un consumible opcional que pones entre los dos padres al cruzarlos, y cambia algo del bebé que va a nacer.
+            Solo cabe una por cruce.
+          </p>
+          <GuideTable
+            caption="Tipos de mákina"
+            head={['Mákina', 'Efecto en el bebé']}
+            rows={[
+              ['Animákina', 'Eliges si nace macho o hembra.'],
+              ['Kromákina', 'Nace con la capacidad Camaleón (100 % de éxito).'],
+              ['Optimákina', '+20 % de probabilidad de que nazca de la generación objetivo.'],
+            ]}
+          />
+          <p class={p}>
+            Hay una mákina de cada clase para cada tipo de montura y cada generación. Debe ser de la generación objetivo del cruce o
+            superior: si el objetivo es la 5, sirve una de generación 8, pero no una de generación 4.
+          </p>
+          <p class={p}>Las capacidades salen al azar al nacer y no se heredan. La única que se elige es Camaleón, con la Kromákina.</p>
+          <GuideTable
+            caption="Capacidades especiales"
+            head={['Capacidad', 'Efecto', 'Probabilidad al nacer']}
+            rows={[
+              ['Enamoradiza', 'Gana amor al doble de velocidad', '8 %'],
+              ['Resistente', 'Gana aguante al doble de velocidad', '8 %'],
+              ['Sabia', 'Gana experiencia al doble de velocidad', '6 %'],
+              ['Reproductora', 'Da un bebé extra al cruzarla', '3 %'],
+              ['Camaleón', 'Toma los colores de tu personaje al equiparla', 'Solo con Kromákina'],
+            ]}
+          />
+          <p class={p}>
+            La Reproductora funciona aunque la tenga el macho. Cruzar dos Reproductoras no sirve de nada: siguen dando un solo bebé
+            extra.
+          </p>
+        </GuideSection>
+
+        <GuideSection id="cercados" title="Cercados: dónde están y cómo se accede">
+          <p class={p}>
+            Todos los cercados del juego están en el Pueblo de los Ganaderos, a la izquierda del zaap [-16,1]; no hay ninguno más en
+            el Mundo de los Doce. Se desbloquean con el nivel del oficio de criador, hasta un máximo de 6, y cada uno tiene 10 plazas.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_16rem] gap-4 items-start">
+            <GuideTable
+              caption="Cercados del Pueblo de los Ganaderos"
+              head={['Cercado', 'Posición', 'Nivel de Ganadero']}
+              rows={[
+                ['Del principiante', '[-18,0]', 1],
+                ['Del novato', '[-19,0]', 40],
+                ['Del aprendiz', '[-20,0]', 80],
+                ['Del iniciado', '[-20,2]', 120],
+                ['Del veterano', '[-19,2]', 160],
+                ['Del maestro', '[-18,2]', 200],
+              ]}
+            />
+            <!-- Plano del pueblo: 3 columnas (x −20, −19, −18) × 3 filas (y 0, 1, 2) -->
+            <figure class="space-y-1.5">
+              <div class="grid grid-cols-3 gap-1.5 text-center text-[11px] leading-tight" role="img" aria-label="Plano del Pueblo de los Ganaderos: cercados en las filas 0 y 2, mapas de servicio en la fila 1, zaap al este en [-16,1]">
+                {
+                  [
+                    ['Aprendiz', '[-20,0]', 'c'], ['Novato', '[-19,0]', 'c'], ['Principiante', '[-18,0]', 'c'],
+                    ['Taller', '[-20,1]', 's'], ['Mercadillo', '[-19,1]', 's'], ['Adela Gana y Eugen Eticha', '[-18,1]', 's'],
+                    ['Iniciado', '[-20,2]', 'c'], ['Veterano', '[-19,2]', 'c'], ['Maestro', '[-18,2]', 'c'],
+                  ].map(([n, pos, k]) => (
+                    <div class={`p-1.5 rounded-lg border ${k === 'c' ? 'bg-emerald-50 border-emerald-200 text-emerald-950' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
+                      <p class="font-bold">{n}</p>
+                      <p class="font-mono text-[10.5px] opacity-80">{pos}</p>
+                    </div>
+                  ))
+                }
+              </div>
+              <figcaption class="text-[11px] text-slate-500">Vista del pueblo. El zaap queda al este, en [-16,1].</figcaption>
+            </figure>
+          </div>
+          <p class={p}>
+            Los seis funcionan igual; el del maestro no cría más rápido que el del principiante. Las plazas son de la cuenta, así que
+            otro personaje de la misma cuenta no te da cercados extra.
+          </p>
+          <p class={p}>
+            Para llegar rápido existe la Poción de teletransporte: Pueblo de los Criadores, que te deja en [-18,1]. La fabrican los
+            alquimistas de nivel 60 con 2 Pez gatito, 2 Avena y 2 Menta salvaje. Cada mapa de cercado tiene además un zaapi: si haces
+            doble clic en un cercado del minimapa, el personaje va solo por el camino más corto.
+          </p>
+          <p class={p}>Entre los cercados hay tres mapas de servicio:</p>
+          <ul class="list-disc pl-5 space-y-1 text-sm leading-relaxed">
+            <li>[-20,1]: el taller de ganaderos, donde se fabrican redes, carburantes y mákinas.</li>
+            <li>[-19,1]: el mercadillo de criaturas.</li>
+            <li>[-18,1]: Adela Gana, que vende carburantes por polvo de crianza, y Eugen Eticha, que cambia las genetichas.</li>
+          </ul>
+        </GuideSection>
+
+        <GuideSection id="interfaz" title="La interfaz de crianza">
+          <p class={p}>
+            La interfaz se abre desde el botón Crianza del menú (tecla D por defecto) y funciona en cualquier parte del mapa, salvo
+            para meter o sacar monturas de un cercado. Para eso tienes que estar en uno de los seis mapas de cercado; si no lo estás,
+            los cercados aparecen con un candado.
+          </p>
+          <p class={p}>
+            Desde cualquier lugar puedes recargar carburante, activar o cambiar medidores, pasar monturas entre el inventario y el
+            establo, y cruzar, clonar o extraer.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2">
+              <h3 class="font-extrabold text-slate-900">Parte izquierda: tu crianza</h3>
+              <ul class="space-y-1.5 text-[13px] leading-relaxed">
+                <li><span class="font-bold text-slate-900">Filtros:</span> ordenan el establo o el cercado para ver solo lo que buscas, por ejemplo por serenidad o por el medidor que les falta.</li>
+                <li><span class="font-bold text-slate-900">Establo:</span> guarda hasta 500 monturas.</li>
+                <li><span class="font-bold text-slate-900">Genética:</span> un árbol con todos los cruces posibles. También se abre con clic derecho sobre una montura.</li>
+                <li><span class="font-bold text-slate-900">Panel superior:</span> elige qué se muestra a la derecha (cercado, apareamiento, clonación o extracción).</li>
+              </ul>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2">
+              <h3 class="font-extrabold text-slate-900">Parte derecha: el cercado</h3>
+              <p class="text-[13px] leading-relaxed">
+                En el centro eliges qué cercado ver. Arriba están sus medidores y abajo las monturas que tiene dentro. Puedes
+                arrastrar monturas desde el establo, el inventario u otro cercado.
+              </p>
+            </div>
+          </div>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[13px] leading-relaxed" aria-label="Medidores del cercado">
+            {
+              [
+                ['bg-violet-500', 'Violeta', 'Pérdida y aumento de serenidad', 'Baja o sube la serenidad. Solo uno de los dos puede estar activo.'],
+                ['bg-yellow-400', 'Amarillo', 'Aguante', 'Sube el aguante si la serenidad es negativa.'],
+                ['bg-sky-500', 'Azul', 'Madurez', 'Sube la madurez si la serenidad está entre −2.000 y 2.000.'],
+                ['bg-rose-500', 'Rojo', 'Amor', 'Sube el amor si la serenidad es positiva.'],
+                ['bg-amber-200', 'Beige', 'Experiencia de montura', 'Da experiencia, sin condición de serenidad.'],
+              ].map(([dot, color, name, what]) => (
+                <li class="flex gap-2.5 p-2.5 rounded-xl border border-slate-200">
+                  <span class={`mt-1 w-3 h-3 rounded-full flex-shrink-0 ${dot}`} aria-hidden="true" />
+                  <span><span class="font-bold text-slate-900">{name}</span> <span class="text-slate-500">({color})</span>. {what}</span>
+                </li>
+              ))
+            }
+          </ul>
+          <h3 class="font-extrabold text-slate-900 pt-1">La ficha de una montura</h3>
+          <p class={p}>
+            Al pasar el ratón por una montura ves, de arriba abajo: nombre, colores, nivel, sexo, tipo y generación; sus barras de
+            serenidad, aguante (rayo), madurez (gota) y amor (corazón), que se iluminan al llegar al máximo; su experiencia, su
+            capacidad si tiene una y su estado de fertilidad; los bonos que da equipada; y por último su genealogía (padres y
+            abuelos), que no aparece en las recién capturadas.
+          </p>
+          <GuideTable
+            caption="Estados de fertilidad"
+            head={['Estado', 'Qué significa']}
+            rows={[
+              ['Fértil', 'Puede cruzarse, pero aún hay que llenar aguante, madurez y amor.'],
+              ['Fecunda', 'Los tres medidores están llenos y puede cruzarse ya.'],
+              ['Estéril', 'Ya se cruzó. No puede volver a hacerlo, pero sí clonarse.'],
+              ['Senil', 'Montura anterior a la 3.5. No se cruza ni se clona.'],
+            ]}
+          />
+          <p class={p}>
+            En el establo y el cercado cada montura lleva una carita de color que resume qué puede ganar con su serenidad actual:
+            verde, solo amor; violeta, amor y madurez; azul, aguante y madurez; roja, solo aguante.
+          </p>
+          <p class={p}>Las otras tres vistas del panel derecho (cruce, clonación y extracción) se explican en la sección siguiente.</p>
+        </GuideSection>
+
+        <!-- Cómo se cría -->
+        <GuideSection id="como-se-cria" title="Cómo se cría">
+          <p class={p}>
+            Criar consiste en llevar a dos monturas del mismo tipo y sexo opuesto a fecundas, cruzarlas y quedarte con el bebé. Para
+            que sean fecundas, sus medidores de aguante, madurez y amor tienen que llegar a 20.000, y cada uno solo sube con la
+            serenidad en una zona concreta.
+          </p>
+          <ol class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[13px]">
+            {
+              toc[2].items.slice(1, 7).map((i) => (
+                <li><a href={`#${i.id}`} class="block p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-800 hover:border-blue-300 hover:bg-blue-50/60">{i.label}</a></li>
+              ))
+            }
+          </ol>
+        </GuideSection>
+
+        <GuideSection id="serenidad" eyebrow="Cómo se cría · Paso 1" title="Ajusta la serenidad">
+          <p class={p}>
+            La serenidad va de −5.000 a 5.000. Con el medidor de pérdida de serenidad la bajas y con el de aumento la subes. La zona en
+            la que esté decide qué medidores pueden subir:
+          </p>
+          <SerenityChart client:visible />
+          <GuideTable
+            caption="Medidores que suben según la serenidad"
+            head={['Serenidad', 'Sube']}
+            rows={[
+              ['−5.000 a −2.001', 'Solo aguante'],
+              ['−2.000 a −1', 'Aguante y madurez'],
+              ['0 a 2.000', 'Amor y madurez'],
+              ['2.001 a 5.000', 'Solo amor'],
+            ]}
+          />
+          <p class={p}>
+            Lo ideal es mantenerlas entre −2.000 y 2.000, cerca de 0, donde suben dos medidores a la vez. Vigila los cercados con un
+            medidor de serenidad activo: si te olvidas, la montura llega a uno de los extremos y tienes que devolverla.
+          </p>
+        </GuideSection>
+
+        <GuideSection id="medidores" eyebrow="Cómo se cría · Paso 2" title="Llena los medidores en el cercado">
+          <p class={p}>
+            Puedes tener hasta dos medidores activos por cercado (se activan con un clic, desde cualquier sitio) y afectan a todas las
+            monturas que haya dentro. Para recargarlos, arrastra el carburante del inventario a la interfaz. Cada medidor llega a
+            200.000 y cada 10 segundos gasta según el tramo en que está; cada montura del cercado gana lo mismo que se gasta.
+          </p>
+          <!-- Tramos dibujados a escala sobre los 200.000 del medidor -->
+          <div class="space-y-1.5" aria-hidden="true">
+            <div class="flex h-3 rounded-full overflow-hidden border border-slate-200">
+              <div class="bg-blue-200" style="width:40%"></div>
+              <div class="bg-blue-400" style="width:30%"></div>
+              <div class="bg-blue-600" style="width:20%"></div>
+              <div class="bg-blue-900" style="width:10%"></div>
+            </div>
+            <div class="flex text-[10.5px] font-mono text-slate-500">
+              <span style="width:40%">Tramo 1 · Extracto</span><span style="width:30%">Tramo 2 · Filtro</span><span style="width:20%">3 · Poción</span><span style="width:10%">4</span>
+            </div>
+          </div>
+          <GuideTable
+            caption="Tramos del medidor"
+            head={['Tramo', 'Rango del medidor', 'Gasto y ganancia cada 10 s', 'Tiempo en vaciar el tramo']}
+            rows={[
+              [1, '0 a 80.000', 10, '22 h 13 min'],
+              [2, '80.001 a 140.000', 20, '8 h 20 min'],
+              [3, '140.001 a 180.000', 30, '3 h 42 min'],
+              [4, '180.001 a 200.000', 40, '1 h 23 min'],
+            ]}
+          />
+          <p class={p}>
+            Un medidor lleno tarda unas 35 h 39 min en vaciarse del todo. Gasta lo mismo con 1 montura que con 10, así que conviene
+            llenar el cercado; y si nadie dentro puede aprovecharlo, no se gasta.
+          </p>
+          <ToolLink href="/establo" label="Establo">Anota la serenidad y los medidores de cada montura para agruparlas por cercado.</ToolLink>
+        </GuideSection>
+
+        <GuideSection id="cruce" eyebrow="Cómo se cría · Paso 3" title="Cruza dos monturas fecundas">
+          <p class={p}>
+            Abre la vista de cruce, pon un macho y una hembra fecundos del mismo tipo (tienen que estar en el establo, no en el
+            inventario ni en un cercado) y, si quieres, una mákina en el centro. La interfaz muestra la probabilidad de cada bebé
+            posible y la experiencia de criador que ganarás: 30 por generación de cada padre.
+          </p>
+          <p class={p}>
+            El bebé nace al instante, de nivel 1, con los medidores a 0 y sexo al azar (salvo con Animákina). Cada pareja da un solo
+            bebé, dos si uno tiene Reproductora, y ambos padres quedan estériles.
+          </p>
+        </GuideSection>
+
+        <GuideSection id="colores" eyebrow="Cómo se cría · Paso 4" title="Entiende de dónde salen los colores">
+          <p class={p}>
+            El color del bebé depende de sus padres y de sus abuelos; el árbol no va más allá. Los padres pesan más que los abuelos,
+            y un color que se repite varias veces en el árbol tiene más probabilidad. En mulaguas y vuelocerontes las generaciones
+            impares pueden tener varios cruces posibles (la Mulagua Esmeralda tiene 8); en dragopavos siempre hay uno solo.
+          </p>
+          <p class={p}>
+            La generación objetivo es la más alta que puede salir del cruce, contando el árbol completo. El bebé tiene un 30 % extra
+            de salir de esa generación, que se reparte si hay varias opciones. A eso se suman el nivel de los padres y la Optimákina:
+          </p>
+          <p class="p-3 rounded-xl bg-slate-900 text-slate-100 font-mono text-[13px] leading-relaxed overflow-x-auto">
+            Probabilidad = 30 % + 0,15 % × (nivel del padre 1 + nivel del padre 2) + 20 % con Optimákina
+          </p>
+          <p class={p}>
+            Dos padres de nivel 200 dan un 90 %, y dos de nivel 167 con Optimákina llegan al 100 %. Subir monturas a 200 lleva mucho
+            tiempo, así que muchos criadores se quedan en un punto medio, entre nivel 50 y 100.
+          </p>
+          <TargetGenCalculator client:visible />
+          <ToolLink href="/cruces" label="Cruces">Consulta qué pareja necesitas para cada color y generación.</ToolLink>
+        </GuideSection>
+
+        <GuideSection id="esteriles" eyebrow="Cómo se cría · Paso 5" title="Qué hacer con las estériles">
+          <ul class="space-y-2 text-sm leading-relaxed">
+            <li class="p-3 rounded-xl border border-slate-200"><span class="font-bold text-slate-900">Clonar:</span> pones dos monturas estériles del mismo tipo y generación, se destruyen ambas y recuperas una al azar, fértil, con su sexo, genealogía y serenidad, pero con los medidores a 0 y sin capacidad. Es la única forma de sacar dos monturas de una pareja.</li>
+            <li class="p-3 rounded-xl border border-slate-200"><span class="font-bold text-slate-900">Extraer:</span> destruye la montura y te da tantos recursos como su generación (desde la 2; una senil da 1). Los recursos sirven para fabricar redes y mákinas.</li>
+            <li class="p-3 rounded-xl border border-slate-200"><span class="font-bold text-slate-900">Vender o equipar:</span> venderlas en el mercadillo, mejor tras subirles algo de nivel, o equiparlas.</li>
+          </ul>
+        </GuideSection>
+
+        <GuideSection id="experiencia" eyebrow="Cómo se cría · Paso 6" title="Sube de nivel tus monturas">
+          <p class={p}>
+            La experiencia solo se gana en el cercado con el medidor de experiencia. Hacen falta 172.668 puntos para el nivel 100 y
+            867.582 para el 200. Con el tramo 4 siempre lleno, una montura gana 4 por segundo: unas 12 h al 100 y unas 60 h al 200.
+            Con el tramo 2, el doble de tiempo. En la práctica cuenta con 100 a 150 horas hasta el 200, la mitad si es Sabia.
+          </p>
+          <ToolLink href="/calculadora" label="Calculadora">Elige una montura de tu establo y te dice cuánto carburante y cuánto tiempo le faltan.</ToolLink>
+        </GuideSection>
+
+        <GuideSection id="recompensas" title="Recompensas">
+          <p class={p}>
+            Las genetichas son fichas de cuenta que ganas cuando el bebé supera en generación a todas las monturas del árbol de sus
+            padres. Recibes, por cada padre, según su generación: 2, 4, 8, 16, 30, 60, 120, 240 y 500 genetichas de la generación 1 a
+            la 9. Un padre de generación 9 y otro de 1 dan 502. Eugen Eticha los cambia por pergaminos de características, turmalinas,
+            alichas y apariencias Camaleón.
+          </p>
+          <p class={p}>El día 10 de cada mes el Almanax da un bono de crianza:</p>
+          <div class="almanax">
+            <GuideTable caption="Bonos de crianza del Almanax" head={['Fecha', 'Bono']} rows={almanax} rowData={almanaxMonths} />
+          </div>
+        </GuideSection>
+
+        <GuideSection id="consejos" title="Consejos para empezar">
+          <ul class="space-y-2 text-sm leading-relaxed">
+            <li class="flex gap-2.5"><span class="text-blue-600 font-bold" aria-hidden="true">•</span><span>Captura mucho y en grupo. Una pareja nunca da más de dos monturas, así que la crianza no se sostiene sola; sube la prospección para conseguir más recursos al extraer.</span></li>
+            <li class="flex gap-2.5"><span class="text-blue-600 font-bold" aria-hidden="true">•</span><span>Sube el oficio cuanto antes. Con nivel 120 ya tienes cuatro cercados, y fabricar carburantes te da experiencia y combustible a la vez.</span></li>
+            <li class="flex gap-2.5"><span class="text-blue-600 font-bold" aria-hidden="true">•</span><span>Agrupa por serenidad: un cercado para las de −2.000 a −1 (aguante y madurez), otro para las de 0 a 2.000 (amor y madurez) y otros para corregir las que están en los extremos.</span></li>
+            <li class="flex gap-2.5"><span class="text-blue-600 font-bold" aria-hidden="true">•</span><span>Si un cercado solo tiene un medidor activo, enciende también el de experiencia.</span></li>
+            <li class="flex gap-2.5"><span class="text-blue-600 font-bold" aria-hidden="true">•</span><span>Usa Optimákina en las generaciones altas y clona en vez de vender si vas a por los logros.</span></li>
+          </ul>
+          <p class={p}>
+            Los logros piden capturar cada tipo salvaje (3 dragopavos, 5 mulaguas, 4 vuelocerontes), hacer nacer 1.000 monturas y
+            obtener todas las generaciones de la 2 a la 10 de los tres tipos, lo que lleva meses.
+          </p>
+        </GuideSection>
+      </div>
+    </div>
   </div>
 </Layout>
+
+<style is:global>
+  .toc-link[aria-current='true'] {
+    color: #1d4ed8;
+    background-color: #eff6ff;
+    font-weight: 700;
+  }
+  .almanax tr[data-current='true'] th,
+  .almanax tr[data-current='true'] td {
+    background-color: #fffbeb;
+  }
+  .almanax tr[data-current='true'] th::after {
+    content: ' · este mes';
+    color: #b45309;
+    font-weight: 700;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+</style>
+
+<script>
+  // Índice: marca la sección que se está leyendo
+  const links = new Map<string, HTMLElement>();
+  document.querySelectorAll<HTMLElement>('[data-toc-link]').forEach((a) => links.set(a.dataset.tocLink!, a));
+  const sections = Array.from(document.querySelectorAll<HTMLElement>('.guide-section'));
+  const visible = new Set<string>();
+  const update = () => {
+    const current = sections.find((s) => visible.has(s.id));
+    links.forEach((a, id) => a.setAttribute('aria-current', String(id === current?.id)));
+  };
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => (e.isIntersecting ? visible.add(e.target.id) : visible.delete(e.target.id)));
+      update();
+    },
+    { rootMargin: '-15% 0px -70% 0px' }
+  );
+  sections.forEach((s) => io.observe(s));
+
+  // Índice móvil: se cierra al elegir una sección
+  document.querySelectorAll<HTMLDetailsElement>('details.toc').forEach((d) =>
+    d.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => (d.open = false)))
+  );
+
+  // Almanax: resalta el bono del mes actual
+  const month = String(new Date().getMonth() + 1);
+  document.querySelectorAll<HTMLElement>('.almanax tr[data-row]').forEach((tr) => {
+    if (tr.dataset.row === month) tr.dataset.current = 'true';
+  });
+</script>

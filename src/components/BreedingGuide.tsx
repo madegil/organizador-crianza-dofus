@@ -27,7 +27,7 @@ const ZONES = [
 ];
 
 /** Gráfica de serenidad al estilo del juego: iconos arriba, barra de -5.000 a +5.000 y zonas debajo. */
-const SerenityChart: React.FC = () => {
+export const SerenityChart: React.FC = () => {
   const captionId = useId();
   return (
   <figure
