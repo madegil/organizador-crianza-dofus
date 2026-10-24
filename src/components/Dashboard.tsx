@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { UserMount } from '../types/mount';
 import { MountTable } from './MountTable';
-import { BreedingGuide } from './BreedingGuide';
 import { db, normalizeStoredMounts } from '../db/mountsDb';
 
 export const Dashboard: React.FC = () => {
@@ -56,7 +55,6 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <BreedingGuide />
       <MountTable mounts={mounts} onDataChanged={fetchMounts} />
     </div>
   );

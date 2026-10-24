@@ -1,9 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Dashboard } from '../components/Dashboard';
+import { BreedingGuide } from '../components/BreedingGuide';
 ---
 
-<Layout title="Gestor de monturas"
-  description="Organiza tu establo de monturas de Dofus: fertilidad, reproducciones, nivel e indicadores de crianza (serenidad, amor, madurez y resistencia). Tus datos se guardan en tu navegador.">
-  <Dashboard client:load />
+<Layout
+  title="Guía de serenidad y medidores"
+  description="Aprende a criar monturas en Dofus: cómo ajustar la serenidad (de −5.000 a +5.000) y llenar los medidores de Aguante, Madurez y Amor con carburantes especializados."
+>
+  <div class="max-w-7xl mx-auto">
+    <BreedingGuide client:load collapsible={false} />
+  </div>
 </Layout>

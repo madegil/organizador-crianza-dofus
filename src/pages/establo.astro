@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Dashboard } from '../components/Dashboard';
+---
+
+<Layout title="Establo"
+  description="Organiza tu establo de monturas de Dofus: fertilidad, reproducciones, nivel e indicadores de crianza (serenidad, aguante, madurez y amor). Tus datos se guardan en tu navegador.">
+  <Dashboard client:load />
+</Layout>

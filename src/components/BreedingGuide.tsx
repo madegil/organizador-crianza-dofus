@@ -3,6 +3,8 @@ import { Sparkles, Heart, Zap, Droplet, ChevronDown, ChevronUp, CheckCircle2, Ar
 
 interface BreedingGuideProps {
   defaultOpen?: boolean;
+  /** false = página propia: siempre abierta y sin botón para plegar */
+  collapsible?: boolean;
 }
 
 // Escala de serenidad: -5.000 … +5.000 → 0 % … 100 % del ancho de la barra
@@ -97,37 +99,54 @@ const SerenityChart: React.FC = () => {
   );
 };
 
-export const BreedingGuide: React.FC<BreedingGuideProps> = ({ defaultOpen = false }) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+export const BreedingGuide: React.FC<BreedingGuideProps> = ({ defaultOpen = false, collapsible = true }) => {
+  const [isOpenState, setIsOpen] = useState(defaultOpen);
+  const isOpen = !collapsible || isOpenState;
 
   return (
     <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden transition-all">
-      {/* Botón Cabecera / Acordeón */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-3 sm:p-4 flex items-center justify-between gap-3 text-left hover:bg-slate-50/80 transition cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
-        aria-expanded={isOpen}
-      >
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+      {/* Cabecera fija (página de la Guía) o acordeón (si se incrusta en otra página) */}
+      {!collapsible ? (
+        <div className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3">
           <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/80 shadow-xs flex-shrink-0">
             <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-tight">
+            <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
               Guía de serenidad y medidores
-            </h2>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-              {isOpen
-                ? 'Toca para ocultar la guía'
-                : 'Cómo ajustar la serenidad y llenar Aguante, Madurez y Amor'}
+            </h1>
+            <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
+              Cómo ajustar la serenidad y llenar Aguante, Madurez y Amor
             </p>
           </div>
         </div>
-        <div className="p-1.5 rounded-lg bg-slate-100 text-slate-600 flex-shrink-0" aria-hidden="true">
-          {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </div>
-      </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full p-3 sm:p-4 flex items-center justify-between gap-3 text-left hover:bg-slate-50/80 transition cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+          aria-expanded={isOpen}
+        >
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/80 shadow-xs flex-shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-4.5 sm:h-4.5" aria-hidden="true" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-xs sm:text-sm font-extrabold text-slate-900 leading-tight">
+                Guía de serenidad y medidores
+              </h2>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                {isOpen
+                  ? 'Toca para ocultar la guía'
+                  : 'Cómo ajustar la serenidad y llenar Aguante, Madurez y Amor'}
+              </p>
+            </div>
+          </div>
+          <div className="p-1.5 rounded-lg bg-slate-100 text-slate-600 flex-shrink-0" aria-hidden="true">
+            {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </div>
+        </button>
+      )}
 
       {/* Contenido desplegable */}
       {isOpen && (

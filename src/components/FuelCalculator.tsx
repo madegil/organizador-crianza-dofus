@@ -177,7 +177,7 @@ export const FuelCalculator: React.FC = () => {
             Colección
           </a>{' '}
           o en{' '}
-          <a href="/" className="text-blue-600 hover:text-blue-800 font-bold underline">
+          <a href="/establo" className="text-blue-600 hover:text-blue-800 font-bold underline">
             Establo
           </a>
           .
