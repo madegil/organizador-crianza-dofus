@@ -1,5 +1,5 @@
 import { getDefaultMaxReproductions } from '../utils/mountRules';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Layers, CheckCircle2, Circle, Eye, Sparkles, Filter, Plus } from 'lucide-react';
 import type { SpeciesType, UserMount } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
@@ -7,6 +7,7 @@ import { MULDOS_DATA } from '../data/muldos';
 import { VOLKORNES_DATA } from '../data/volkornes';
 import { normalizeBreedParts } from '../data/allMounts';
 import { db, normalizeStoredMounts } from '../db/mountsDb';
+import { MAX_MOUNT_XP } from '../data/fuelData';
 import { MountAvatar } from './MountAvatar';
 
 export const CollectionTracker: React.FC = () => {
@@ -15,6 +16,10 @@ export const CollectionTracker: React.FC = () => {
   const [userMounts, setUserMounts] = useState<UserMount[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [registeringId, setRegisteringId] = useState<string | null>(null);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+  // Bloqueo síncrono: evita registros duplicados por doble clic antes de que React re-renderice
+  const registeringRef = useRef(false);
 
   const loadMounts = async () => {
     setLoadError(false);
@@ -58,13 +63,23 @@ export const CollectionTracker: React.FC = () => {
     userMounts.some(
       (m) =>
         isMountOfDef(m, def) &&
-        (m.currentLevel >= 200 || m.currentXp >= 867582)
+        (m.currentLevel >= 200 || m.currentXp >= MAX_MOUNT_XP)
     )
   ).length;
 
+  const createMountId = () =>
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? `mount_${crypto.randomUUID()}`
+      : `mount_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+
   const quickRegisterMount = async (def: any) => {
+    if (registeringRef.current) return;
+    registeringRef.current = true;
+    setRegisteringId(def.id);
+    setRegisterError(null);
+
     const newMount: UserMount = {
-      id: `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: createMountId(),
       nickname: def.name,
       definitionId: def.id,
       species: activeSpecies,
@@ -87,8 +102,20 @@ export const CollectionTracker: React.FC = () => {
       updatedAt: Date.now(),
     };
 
-    await db.mounts.add(newMount);
-    await loadMounts();
+    try {
+      // Si ya existe un ejemplar de esta raza (p. ej. registrado en otra pestaña), no duplicar
+      const existing = await db.mounts.toArray();
+      if (!existing.some((m) => isMountOfDef(m, def))) {
+        await db.mounts.add(newMount);
+      }
+      await loadMounts();
+    } catch (err) {
+      console.error(err);
+      setRegisterError(`No se pudo registrar «${def.name}». Inténtalo de nuevo.`);
+    } finally {
+      registeringRef.current = false;
+      setRegisteringId(null);
+    }
   };
 
   const percentageOwned =
@@ -252,13 +279,30 @@ export const CollectionTracker: React.FC = () => {
           })}
         </div>
 
+        {registerError && (
+          <div
+            role="alert"
+            className="flex items-start justify-between gap-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-semibold"
+          >
+            <span>{registerError}</span>
+            <button
+              type="button"
+              onClick={() => setRegisterError(null)}
+              className="text-rose-700 hover:text-rose-900 font-bold cursor-pointer"
+              aria-label="Cerrar aviso"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Grid de Razas adaptable (1 col en xs, 2 en sm, 3 en lg, 4 en xl) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
           {filteredCatalog.map((def) => {
             const matches = userMounts.filter((m) => isMountOfDef(m, def));
             const isOwned = matches.length > 0;
             const hasLvl200 = matches.some(
-              (m) => m.currentLevel >= 200 || m.currentXp >= 867582
+              (m) => m.currentLevel >= 200 || m.currentXp >= MAX_MOUNT_XP
             );
 
             return (
@@ -304,11 +348,16 @@ export const CollectionTracker: React.FC = () => {
                       </span>
                     ) : (
                       <button
+                        type="button"
                         onClick={() => quickRegisterMount(def)}
+                        disabled={registeringId !== null}
+                        aria-busy={registeringId === def.id}
                         title="Registrar montura en tu establo"
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-800 text-[10px] font-bold border border-slate-200 transition cursor-pointer"
+                        aria-label={`Registrar ${def.name} en tu establo`}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-800 text-[10px] font-bold border border-slate-200 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                       >
-                        <Plus className="w-3 h-3" /> Registrar
+                        <Plus className="w-3 h-3" aria-hidden="true" />
+                        {registeringId === def.id ? 'Registrando…' : 'Registrar'}
                       </button>
                     )}
                   </div>
