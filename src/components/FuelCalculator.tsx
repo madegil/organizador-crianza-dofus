@@ -652,14 +652,15 @@ export const FuelCalculator: React.FC = () => {
                       </p>
                     </div>
 
-                    <div role="group" aria-label="Variante de combustible" className="flex flex-wrap items-center gap-1 sm:gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto self-start sm:self-auto">
-                      {(Object.keys(FUEL_VARIANTS) as FuelVariant[]).map((v) => (
+                    <div role="group" aria-label="Variante de combustible" className="grid grid-cols-6 sm:flex sm:items-center gap-1 sm:gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto self-start sm:self-auto">
+                      {/* Móvil: 3 arriba (2/6 cada uno) y 2 abajo (3/6 cada uno) */}
+                      {(Object.keys(FUEL_VARIANTS) as FuelVariant[]).map((v, i) => (
                         <button
                           key={v}
                           type="button"
                           aria-pressed={selectedVariant === v}
                           onClick={() => setSelectedVariant(v)}
-                          className={`flex-1 sm:flex-none min-h-[40px] sm:min-h-0 px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                          className={`${i < 3 ? 'col-span-2' : 'col-span-3'} min-h-[40px] sm:min-h-0 px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                             selectedVariant === v
                               ? 'bg-[#1e3a8a] text-white'
                               : 'text-slate-600 hover:text-slate-900 hover:bg-white'
