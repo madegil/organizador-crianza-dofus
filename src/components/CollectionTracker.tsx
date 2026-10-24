@@ -18,6 +18,7 @@ export const CollectionTracker: React.FC = () => {
   const [loadError, setLoadError] = useState(false);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
   const [registerError, setRegisterError] = useState<string | null>(null);
+  const [statusText, setStatusText] = useState('');
   // Bloqueo síncrono: evita registros duplicados por doble clic antes de que React re-renderice
   const registeringRef = useRef(false);
 
@@ -109,6 +110,7 @@ export const CollectionTracker: React.FC = () => {
         await db.mounts.add(newMount);
       }
       await loadMounts();
+      setStatusText(`${def.name} registrada en tu establo.`);
     } catch (err) {
       console.error(err);
       setRegisterError(`No se pudo registrar «${def.name}». Inténtalo de nuevo.`);
@@ -148,6 +150,7 @@ export const CollectionTracker: React.FC = () => {
           No se pudo acceder al almacenamiento local (¿modo privado o almacenamiento bloqueado?)
         </p>
         <button
+          type="button"
           onClick={() => {
             setLoading(true);
             loadMounts();
@@ -167,7 +170,7 @@ export const CollectionTracker: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-100 flex-shrink-0">
-              <Layers className="w-5 h-5" />
+              <Layers className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
@@ -180,36 +183,46 @@ export const CollectionTracker: React.FC = () => {
           </div>
 
           {/* Selector de Especie */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
+          <div
+            role="group"
+            aria-label="Especie"
+            className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto"
+          >
             <button
+              type="button"
               onClick={() => setActiveSpecies('dragopavo')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              aria-pressed={activeSpecies === 'dragopavo'}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                 activeSpecies === 'dragopavo'
                   ? 'bg-[#1e3a8a] text-white'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              🐴 Dragopavos ({DRAGODINDES_DATA.length})
+              <span aria-hidden="true">🐴</span> Dragopavos ({DRAGODINDES_DATA.length})
             </button>
             <button
+              type="button"
               onClick={() => setActiveSpecies('muluaga')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              aria-pressed={activeSpecies === 'muluaga'}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                 activeSpecies === 'muluaga'
                   ? 'bg-[#1e3a8a] text-white'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              🐟 Mulaguas ({MULDOS_DATA.length})
+              <span aria-hidden="true">🐟</span> Mulaguas ({MULDOS_DATA.length})
             </button>
             <button
+              type="button"
               onClick={() => setActiveSpecies('vueloceronte')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              aria-pressed={activeSpecies === 'vueloceronte'}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                 activeSpecies === 'vueloceronte'
                   ? 'bg-[#1e3a8a] text-white'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              🦏 Vuelocerontes ({VOLKORNES_DATA.length})
+              <span aria-hidden="true">🦏</span> Vuelocerontes ({VOLKORNES_DATA.length})
             </button>
           </div>
         </div>
@@ -223,7 +236,15 @@ export const CollectionTracker: React.FC = () => {
                 {ownedBreedsCount} / {totalSpeciesBreeds} ({percentageOwned}%)
               </span>
             </div>
-            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+            <div
+              className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden"
+              role="progressbar"
+              aria-label="Razas obtenidas"
+              aria-valuemin={0}
+              aria-valuemax={totalSpeciesBreeds}
+              aria-valuenow={ownedBreedsCount}
+              aria-valuetext={`${ownedBreedsCount} de ${totalSpeciesBreeds} razas (${percentageOwned}%)`}
+            >
               <div
                 className="h-full bg-[#1e3a8a] rounded-full transition-all"
                 style={{ width: `${percentageOwned}%` }}
@@ -238,7 +259,15 @@ export const CollectionTracker: React.FC = () => {
                 {level200BreedsCount} / {totalSpeciesBreeds} ({percentage200}%)
               </span>
             </div>
-            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+            <div
+              className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden"
+              role="progressbar"
+              aria-label="Razas en nivel 200"
+              aria-valuemin={0}
+              aria-valuemax={totalSpeciesBreeds}
+              aria-valuenow={level200BreedsCount}
+              aria-valuetext={`${level200BreedsCount} de ${totalSpeciesBreeds} razas en nivel 200 (${percentage200}%)`}
+            >
               <div
                 className="h-full bg-emerald-600 rounded-full transition-all"
                 style={{ width: `${percentage200}%` }}
@@ -251,10 +280,16 @@ export const CollectionTracker: React.FC = () => {
       {/* Grid por Generaciones */}
       <div className="space-y-4 sm:space-y-6">
         {/* Filtro por Generación */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+        <div
+          role="group"
+          aria-label="Filtrar por generación"
+          className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none"
+        >
           <button
+            type="button"
             onClick={() => setSelectedGen('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
+            aria-pressed={selectedGen === 'all'}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
               selectedGen === 'all'
                 ? 'bg-[#1e3a8a] text-white'
                 : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
@@ -266,8 +301,11 @@ export const CollectionTracker: React.FC = () => {
             return (
               <button
                 key={g}
+                type="button"
                 onClick={() => setSelectedGen(g)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer ${
+                aria-pressed={selectedGen === g}
+                title={`Generación ${g}`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                   selectedGen === g
                     ? 'bg-[#1e3a8a] text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -296,8 +334,16 @@ export const CollectionTracker: React.FC = () => {
           </div>
         )}
 
+        <p className="sr-only" role="status" aria-live="polite">
+          {statusText}
+        </p>
+
         {/* Grid de Razas adaptable (1 col en xs, 2 en sm, 3 en lg, 4 en xl) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
+        <div
+          role="list"
+          aria-label={`Razas${selectedGen === 'all' ? '' : ` de generación ${selectedGen}`}`}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3"
+        >
           {filteredCatalog.map((def) => {
             const matches = userMounts.filter((m) => isMountOfDef(m, def));
             const isOwned = matches.length > 0;
@@ -308,6 +354,7 @@ export const CollectionTracker: React.FC = () => {
             return (
               <div
                 key={def.id}
+                role="listitem"
                 className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex flex-col justify-between space-y-2.5 ${
                   hasLvl200
                     ? 'bg-emerald-50/50 border-emerald-300/80'
@@ -327,10 +374,10 @@ export const CollectionTracker: React.FC = () => {
                       generation={def.generation}
                     />
                     <div className="min-w-0">
-                      <span className="font-extrabold text-xs text-slate-900 block truncate leading-tight">
+                      <h2 className="font-extrabold text-xs text-slate-900 block truncate leading-tight">
                         {def.name}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-medium">
+                      </h2>
+                      <span className="text-[10px] text-slate-500 font-medium">
                         Gen {def.generation}
                       </span>
                     </div>
@@ -340,11 +387,11 @@ export const CollectionTracker: React.FC = () => {
                   <div className="flex-shrink-0">
                     {hasLvl200 ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Nvl 200
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" aria-hidden="true" /> Nvl 200
                       </span>
                     ) : isOwned ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold border border-blue-200">
-                        <Eye className="w-3 h-3 text-blue-600" /> Obtenida
+                        <Eye className="w-3 h-3 text-blue-600" aria-hidden="true" /> Obtenida
                       </span>
                     ) : (
                       <button
@@ -354,7 +401,7 @@ export const CollectionTracker: React.FC = () => {
                         aria-busy={registeringId === def.id}
                         title="Registrar montura en tu establo"
                         aria-label={`Registrar ${def.name} en tu establo`}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-800 text-[10px] font-bold border border-slate-200 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-800 text-[10px] font-bold border border-slate-200 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
                       >
                         <Plus className="w-3 h-3" aria-hidden="true" />
                         {registeringId === def.id ? 'Registrando…' : 'Registrar'}
@@ -366,7 +413,7 @@ export const CollectionTracker: React.FC = () => {
                 {/* Lista de ejemplares en establo */}
                 <div className="pt-2 border-t border-slate-100 space-y-1">
                   {matches.length === 0 ? (
-                    <span className="text-[10px] text-slate-400 italic block">
+                    <span className="text-[10px] text-slate-500 italic block">
                       Sin ejemplares en establo
                     </span>
                   ) : (
