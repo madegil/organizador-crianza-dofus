@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import type { UserMount } from '../types/mount';
 import { getFertilityLabel } from '../utils/badgeHelpers';
 import { MAX_MOUNT_XP, calculateLevelFromXp } from '../data/mountXpTable';
+import { clampSerenity } from '../data/fuelData';
 import { findMountByBreedAndSpecies } from '../data/allMounts';
 
 export class BreedingDatabase extends Dexie {
@@ -17,7 +18,7 @@ export class BreedingDatabase extends Dexie {
 
 export const db = new BreedingDatabase();
 
-const NORMALIZATION_KEY = 'dofus_breeding_normalized_v5';
+const NORMALIZATION_KEY = 'dofus_breeding_normalized_v6';
 
 export async function normalizeStoredMounts() {
   const count = await db.mounts.count();
@@ -76,6 +77,12 @@ export async function normalizeStoredMounts() {
         changed = true;
       }
     }
+    // Serenidad al rango de la 3.5 (−5.000 a +5.000)
+    const serenity = clampSerenity(m.serenity);
+    if (serenity !== m.serenity) {
+      m.serenity = serenity;
+      changed = true;
+    }
     // Sincronizar y reparar definitionId, breed canónico e imageUrl si estaban desalineados
     const matchedDef = findMountByBreedAndSpecies(m.breed, m.species, m.generation);
     if (matchedDef) {
@@ -89,6 +96,10 @@ export async function normalizeStoredMounts() {
       }
       if (m.breed !== matchedDef.name) {
         m.breed = matchedDef.name;
+        changed = true;
+      }
+      if (m.generation !== matchedDef.generation) {
+        m.generation = matchedDef.generation;
         changed = true;
       }
     }

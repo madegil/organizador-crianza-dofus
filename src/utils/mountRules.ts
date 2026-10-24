@@ -1,6 +1,6 @@
 import type { UserMount, SpeciesType, FertilityStatus, SpecialCapacity } from '../types/mount';
 import { findMountByBreedAndSpecies } from '../data/allMounts';
-import { MAX_MOUNT_XP, calculateLevelFromXp, calculateXpForLevel } from '../data/fuelData';
+import { MAX_MOUNT_XP, calculateLevelFromXp, calculateXpForLevel, clampSerenity } from '../data/fuelData';
 
 /**
  * Retorna las reproducciones máximas por defecto según la especie:
@@ -116,9 +116,9 @@ export function sanitizeMount(raw: unknown): UserMount | null {
     currentXp = calculateXpForLevel(currentLevel);
   }
 
-  // serenidad -10000..10000; amor, madurez y resistencia 0–20000; si es estéril o senil, los cuatro medidores en 0
+  // serenidad -5000..5000; amor, madurez y resistencia 0–20000; si es estéril o senil, los cuatro medidores en 0
   const isEsterilOrSenil = fertility === 'esteril' || fertility === 'senil';
-  const serenity = isEsterilOrSenil ? 0 : Math.min(10000, Math.max(-10000, Number(r.serenity) || 0));
+  const serenity = isEsterilOrSenil ? 0 : clampSerenity(Number(r.serenity));
   const love = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(r.love) || 0));
   const maturity = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(r.maturity) || 0));
   const stamina = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(r.stamina) || 0));

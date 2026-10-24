@@ -26,6 +26,7 @@ export function normalizeBreedName(name: string): string {
     .replace(/\balmendrad[ao]\b/g, 'almendrado')
     .replace(/\bdorad[ao]\b/g, 'dorado')
     .replace(/\bpelirroj[ao]\b/g, 'pelirrojo')
+    .replace(/\broj[ao]\b/g, 'pelirrojo')
     .replace(/\borquide[ao]\b/g, 'orquideo');
 }
 

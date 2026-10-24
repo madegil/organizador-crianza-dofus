@@ -4,6 +4,11 @@ export { MAX_MOUNT_XP, MOUNT_LEVEL_XP_THRESHOLDS, calculateLevelFromXp, calculat
 export const LEVEL_100_XP = 172668;
 export const MAX_ENCLOS_GAUGE = 200000;
 export const MAX_MOUNT_BREEDING_STAT = 20000;
+// Serenidad desde la 3.5: de −5.000 a +5.000
+export const SERENITY_MIN = -5000;
+export const SERENITY_MAX = 5000;
+export const clampSerenity = (value: number): number =>
+  Math.min(SERENITY_MAX, Math.max(SERENITY_MIN, Number(value) || 0));
 
 export const FUEL_RANGE_LABELS: Record<FuelTier, string> = {
   1: '0 - 80.000',

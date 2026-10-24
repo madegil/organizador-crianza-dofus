@@ -28,7 +28,7 @@ import {
 } from '../utils/excelHelper';
 import { db } from '../db/mountsDb';
 import { ALL_MOUNTS_DATA, getMountsBySpecies } from '../data/allMounts';
-import { calculateLevelFromXp, calculateXpForLevel, MAX_MOUNT_XP } from '../data/fuelData';
+import { calculateLevelFromXp, calculateXpForLevel, MAX_MOUNT_XP, MAX_MOUNT_BREEDING_STAT, SERENITY_MIN, SERENITY_MAX, clampSerenity } from '../data/fuelData';
 
 import { FERTILITY_LABELS, CAPACITY_LABELS, SPECIES_LABELS } from '../data/labels';
 export { FERTILITY_LABELS, CAPACITY_LABELS, SPECIES_LABELS } from '../data/labels';
@@ -60,15 +60,13 @@ export type MountDraft = Omit<
 
 const toNum = (val?: NumField): number => (val === '' || val === undefined ? 0 : Number(val));
 
-/** ¿La montura cumple los requisitos para cruzarse? (misma regla en tabla y tarjetas) */
+/** ¿La montura está fecunda? Desde la 3.5 basta con aguante, madurez y amor al máximo (20.000), sin importar la serenidad. */
 const isMountReadyToBreed = (m: UserMount): boolean =>
   m.fertility !== 'esteril' &&
   m.fertility !== 'senil' &&
-  m.love >= 7500 &&
-  m.maturity >= 10000 &&
-  m.stamina >= 7500 &&
-  m.serenity >= -2000 &&
-  m.serenity <= 2000;
+  m.love >= MAX_MOUNT_BREEDING_STAT &&
+  m.maturity >= MAX_MOUNT_BREEDING_STAT &&
+  m.stamina >= MAX_MOUNT_BREEDING_STAT;
 
 /** Tarjeta de montura para pantallas pequeñas (< md) */
 function MountCard({
@@ -602,7 +600,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       capacity: (editingMount.capacity as SpecialCapacity) || 'ninguna',
       reproductionCount: isNew ? 0 : toNum(editingMount.reproductionCount),
       maxReproductions: isNew ? defaultMaxRepro : (toNum(editingMount.maxReproductions) || defaultMaxRepro),
-      serenity: isEsterilOrSenil ? 0 : Math.min(10000, Math.max(-10000, toNum(editingMount.serenity))),
+      serenity: isEsterilOrSenil ? 0 : clampSerenity(toNum(editingMount.serenity)),
       love: isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, toNum(editingMount.love))),
       maturity: isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, toNum(editingMount.maturity))),
       stamina: isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, toNum(editingMount.stamina))),
@@ -1583,8 +1581,8 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                     <input
                       id={serenityId}
                       type="number"
-                      min={-10000}
-                      max={10000}
+                      min={SERENITY_MIN}
+                      max={SERENITY_MAX}
                       disabled={isEditingEsterilOrSenil}
                       value={isEditingEsterilOrSenil ? 0 : (editingMount.serenity ?? 0)}
                       onChange={(e) => {
@@ -1597,7 +1595,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                       onBlur={() => {
                         setEditingMount({
                           ...editingMount,
-                          serenity: Math.min(10000, Math.max(-10000, toNum(editingMount.serenity))),
+                          serenity: clampSerenity(toNum(editingMount.serenity)),
                         });
                       }}
                       className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"

@@ -1,6 +1,6 @@
 import type { UserMount, SpeciesType, FertilityStatus, SpecialCapacity } from '../types/mount';
 import { ALL_MOUNTS_DATA, findMountByBreedAndSpecies } from '../data/allMounts';
-import { calculateLevelFromXp, calculateXpForLevel, MAX_MOUNT_XP } from '../data/fuelData';
+import { calculateLevelFromXp, calculateXpForLevel, MAX_MOUNT_XP, clampSerenity } from '../data/fuelData';
 import { sanitizeMount, getDefaultMaxReproductions } from './mountRules';
 
 export const CSV_TEMPLATE_COLUMNS = [
@@ -88,7 +88,7 @@ export async function downloadExcelTemplate(): Promise<void> {
     ['XP de la montura', `0 a ${MAX_MOUNT_XP}`, `Puntos de experiencia acumulados (${MAX_MOUNT_XP} = Nivel 200)`],
     ['Fertilidad', 'Fertil, Fecunda, Esteril, Senil', 'Estado de fecundidad actual'],
     ['Capacidad', 'Ninguna, Sabia, Enamoradiza, Resistente, Precoz, Reproductora, Camaleón', 'Capacidad genética especial'],
-    ['Serenidad', '-10000 a 10000', 'Negativo = Machos/Resistencia; Positivo = Hembras/Amor'],
+    ['Serenidad', '-5000 a 5000', 'De -5000 a -1 sube el aguante; de -2000 a 2000, la madurez; de 0 a 5000, el amor'],
     ['Amor', '0 a 20000', 'Amor actual de la montura'],
     ['Madurez', '0 a 20000', 'Madurez actual de la montura'],
     ['Resistencia', '0 a 20000', 'Resistencia actual de la montura'],
@@ -276,7 +276,7 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     else if (rawCapacity.includes('camele') || rawCapacity.includes('camale')) capacity = 'camaleon';
 
     const isEsterilOrSenil = fertility === 'esteril' || fertility === 'senil';
-    const serenity = isEsterilOrSenil ? 0 : Math.min(10000, Math.max(-10000, Number(row[9]) || 0));
+    const serenity = isEsterilOrSenil ? 0 : clampSerenity(Number(row[9]));
     const love = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(row[10]) || 0));
     const maturity = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(row[11]) || 0));
     const stamina = isEsterilOrSenil ? 0 : Math.min(20000, Math.max(0, Number(row[12]) || 0));
