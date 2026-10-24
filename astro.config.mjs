@@ -10,5 +10,6 @@ export default defineConfig({
       configFile: './tailwind.config.mjs',
     }),
   ],
+  site: 'https://organizador-crianza-dofus.vercel.app',
   output: 'static',
 });
