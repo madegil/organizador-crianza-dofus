@@ -256,7 +256,12 @@ export const FuelCalculator: React.FC = () => {
                   />
                   <div className="min-w-0 flex-1">
                     <p className="font-extrabold text-xs text-slate-900 truncate">{m.nickname}</p>
-                    <p className="text-[11px] text-slate-500 truncate font-medium">{m.breed}</p>
+                    <p className={`text-[11px] truncate font-medium ${isSelected ? 'text-slate-600' : 'text-slate-500'}`}>{m.breed}</p>
+                    {m.capacity === 'sabia' && (
+                      <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-extrabold border border-purple-200">
+                        <span aria-hidden="true">✨ </span>Sabia
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -274,12 +279,6 @@ export const FuelCalculator: React.FC = () => {
                     </span>
                   )}
                 </div>
-
-                {m.capacity === 'sabia' && (
-                  <span className="absolute top-1.5 right-1.5 text-[11px] px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-extrabold border border-purple-200">
-                    ✨ Sabia
-                  </span>
-                )}
 
                 {isSelected && (
                   <div className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center shadow-md">
@@ -322,12 +321,12 @@ export const FuelCalculator: React.FC = () => {
           </div>
 
           {/* Selector de Objetivo de Subida (Estilo botones de index) */}
-          <div role="group" aria-label="Objetivo de XP" className="flex flex-wrap gap-1 bg-slate-200/60 p-1 rounded-2xl border border-slate-200">
+          <div role="group" aria-label="Objetivo de XP" className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1 bg-slate-200/60 p-1 rounded-2xl border border-slate-200">
             <button
               type="button"
               aria-pressed={targetMode === 'nextLevel'}
               onClick={() => setTargetMode('nextLevel')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'nextLevel'
                   ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
@@ -339,7 +338,7 @@ export const FuelCalculator: React.FC = () => {
               type="button"
               aria-pressed={targetMode === 'gauge200k'}
               onClick={() => setTargetMode('gauge200k')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'gauge200k'
                   ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
@@ -351,7 +350,7 @@ export const FuelCalculator: React.FC = () => {
               type="button"
               aria-pressed={targetMode === 'level200'}
               onClick={() => setTargetMode('level200')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'level200'
                   ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
@@ -363,7 +362,7 @@ export const FuelCalculator: React.FC = () => {
               type="button"
               aria-pressed={targetMode === 'custom'}
               onClick={() => setTargetMode('custom')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'custom'
                   ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
@@ -488,9 +487,9 @@ export const FuelCalculator: React.FC = () => {
 
                 {/* B. SELECTOR DE ESTRATEGIA: MANTENER NIVEL FIJO VS VACIADO CONTINUO (CASCADA) */}
                 <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-3">
                     <span className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
-                      <Zap className="w-4 h-4 text-amber-500" />
+                      <Zap className="w-4 h-4 text-amber-500 flex-shrink-0" aria-hidden="true" />
                       Estrategia de Entrenamiento de Experiencia
                     </span>
                     <span className="text-[11px] text-slate-500 font-medium">
@@ -516,7 +515,7 @@ export const FuelCalculator: React.FC = () => {
                           <span className="text-xs font-extrabold text-slate-900">Vaciado Natural Continuo</span>
                           <span className="text-[11px] px-1.5 rounded-md bg-slate-200 text-slate-700 font-mono font-bold">Cascada</span>
                         </div>
-                        <p className="text-[11px] text-slate-500 mt-0.5 leading-tight font-medium">
+                        <p className="text-[11px] text-slate-600 mt-0.5 leading-tight font-medium">
                           Llenas el medidor de experiencia y dejas que se vacíe solo (Nivel 4 → 3 → 2 → 1). Total: 35h 39m.
                         </p>
                       </div>
@@ -651,14 +650,14 @@ export const FuelCalculator: React.FC = () => {
                       </p>
                     </div>
 
-                    <div role="group" aria-label="Variante de combustible" className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+                    <div role="group" aria-label="Variante de combustible" className="flex flex-wrap items-center gap-1 sm:gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto self-start sm:self-auto">
                       {(Object.keys(FUEL_VARIANTS) as FuelVariant[]).map((v) => (
                         <button
                           key={v}
                           type="button"
                           aria-pressed={selectedVariant === v}
                           onClick={() => setSelectedVariant(v)}
-                          className={`px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                          className={`flex-1 sm:flex-none min-h-[40px] sm:min-h-0 px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                             selectedVariant === v
                               ? 'bg-[#1e3a8a] text-white'
                               : 'text-slate-600 hover:text-slate-900 hover:bg-white'

@@ -25,7 +25,7 @@ export const XpGauge: React.FC<XpGaugeProps> = ({
       title={`Medidor de XP: ${safeXp.toLocaleString()} / ${maxGauge.toLocaleString()} XP`}
     >
       {/* Barra vertical (Track) */}
-      <div className="relative w-8 sm:w-9 h-64 sm:h-72 bg-[#0d0d0f] rounded-sm border border-[#3d372b] overflow-hidden flex flex-col justify-end shadow-inner">
+      <div className="relative w-8 sm:w-9 h-52 sm:h-72 bg-[#0d0d0f] rounded-sm border border-[#3d372b] overflow-hidden flex flex-col justify-end shadow-inner">
         {/* Relleno dinámico de XP */}
         <div
           className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#dfbe76] to-[#f4d697] transition-all duration-300 ease-out flex flex-col justify-start"
