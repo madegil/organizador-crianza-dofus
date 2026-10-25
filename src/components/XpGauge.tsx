@@ -21,11 +21,11 @@ export const XpGauge: React.FC<XpGaugeProps> = ({
 
   return (
     <div
-      className={`relative bg-[#222225] border-2 border-[#dfc38c] rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between shadow-2xl shadow-black/80 select-none w-20 sm:w-24 flex-shrink-0 ${className}`}
+      className={`relative bg-madera border-2 border-[#dfc38c] rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between shadow-2xl shadow-black/80 select-none w-20 sm:w-24 flex-shrink-0 ${className}`}
       title={`Medidor de XP: ${safeXp.toLocaleString()} / ${maxGauge.toLocaleString()} XP`}
     >
       {/* Barra vertical (Track) */}
-      <div className="relative w-8 sm:w-9 h-52 sm:h-72 bg-[#0d0d0f] rounded-sm border border-[#3d372b] overflow-hidden flex flex-col justify-end shadow-inner">
+      <div className="relative w-8 sm:w-9 h-52 sm:h-72 bg-[#1a120a] rounded-sm border border-[#4a321d] overflow-hidden flex flex-col justify-end shadow-inner">
         {/* Relleno dinámico de XP */}
         <div
           className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#dfbe76] to-[#f4d697] transition-all duration-300 ease-out flex flex-col justify-start"
@@ -42,21 +42,21 @@ export const XpGauge: React.FC<XpGaugeProps> = ({
             (Sin texto incrustado, solo la distribución visual)
         */}
         <div
-          className="absolute left-0 right-0 h-[2px] bg-[#161618] z-10 pointer-events-none shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
+          className="absolute left-0 right-0 h-[2px] bg-[#25180c] z-10 pointer-events-none shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
           style={{ bottom: '40%' }}
         />
         <div
-          className="absolute left-0 right-0 h-[2px] bg-[#161618] z-10 pointer-events-none shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
+          className="absolute left-0 right-0 h-[2px] bg-[#25180c] z-10 pointer-events-none shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
           style={{ bottom: '70%' }}
         />
         <div
-          className="absolute left-0 right-0 h-[2px] bg-[#161618] z-10 pointer-events-none shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
+          className="absolute left-0 right-0 h-[2px] bg-[#25180c] z-10 pointer-events-none shadow-[0_1px_1px_rgba(0,0,0,0.6)]"
           style={{ bottom: '90%' }}
         />
       </div>
 
       {/* Insignia Circular inferior "XP" */}
-      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#161618] border border-[#35353d] flex items-center justify-center mt-2.5 shadow-md shadow-black/60">
+      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#25180c] border border-[#6b4a2b] flex items-center justify-center mt-2.5 shadow-md shadow-black/60">
         <span className="font-black text-sm sm:text-base tracking-widest text-[#eed496] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] font-mono">
           XP
         </span>

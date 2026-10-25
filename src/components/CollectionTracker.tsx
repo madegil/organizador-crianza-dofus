@@ -349,9 +349,9 @@ export const CollectionTracker: React.FC = () => {
                 role="listitem"
                 className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex flex-col justify-between space-y-2.5 ${
                   hasLvl200
-                    ? 'bg-emerald-50/50 border-emerald-300/80'
+                    ? 'bg-emerald-50 border-emerald-300'
                     : isOwned
-                    ? 'bg-blue-50/40 border-blue-200'
+                    ? 'bg-blue-50 border-blue-300'
                     : 'bg-white border-slate-200/90 hover:border-slate-300'
                 }`}
               >
@@ -369,7 +369,7 @@ export const CollectionTracker: React.FC = () => {
                       <h2 className="font-extrabold text-xs text-slate-900 block truncate leading-tight">
                         {def.name}
                       </h2>
-                      <span className="text-[10px] text-slate-500 font-medium">
+                      <span className="text-[11px] text-slate-600 font-medium">
                         Gen {def.generation}
                       </span>
                     </div>

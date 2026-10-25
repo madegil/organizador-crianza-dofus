@@ -68,6 +68,8 @@ export default {
       },
       fontFamily: {
         sans: ['"Manrope Variable"', 'Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Los números usan la misma fuente con cifras tabulares: más amable que una monoespaciada
+        mono: ['"Manrope Variable"', 'Manrope', 'ui-sans-serif', 'sans-serif'],
         display: ['"Lilita One"', 'Manrope', 'ui-sans-serif', 'sans-serif'],
       },
       fontWeight: {

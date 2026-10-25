@@ -21,7 +21,7 @@ const CrossList: React.FC<{ crosses: [string, string][]; getName: (id: string) =
   const shown = open ? crosses : crosses.slice(0, 1);
   return (
     <div className="p-2 bg-blue-50/90 border border-blue-200/80 rounded-xl text-blue-950 space-y-1.5">
-      <span className="font-semibold text-slate-600 block text-[11px] uppercase tracking-wider">
+      <span className="font-semibold text-slate-600 block text-[11px] ">
         {crosses.length === 1 ? 'Cruce' : `${crosses.length} cruces posibles`}
       </span>
       <ul className="divide-y divide-blue-200/70">
@@ -179,7 +179,17 @@ export const BreedingHelper: React.FC = () => {
                     </div>
                   </div>
 
-                  <CrossList crosses={getMountCrosses(m)} getName={getParentName} />
+                  {getMountCrosses(m).length > 0 ? (
+                    <CrossList crosses={getMountCrosses(m)} getName={getParentName} />
+                  ) : (
+                    <a
+                      href="/#donde-capturar"
+                      className="block p-2 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950 hover:bg-amber-100"
+                    >
+                      <span className="font-semibold text-amber-900 block">Salvaje</span>
+                      Se captura con una red; no sale de ningún cruce.
+                    </a>
+                  )}
                 </div>
 
                 <div className="pt-2 border-t border-slate-200/60 text-[11px] text-slate-600 space-y-0.5 font-medium">

@@ -58,6 +58,13 @@ h2[class] {
   font-synthesis: none;
 }
 
+/* Cifras alineadas en tablas y medidores */
+.font-mono,
+table,
+[class*='tabular'] {
+  font-variant-numeric: tabular-nums;
+}
+
 /* Paneles de pergamino: grano de papel y canto inferior, solo en contenedores principales */
 main [class~='bg-white'][class~='border'][class*='rounded-'] {
   background-image: var(--grano);
@@ -198,12 +205,6 @@ progress {
 }
 .cercado-entrada {
   animation: subeTablon 700ms var(--resorte) 250ms both;
-}
-
-/* El huevo del estado vacío se tambalea al pasar el ratón, como a punto de eclosionar */
-.estado-vacio:hover .huevo {
-  animation: balanceo 700ms var(--resorte);
-  transform-origin: 50% 92%;
 }
 
 /* El icono del menú se balancea al pasar el ratón, como una hoja */

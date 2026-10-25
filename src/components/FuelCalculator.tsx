@@ -564,7 +564,7 @@ export const FuelCalculator: React.FC = () => {
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 via-amber-50/50 to-orange-50/30 border border-amber-200 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between text-xs text-amber-900/80 mb-1">
-                        <span className="font-extrabold text-amber-900 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                        <span className="font-extrabold text-amber-900 flex items-center gap-1.5  text-[11px]">
                           <Clock className="w-4 h-4 text-amber-600" />
                           Tiempo para subir
                         </span>
@@ -597,7 +597,7 @@ export const FuelCalculator: React.FC = () => {
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-blue-100/30 border border-blue-200 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between text-xs text-blue-900/80 mb-1">
-                        <span className="font-extrabold text-blue-800 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                        <span className="font-extrabold text-blue-800 flex items-center gap-1.5  text-[11px]">
                           <Gauge className="w-4 h-4 text-blue-600" />
                           Duración del carburante
                         </span>
