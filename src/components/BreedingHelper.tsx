@@ -4,7 +4,7 @@ import type { SpeciesType } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
 import { VOLKORNES_DATA } from '../data/volkornes';
-import { ALL_MOUNTS_DATA } from '../data/allMounts';
+import { ALL_MOUNTS_DATA, getMountCrosses } from '../data/allMounts';
 import { MountAvatar } from './MountAvatar';
 
 // \u00AD = guion opcional: solo parte la palabra si no cabe (pantallas de ~320 px)
@@ -13,6 +13,39 @@ const SPECIES_OPTIONS: { key: SpeciesType; label: string }[] = [
   { key: 'muluaga', label: 'Mula\u00ADguas' },
   { key: 'vueloceronte', label: 'Vuelo\u00ADcerontes' },
 ];
+
+/** Lista de cruces de una montura: muestra el primero y despliega el resto. */
+const CrossList: React.FC<{ crosses: [string, string][]; getName: (id: string) => string }> = ({ crosses, getName }) => {
+  const [open, setOpen] = useState(false);
+  if (crosses.length === 0) return null;
+  const shown = open ? crosses : crosses.slice(0, 1);
+  return (
+    <div className="p-2 bg-blue-50/90 border border-blue-200/80 rounded-xl text-blue-950 space-y-1.5">
+      <span className="font-semibold text-slate-600 block text-[11px] uppercase tracking-wider">
+        {crosses.length === 1 ? 'Cruce' : `${crosses.length} cruces posibles`}
+      </span>
+      <ul className="divide-y divide-blue-200/70">
+        {shown.map(([a, b], i) => (
+          <li key={i} className="flex flex-wrap items-center gap-1 text-[11px] py-1.5 first:pt-0 last:pb-0">
+            <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(a)}</span>
+            <span className="text-slate-600 font-bold" aria-label="con">×</span>
+            <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(b)}</span>
+          </li>
+        ))}
+      </ul>
+      {crosses.length > 1 && (
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          className="text-[11px] font-bold text-blue-700 hover:text-blue-900 cursor-pointer rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        >
+          {open ? 'Ver solo uno' : `Ver los otros ${crosses.length - 1}`}
+        </button>
+      )}
+    </div>
+  );
+};
 
 export const BreedingHelper: React.FC = () => {
   const [species, setSpecies] = useState<SpeciesType>('dragopavo');
@@ -48,7 +81,7 @@ export const BreedingHelper: React.FC = () => {
                 Árbol de Cruces &amp; Guía de Hibridaciones
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
-                Consulta cómo obtener cada generación a partir de cruces.
+                Consulta cómo obtener cada generación a partir de cruces. Algunas monturas tienen varios cruces posibles.
               </p>
             </div>
           </div>
@@ -146,22 +179,7 @@ export const BreedingHelper: React.FC = () => {
                     </div>
                   </div>
 
-                  {m.parents && (
-                    <div className="p-2 bg-blue-50/90 border border-blue-200/80 rounded-xl text-blue-950 space-y-1">
-                      <span className="font-semibold text-slate-600 block text-[11px] uppercase tracking-wider">
-                        Cruce requerido:
-                      </span>
-                      <div className="flex flex-wrap items-center gap-1 text-[11px]">
-                        <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">
-                          {getParentName(m.parents[0])}
-                        </span>
-                        <span className="text-slate-600 font-bold">×</span>
-                        <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">
-                          {getParentName(m.parents[1])}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  <CrossList crosses={getMountCrosses(m)} getName={getParentName} />
                 </div>
 
                 <div className="pt-2 border-t border-slate-200/60 text-[11px] text-slate-600 space-y-0.5 font-medium">

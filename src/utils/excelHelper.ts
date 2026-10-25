@@ -101,7 +101,7 @@ export async function downloadExcelTemplate(): Promise<void> {
   const catRows = ALL_MOUNTS_DATA.map((m) => [
     m.species === 'dragopavo' ? 'Dragopavo' : m.species === 'muluaga' ? 'Mulagua' : 'Vueloceronte',
     m.generation,
-    m.breed,
+    m.name,
   ]);
   const ws3 = XLSX.utils.aoa_to_sheet([catHeaders, ...catRows]);
   ws3['!cols'] = [{ wch: 16 }, { wch: 14 }, { wch: 25 }];
@@ -291,10 +291,11 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
     const maxReproductions = !isNaN(rawMaxRepro) && rawMaxRepro > 0 ? Math.floor(rawMaxRepro) : defaultMax;
 
     parsedMounts.push({
-      id: `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `mount_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
       nickname: nickname || (matchedDef ? matchedDef.name : breed) || 'Sin Nombre',
       species,
-      breed: matchedDef ? matchedDef.breed : breed,
+      definitionId: matchedDef ? matchedDef.id : `${species}_custom`,
+      breed: matchedDef ? matchedDef.name : breed,
       imageUrl: matchedDef ? matchedDef.imageUrl : '',
       generation: matchedDef ? matchedDef.generation : generation,
       gender,
@@ -309,6 +310,8 @@ export async function parseExcelFile(file: File): Promise<UserMount[]> {
       maturity,
       stamina,
       notes,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
   }
 

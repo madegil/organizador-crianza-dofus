@@ -1,35 +1,21 @@
 import React, { useEffect, useMemo, useState, useId } from 'react';
+import { Clock, Check, Zap, Layers, Hourglass, Gauge, Flame } from 'lucide-react';
 import {
-  Calculator,
-  Clock,
-  Sparkles,
-  Box,
-  CheckCircle2,
-  Check,
-  Zap,
-  Layers,
-  ArrowRight,
-  Hourglass,
-  Gauge,
-  Flame,
-} from 'lucide-react';
-import {
-  FUEL_TIERS,
   FUEL_VARIANTS,
-  FUEL_ITEM_NAMES,
   MAX_MOUNT_XP,
   MAX_ENCLOS_GAUGE,
-  TOTAL_CONTINUOUS_DRAIN_SECONDS,
   calculateLevelFromXp,
   calculateXpForLevel,
 } from '../data/fuelData';
 import type { FuelTier, FuelVariant, UserMount } from '../types/mount';
-import { calculateFuelBreakdown, type TrainingStrategy, formatDurationSpanish } from '../utils/calculator';
+import { calculateFuelBreakdown, type TrainingStrategy } from '../utils/calculator';
 import { db, normalizeStoredMounts } from '../db/mountsDb';
 import { MountAvatar } from './MountAvatar';
 import { XpGauge } from './XpGauge';
 
 type CalculationTarget = 'nextLevel' | 'gauge200k' | 'level200' | 'custom';
+
+const TIER_NAMES: Record<FuelTier, string> = { 1: 'Extracto', 2: 'Filtro', 3: 'Poción', 4: 'Elixir' };
 
 export const FuelCalculator: React.FC = () => {
   const [mounts, setMounts] = useState<UserMount[]>([]);
@@ -196,9 +182,9 @@ export const FuelCalculator: React.FC = () => {
               <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Establo de Monturas</h2>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Tus monturas</h2>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
-                Selecciona una montura de tu establo para ver sus cálculos de nivel y carburante.
+                Elige una montura para ver cuánto tiempo y carburante le faltan.
               </p>
             </div>
           </div>
@@ -217,7 +203,7 @@ export const FuelCalculator: React.FC = () => {
 
         {visibleMounts.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 text-center space-y-3">
-            <p className="text-sm sm:text-base font-semibold text-slate-700">¡Todas tus monturas ya están en nivel 200! No necesitan más combustible.</p>
+            <p className="text-sm sm:text-base font-semibold text-slate-700">Todas tus monturas están en nivel 200. No necesitan más carburante.</p>
             <button type="button" onClick={() => setShowMaxLevel(true)} className="h-11 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs border border-slate-200 transition cursor-pointer">
               Mostrar monturas nivel 200
             </button>
@@ -385,7 +371,7 @@ export const FuelCalculator: React.FC = () => {
                 {gaugeDisplayXp.toLocaleString()} / 200.000 XP
               </span>
               <span className="text-[11px] text-slate-500 font-medium">
-                Capacidad del medidor
+                Medidor de experiencia
               </span>
             </div>
           </div>
@@ -404,7 +390,7 @@ export const FuelCalculator: React.FC = () => {
                 {targetMode === 'custom' && (
                   <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
                     <label id={manualLabelId} className="block text-xs font-bold text-slate-700">
-                      XP a calcular en el medidor (1.000 a 200.000 XP):
+                      Experiencia que quieres cargar (de 1.000 a 200.000):
                     </label>
                     <div className="flex items-center gap-3">
                       <input
@@ -437,7 +423,7 @@ export const FuelCalculator: React.FC = () => {
                   </div>
                 )}
 
-                {/* A. Casilla ¿Tiene capacidad « Sabia »? • XP x2 */}
+                {/* A. Casilla ¿Tiene la capacidad Sabia? • XP x2 */}
                 <label className="flex items-center gap-3 cursor-pointer p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 transition select-none shadow-sm">
                   <input
                     type="checkbox"
@@ -447,10 +433,10 @@ export const FuelCalculator: React.FC = () => {
                   />
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                     <span className="text-xs sm:text-sm font-extrabold text-slate-900">
-                      ¿Tiene capacidad « Sabia »?
+                      ¿Tiene la capacidad Sabia?
                     </span>
                     <span className="text-xs font-extrabold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
-                      XP x2 • Requiere mitad de tiempo y carburante
+                      Gana el doble: mitad de tiempo y de carburante
                     </span>
                   </div>
                 </label>
@@ -458,7 +444,7 @@ export const FuelCalculator: React.FC = () => {
                 {/* Barra horizontal de tramos de 200.000 XP */}
                 <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                    <span>Tramos del Medidor (200.000 XP)</span>
+                    <span>Tramos del medidor (200.000)</span>
                   </div>
                   <div className="w-full h-3 rounded-full bg-slate-100 flex overflow-hidden border border-slate-200" role="img" aria-label="Tramos del medidor de 200.000 XP">
                     <div style={{ width: '40%' }} className={`h-full border-r border-white/60 transition ${strategy === 'tier1' ? 'bg-purple-700' : 'bg-purple-400'}`} />
@@ -470,7 +456,7 @@ export const FuelCalculator: React.FC = () => {
                     {[
                       { tier: 1, name: 'Extracto', range: '0 - 80.000', strat: 'tier1' },
                       { tier: 2, name: 'Filtro', range: '80.001 - 140.000', strat: 'tier2' },
-                      { tier: 3, name: 'Pócima', range: '140.001 - 180.000', strat: 'tier3' },
+                      { tier: 3, name: 'Poción', range: '140.001 - 180.000', strat: 'tier3' },
                       { tier: 4, name: 'Elixir', range: '180.001 - 200.000', strat: 'tier4' },
                     ].map((item) => {
                       const isChosen = strategy === item.strat;
@@ -478,7 +464,7 @@ export const FuelCalculator: React.FC = () => {
                         <div key={item.tier} className={`p-2 rounded-xl border transition ${isChosen ? 'bg-slate-900 text-white border-slate-900 font-bold shadow-xs' : 'bg-slate-50 text-slate-700 border-slate-200'}`}>
                           <div className="flex items-center justify-between">
                             <span className="font-bold">{item.name}</span>
-                            {isChosen && <span className="text-[10px] bg-blue-500 text-white px-1 rounded">Elegido</span>}
+                            {isChosen && <span className="text-[10px] bg-blue-500 text-white px-1 rounded">En uso</span>}
                           </div>
                           <p className={`text-[11px] font-mono mt-0.5 ${isChosen ? 'text-slate-200' : 'text-slate-600'}`}>{item.range}</p>
                         </div>
@@ -492,14 +478,14 @@ export const FuelCalculator: React.FC = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-3">
                     <span className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
                       <Zap className="w-4 h-4 text-amber-500 flex-shrink-0" aria-hidden="true" />
-                      Estrategia de Entrenamiento de Experiencia
+                      Cómo recargas el medidor
                     </span>
                     <span className="text-[11px] text-slate-500 font-medium">
-                      ¿Cómo mantienes el medidor de experiencia?
+                      Elige una forma; los cálculos cambian con ella
                     </span>
                   </div>
 
-                  <div role="group" aria-label="Estrategia" className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
+                  <div role="group" aria-label="Forma de recarga" className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
                     {/* Opción 1: Vaciado Continuo Natural (Cascada 200k -> 0) */}
                     <button
                       type="button"
@@ -514,11 +500,11 @@ export const FuelCalculator: React.FC = () => {
                       <Hourglass className={`w-4 h-4 mt-0.5 flex-shrink-0 ${strategy === 'cascade' ? 'text-[#1e3a8a]' : 'text-slate-400'}`} />
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-extrabold text-slate-900">Vaciado Natural Continuo</span>
-                          <span className="text-[11px] px-1.5 rounded-md bg-slate-200 text-slate-700 font-mono font-bold">Cascada</span>
+                          <span className="text-xs font-extrabold text-slate-900">Llenarlo y dejar que se vacíe</span>
+                          <span className="text-[11px] px-1.5 rounded-md bg-slate-200 text-slate-700 font-mono font-bold">Una carga</span>
                         </div>
                         <p className="text-[11px] text-slate-600 mt-0.5 leading-tight font-medium">
-                          Llenas el medidor de experiencia y dejas que se vacíe solo (Nivel 4 → 3 → 2 → 1). Total: 35h 39m.
+                          Lo llenas hasta 200.000 y se vacía solo, pasando de Elixir a Extracto. Tarda 35 h 39 min.
                         </p>
                       </div>
                     </button>
@@ -534,10 +520,10 @@ export const FuelCalculator: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <Flame className={`w-4 h-4 ${strategy !== 'cascade' ? 'text-amber-500' : 'text-slate-400'}`} />
-                          <span className="text-xs font-extrabold text-slate-900">Mantener Nivel Fijo</span>
+                          <span className="text-xs font-extrabold text-slate-900">Mantenerlo en un carburante</span>
                         </div>
                         <span className="text-[11px] text-amber-700 font-extrabold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                          Ritmo Constante
+                          Ritmo fijo
                         </span>
                       </div>
 
@@ -559,7 +545,7 @@ export const FuelCalculator: React.FC = () => {
                                   : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                               }`}
                             >
-                              <span>Nvl {t}</span>
+                              <span>{TIER_NAMES[t]}</span>
                               <span className="text-[8px] opacity-75 font-mono">
                                 {t === 4 ? '4 XP/s' : t === 3 ? '3 XP/s' : t === 2 ? '2 XP/s' : '1 XP/s'}
                               </span>
@@ -579,7 +565,7 @@ export const FuelCalculator: React.FC = () => {
                       <div className="flex items-center justify-between text-xs text-amber-900/80 mb-1">
                         <span className="font-extrabold text-amber-900 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
                           <Clock className="w-4 h-4 text-amber-600" />
-                          Tiempo de Subida de Nivel
+                          Tiempo para subir
                         </span>
                         <span className="font-mono text-amber-800 font-bold text-[11px]">
                           {xpNeeded.toLocaleString()} XP
@@ -594,13 +580,13 @@ export const FuelCalculator: React.FC = () => {
                     <div className="pt-2 border-t border-amber-200/60 text-[11px] text-amber-900 font-medium mt-2">
                       {strategy === 'cascade' ? (
                         <span>
-                          Velocidad en cascada: {isSage ? '✨ 2x por Sabia (~2.0 - 8.0 XP/s)' : '1.0 - 4.0 XP/s promedio'}
+                          Velocidad: {isSage ? 'de 2 a 8 XP/s (Sabia, x2)' : 'de 1 a 4 XP/s según el tramo'}
                         </span>
                       ) : (
                         <span>
-                          Velocidad fija ({strategy.toUpperCase()}):{' '}
+                          Velocidad con {TIER_NAMES[Number(strategy.slice(-1)) as FuelTier]}:{' '}
                           <strong className="text-amber-900 font-mono">{breakdown.effectiveRatePerSec.toFixed(1)} XP/s</strong>{' '}
-                          {isSage ? '✨ (Sabia x2)' : ''}
+                          {isSage ? '(Sabia, x2)' : ''}
                         </span>
                       )}
                     </div>
@@ -612,10 +598,10 @@ export const FuelCalculator: React.FC = () => {
                       <div className="flex items-center justify-between text-xs text-blue-900/80 mb-1">
                         <span className="font-extrabold text-[#1e3a8a] flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
                           <Gauge className="w-4 h-4 text-blue-600" />
-                          Vaciado del Carburante
+                          Duración del carburante
                         </span>
-                        <span className="font-mono text-blue-800 font-bold text-[11px]">
-                          Autonomía de experiencia
+                        <span className="hidden sm:inline font-mono text-blue-800 font-bold text-[11px]">
+                          Antes de recargar
                         </span>
                       </div>
 
@@ -629,11 +615,11 @@ export const FuelCalculator: React.FC = () => {
                     <div className="pt-2 border-t border-blue-200/60 text-[11px] text-blue-900 font-medium mt-2">
                       {strategy === 'cascade' ? (
                         <span>
-                          Vaciado continuo total del medidor (200k a 0): <strong className="text-blue-900 font-mono">35 h 39 min</strong>
+                          Un medidor lleno tarda en vaciarse: <strong className="text-blue-900 font-mono">35 h 39 min</strong>
                         </span>
                       ) : (
                         <span>
-                          Duración del tramo de experiencia antes de recargar.
+                          Lo que dura el tramo elegido antes de tener que recargarlo.
                         </span>
                       )}
                     </div>
@@ -645,14 +631,14 @@ export const FuelCalculator: React.FC = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                       <h4 className="text-xs sm:text-sm font-bold text-slate-900">
-                        Desglose por Nivel de Carburante y Velocidades
+                        Carburante necesario por tipo
                       </h4>
                       <p className="text-[11px] text-slate-500 font-medium">
-                        Haz clic en un nivel para fijar su ritmo o visualiza su consumo independiente.
+                        Toca un carburante para mantener el medidor en su tramo y elige el tamaño que usas.
                       </p>
                     </div>
 
-                    <div role="group" aria-label="Variante de combustible" className="grid grid-cols-6 sm:flex sm:items-center gap-1 sm:gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto self-start sm:self-auto">
+                    <div role="group" aria-label="Tamaño del carburante" className="grid grid-cols-6 sm:flex sm:items-center gap-1 sm:gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto self-start sm:self-auto">
                       {/* Móvil: 3 arriba (2/6 cada uno) y 2 abajo (3/6 cada uno) */}
                       {(Object.keys(FUEL_VARIANTS) as FuelVariant[]).map((v, i) => (
                         <button
@@ -704,18 +690,18 @@ export const FuelCalculator: React.FC = () => {
                                     : 'bg-rose-100 text-rose-800 border border-rose-200'
                                 }`}
                               >
-                                Nivel {t.tier} - {t.tierName}
+                                {t.tierName}
                               </span>
                               <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold border border-slate-200">
                                 {t.rangeLabel}
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-500 font-medium">Capacidad por recarga: <strong className="text-slate-700 font-mono">{t.maxTierCapacity.toLocaleString()}</strong></p>
+                            <p className="text-[11px] text-slate-500 font-medium">Carga del tramo: <strong className="text-slate-700 font-mono">{t.maxTierCapacity.toLocaleString()}</strong></p>
 
                             {/* Velocidad y Consumo */}
                             <div className="flex items-center justify-between text-xs mt-1.5">
                               <span className="text-slate-500 font-medium">
-                                Baja: <strong className="text-slate-700 font-mono">{t.consumptionRatePer10s} / 10s</strong> ({t.baseXpPerSec} pts/s)
+                                Gasta <strong className="text-slate-700 font-mono">{t.consumptionRatePer10s}</strong> cada 10 s
                               </span>
                               <span className="font-mono font-bold text-[#1e3a8a]">
                                 +{t.effectiveXpPerSec} XP/s {isSage ? '✨' : ''}
@@ -724,7 +710,7 @@ export const FuelCalculator: React.FC = () => {
 
                             {/* Tiempo si se mantiene fijo */}
                             <div className="mt-1.5 p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-[11px]">
-                              <span className="text-slate-500 font-medium">Tiempo si mantienes Nivel {t.tier}:</span>
+                              <span className="text-slate-500 font-medium">Tiempo si lo mantienes:</span>
                               <span className="font-mono font-bold text-amber-800">
                                 {t.formattedTimeIfMaintained}
                               </span>
@@ -742,7 +728,7 @@ export const FuelCalculator: React.FC = () => {
                           </div>
 
                           <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
-                            <span>Vaciado del tramo: <strong className="text-slate-700">{t.drainDurationText}</strong></span>
+                            <span>El tramo dura: <strong className="text-slate-700">{t.drainDurationText}</strong></span>
                             {isThisTierSelected && (
                               <span className="text-[#1e3a8a] font-extrabold flex items-center gap-1">
                                 <Check className="w-3 h-3 stroke-[3]" /> Activo
@@ -757,16 +743,16 @@ export const FuelCalculator: React.FC = () => {
                   {strategy !== 'cascade' && (
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-200">
-                        <span className="text-xs font-bold text-slate-800">Incluir carburante de preparación en el total</span>
+                        <span className="text-xs font-bold text-slate-800">Sumar el carburante para llenar los tramos de abajo</span>
                         <button type="button" role="switch" aria-checked={includeBase} onClick={() => setIncludeBase((prev) => !prev)} className={`h-11 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1.5 ${includeBase ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>
-                          {includeBase ? 'Incluido ✓' : 'Omitido'}
+                          {includeBase ? 'Sumado ✓' : 'Sin sumar'}
                         </button>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1">
                           <div className="flex justify-between items-center border-b border-slate-100 pb-1">
-                            <span className="text-xs font-bold text-slate-900">Preparación (una vez)</span>
+                            <span className="text-xs font-bold text-slate-900">Llenado inicial (una vez)</span>
                             <span className="text-[11px] font-mono font-bold text-purple-700">{breakdown.baseUnitsTotal || 0} {(breakdown.baseUnitsTotal || 0) === 1 ? 'unidad' : 'unidades'}</span>
                           </div>
                           {(breakdown.baseUnitsTotal || 0) > 0 ? (
@@ -779,14 +765,14 @@ export const FuelCalculator: React.FC = () => {
                               ))}
                             </div>
                           ) : (
-                            <p className="text-[11px] text-slate-500 italic">No requiere carburante de base.</p>
+                            <p className="text-[11px] text-slate-500 italic">No hace falta llenar tramos de abajo.</p>
                           )}
-                          <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-100 font-medium">La preparación llena los tramos inferiores y no se consume.</p>
+                          <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-100 font-medium">Llena los tramos de abajo una sola vez: mientras recargues el de arriba, no se gastan.</p>
                         </div>
 
                         <div className="p-3 bg-white rounded-2xl border border-slate-200 space-y-1">
                           <div className="flex justify-between items-center border-b border-slate-100 pb-1">
-                            <span className="text-xs font-bold text-slate-900">Mantenimiento</span>
+                            <span className="text-xs font-bold text-slate-900">Recargas</span>
                             <span className="text-[11px] font-mono font-bold text-blue-700">{breakdown.maintenanceUnits || 0} {(breakdown.maintenanceUnits || 0) === 1 ? 'unidad' : 'unidades'}</span>
                           </div>
                           <div className="space-y-0.5 text-[11px] text-slate-700 font-medium">
@@ -795,7 +781,7 @@ export const FuelCalculator: React.FC = () => {
                               <strong className="font-mono">{breakdown.refills || 0} {(breakdown.refills || 0) === 1 ? 'recarga' : 'recargas'}</strong>
                             </div>
                             <div className="flex justify-between">
-                              <span>Carburante del tramo:</span>
+                              <span>Carburante:</span>
                               <strong className="font-mono">{breakdown.tiers.find(t => t.itemsNeeded > 0)?.tierName || 'Ninguno'}</strong>
                             </div>
                           </div>
@@ -807,7 +793,7 @@ export const FuelCalculator: React.FC = () => {
                   {/* Resumen total de unidades de la estrategia activa */}
                   <div className="p-3.5 sm:p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm">
                     <span className="text-slate-700 font-bold">
-                      Total de carburantes requeridos ({strategy === 'cascade' ? 'Modo Cascada' : `Manteniendo Nivel ${strategy.slice(-1)}`}):
+                      Total de carburante ({strategy === 'cascade' ? 'una carga completa' : `manteniendo ${TIER_NAMES[Number(strategy.slice(-1)) as FuelTier]}`}):
                     </span>
                     <span className="font-mono font-black text-[#1e3a8a] text-sm sm:text-base">
                       {breakdown.totalItemsNeeded} {breakdown.totalItemsNeeded === 1 ? 'unidad' : 'unidades'} ({FUEL_VARIANTS[selectedVariant].name})

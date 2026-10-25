@@ -2,6 +2,7 @@ import type { MountDefinition, SpeciesType } from '../types/mount';
 import { DRAGODINDES_DATA } from './dragodindes';
 import { MULDOS_DATA } from './muldos';
 import { VOLKORNES_DATA } from './volkornes';
+import { EXTRA_CROSSES } from './crosses';
 
 export const ALL_MOUNTS_DATA: MountDefinition[] = [
   ...DRAGODINDES_DATA,
@@ -11,6 +12,11 @@ export const ALL_MOUNTS_DATA: MountDefinition[] = [
 
 export function getMountsBySpecies(species: SpeciesType): MountDefinition[] {
   return ALL_MOUNTS_DATA.filter((m) => m.species === species);
+}
+
+/** Todas las parejas de padres que dan esta montura (la primera es `parents`). */
+export function getMountCrosses(m: MountDefinition): [string, string][] {
+  return EXTRA_CROSSES[m.id] ?? (m.parents ? [m.parents] : []);
 }
 
 export function getMountDefinitionById(id: string): MountDefinition | undefined {

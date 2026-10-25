@@ -583,7 +583,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
     const oldId = editingMount.id;
     const newId = isSample
       ? `mount_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
-      : (editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+      : (editingMount.id || `mount_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`);
 
     const mountData: UserMount = {
       ...editingMount,

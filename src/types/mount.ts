@@ -1,4 +1,5 @@
-export type SpeciesType = 'dragopavo' | 'muldo' | 'muluaga' | 'volkorne' | 'vueloceronte';
+// 'muluaga' es la clave guardada de las mulaguas; no se renombra para no perder datos del navegador
+export type SpeciesType = 'dragopavo' | 'muluaga' | 'vueloceronte';
 export type FertilityStatus = 'fertil' | 'fecunda' | 'esteril' | 'senil';
 export type SpecialCapacity = 'ninguna' | 'sabia' | 'enamoradiza' | 'resistente' | 'precoz' | 'reproductora' | 'camaleon';
 

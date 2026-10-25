@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import GuideSection from '../components/guide/GuideSection.astro';
 import GuideTable from '../components/guide/GuideTable.astro';
 import ToolLink from '../components/guide/ToolLink.astro';
-import { SerenityChart } from '../components/BreedingGuide';
+import { SerenityChart } from '../components/guide/SerenityChart';
 import { TargetGenCalculator } from '../components/guide/TargetGenCalculator';
 
 // Índice: grupos y secciones en el orden de la página
@@ -638,6 +638,10 @@ const p = 'text-sm leading-relaxed';
             obtener todas las generaciones de la 2 a la 10 de los tres tipos, lo que lleva meses.
           </p>
         </GuideSection>
+        <p class="px-1 text-[11px] text-slate-500">
+          Basada en las guías de
+          <a href="https://www.dofuspourlesnoobs.com/guide-de-l-eleveur.html" target="_blank" rel="noopener" class="underline decoration-slate-600 underline-offset-2 hover:text-slate-300">Dofus pour les Noobs</a>.
+        </p>
       </div>
     </div>
   </div>

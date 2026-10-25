@@ -1,6 +1,6 @@
 import { getDefaultMaxReproductions } from '../utils/mountRules';
 import React, { useState, useEffect, useRef } from 'react';
-import { Layers, CheckCircle2, Circle, Eye, Sparkles, Filter, Plus } from 'lucide-react';
+import { Layers, CheckCircle2, Eye, Plus } from 'lucide-react';
 import type { SpeciesType, UserMount } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
