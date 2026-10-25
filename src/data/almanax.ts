@@ -30,8 +30,8 @@ export const ALMANAX_BONUSES: AlmanaxBonus[] = [
 
 /** Qué conviene preparar para aprovechar cada tipo de bonus */
 export const ALMANAX_TIPS: Record<AlmanaxKind, string> = {
-  medidor: 'Recarga ese medidor antes para aprovechar el día.',
-  capacidad: 'Ten parejas fecundas listas para cruzarlas ese día.',
+  medidor: 'Mantén ese medidor con carburante para aprovecharlo.',
+  capacidad: 'Aprovecha el día para cruzar tus parejas fecundas.',
   oficio: 'Buen día para fabricar redes, carburantes y mákinas.',
   cruce: 'Buen día para tus cruces de generaciones altas.',
 };
