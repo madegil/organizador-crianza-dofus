@@ -1,5 +1,6 @@
 import { getDefaultMaxReproductions } from '../utils/mountRules';
 import { EstadoVacio } from './EstadoVacio';
+import { MountForm } from './MountForm';
 import { formatNumber, formatSigned } from '../utils/formatNumber';
 import React, { useState, useRef, useEffect, useId } from 'react';
 import {
@@ -238,20 +239,6 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const mobileSortId = useId();
   const filtersPanelId = useId();
   const modalTitleId = useId();
-  const speciesId = useId();
-  const breedId = useId();
-  const nicknameId = useId();
-  const genderLabelId = useId();
-  const genderMachoId = useId();
-  const levelId = useId();
-  const xpId = useId();
-  const fertilityId = useId();
-  const capacityId = useId();
-  const serenityId = useId();
-  const loveId = useId();
-  const maturityId = useId();
-  const staminaId = useId();
-  const notesId = useId();
 
   const [isUploading, setIsUploading] = useState(false);
   const [isExportingExcel, setIsExportingExcel] = useState(false);
@@ -376,7 +363,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       const isJson = file.name.toLowerCase().endsWith('.json');
 
       if (isJson) {
-        const { mounts: backupMounts, invalid } = await parseBackupFile(file);
+        const { mounts: backupMounts, invalid, logros: backupLogros } = await parseBackupFile(file);
         const currentIds = new Set(mounts.map((m) => m.id));
         const existingCount = backupMounts.filter((m) => currentIds.has(m.id)).length;
 
@@ -392,6 +379,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         }
 
         await db.mounts.bulkPut(backupMounts);
+        if (backupLogros.length > 0) await db.logros.bulkPut(backupLogros);
         setStatusMessage({
           type: 'success',
           text: `Se importaron ${backupMounts.length} monturas, 0 omitidas por duplicadas y ${invalid} inválidas.`,
@@ -1347,394 +1335,21 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
           role="dialog"
           aria-modal="true"
           aria-labelledby={modalTitleId}
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 bg-[#131209]/75 backdrop-blur-[2px] z-50 flex items-center justify-center p-3 sm:p-4"
         >
-          <div className="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-              <h3 id={modalTitleId} className="font-extrabold text-sm sm:text-base text-slate-900">
-                {editingMount.id ? 'Editar Montura' : 'Añadir Nueva Montura'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditModalOpen(false);
-                  setEditingMount(null);
-                }}
-                aria-label="Cerrar"
-                className="p-1 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveMount} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-              {statusMessage && statusMessage.type === 'error' && (
-                <div
-                  role="alert"
-                  className="p-3 rounded-xl text-xs font-semibold flex items-center justify-between bg-rose-50 text-rose-800 border border-rose-200"
-                >
-                  <span>{statusMessage.text}</span>
-                  <button type="button" onClick={() => setStatusMessage(null)} aria-label="Cerrar">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Especie */}
-                <div>
-                  <label htmlFor={speciesId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                    Especie
-                  </label>
-                  <select
-                    ref={firstFieldRef}
-                    id={speciesId}
-                    value={editingMount.species || 'dragopavo'}
-                    onChange={(e) => {
-                      const newSp = e.target.value as SpeciesType;
-                      const list = getMountsBySpecies(newSp);
-                      setEditingMount({
-                        ...editingMount,
-                        species: newSp,
-                        breed: list[0]?.name || '',
-                        generation: list[0]?.generation || 1,
-                        imageUrl: list[0]?.imageUrl || '',
-                      });
-                    }}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {(Object.keys(SPECIES_LABELS) as SpeciesType[]).map((sp) => (
-                      <option key={sp} value={sp}>
-                        {SPECIES_LABELS[sp]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Raza / Color */}
-                <div>
-                  <label htmlFor={breedId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                    Raza
-                  </label>
-                  <select
-                    id={breedId}
-                    value={editingMount.breed || ''}
-                    onChange={(e) => {
-                      const selectedName = e.target.value;
-                      const def = ALL_MOUNTS_DATA.find(
-                        (m) => m.name === selectedName && m.species === editingMount.species
-                      );
-                      setEditingMount({
-                        ...editingMount,
-                        breed: selectedName,
-                        generation: def?.generation || editingMount.generation,
-                        imageUrl: def?.imageUrl || editingMount.imageUrl,
-                      });
-                    }}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {getMountsBySpecies(editingMount.species || 'dragopavo').map((m) => (
-                      <option key={m.id} value={m.name}>
-                        {m.name} (G{m.generation})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Apodo */}
-                <div>
-                  <label htmlFor={nicknameId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                    Apodo / Nombre
-                  </label>
-                  <input
-                    id={nicknameId}
-                    type="text"
-                    required
-                    value={editingMount.nickname || ''}
-                    onChange={(e) => setEditingMount({ ...editingMount, nickname: e.target.value })}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ej. Flamito"
-                  />
-                </div>
-
-                {/* Sexo */}
-                <div>
-                  <label id={genderLabelId} htmlFor={genderMachoId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                    Sexo
-                  </label>
-                  <div role="group" aria-labelledby={genderLabelId} className="grid grid-cols-2 gap-2">
-                    <button
-                      id={genderMachoId}
-                      type="button"
-                      onClick={() => setEditingMount({ ...editingMount, gender: 'M' })}
-                      className={`py-2 text-xs font-bold rounded-xl border transition cursor-pointer ${
-                        editingMount.gender === 'M'
-                          ? 'bg-blue-50 border-blue-500 text-blue-700'
-                          : 'bg-slate-50 border-slate-200 text-slate-600'
-                      }`}
-                    >
-                      ♂ Macho
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingMount({ ...editingMount, gender: 'F' })}
-                      className={`py-2 text-xs font-bold rounded-xl border transition cursor-pointer ${
-                        editingMount.gender === 'F'
-                          ? 'bg-rose-50 border-rose-500 text-rose-700'
-                          : 'bg-slate-50 border-slate-200 text-slate-600'
-                      }`}
-                    >
-                      ♀ Hembra
-                    </button>
-                  </div>
-                </div>
-
-                {/* Nivel Actual */}
-                <div>
-                  <label htmlFor={levelId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                    Nivel (1 - 200)
-                  </label>
-                  <input
-                    id={levelId}
-                    type="number"
-                    min={1}
-                    max={200}
-                    value={editingMount.currentLevel ?? 1}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setEditingMount({
-                        ...editingMount,
-                        currentLevel: val === '' ? '' : Number(val),
-                      });
-                    }}
-                    onBlur={() => {
-                      const lvl = Math.min(200, Math.max(1, toNum(editingMount.currentLevel) || 1));
-                      setEditingMount({
-                        ...editingMount,
-                        currentLevel: lvl,
-                        currentXp: calculateXpForLevel(lvl),
-                      });
-                    }}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* XP Actual */}
-                <div>
-                  <label htmlFor={xpId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                    XP Actual
-                  </label>
-                  <input
-                    id={xpId}
-                    type="number"
-                    min={0}
-                    max={MAX_MOUNT_XP}
-                    value={editingMount.currentXp ?? 0}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setEditingMount({
-                        ...editingMount,
-                        currentXp: val === '' ? '' : Number(val),
-                      });
-                    }}
-                    onBlur={() => {
-                      const xp = Math.min(MAX_MOUNT_XP, Math.max(0, toNum(editingMount.currentXp)));
-                      setEditingMount({
-                        ...editingMount,
-                        currentXp: xp,
-                        currentLevel: calculateLevelFromXp(xp),
-                      });
-                    }}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* Fertilidad */}
-                <div>
-                  <label htmlFor={fertilityId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                    Fertilidad
-                  </label>
-                  <select
-                    id={fertilityId}
-                    value={editingMount.fertility || 'fertil'}
-                    onChange={(e) => setEditingMount({ ...editingMount, fertility: e.target.value as FertilityStatus })}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {(Object.keys(FERTILITY_LABELS) as FertilityStatus[]).map((fert) => (
-                      <option key={fert} value={fert}>
-                        {FERTILITY_LABELS[fert]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Capacidad Especial */}
-                <div>
-                  <label htmlFor={capacityId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                    Capacidad
-                  </label>
-                  <select
-                    id={capacityId}
-                    value={editingMount.capacity || 'ninguna'}
-                    onChange={(e) => setEditingMount({ ...editingMount, capacity: e.target.value as SpecialCapacity })}
-                    className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {(Object.keys(CAPACITY_LABELS) as SpecialCapacity[]).map((cap) => (
-                      <option key={cap} value={cap}>
-                        {CAPACITY_LABELS[cap]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Medidores de Cría */}
-              <div className="pt-2 border-t border-slate-100">
-                <span className="block text-[11px] font-bold text-slate-500  mb-2">
-                  Medidores Reproductivos {isEditingEsterilOrSenil && '(Bloqueados por estado infértil)'}
-                </span>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <div>
-                    <label htmlFor={serenityId} className="block text-xs text-slate-600 font-medium mb-1">Serenidad</label>
-                    <input
-                      id={serenityId}
-                      type="number"
-                      min={SERENITY_MIN}
-                      max={SERENITY_MAX}
-                      disabled={isEditingEsterilOrSenil}
-                      value={isEditingEsterilOrSenil ? 0 : (editingMount.serenity ?? 0)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingMount({
-                          ...editingMount,
-                          serenity: val === '' ? '' : Number(val),
-                        });
-                      }}
-                      onBlur={() => {
-                        setEditingMount({
-                          ...editingMount,
-                          serenity: clampSerenity(toNum(editingMount.serenity)),
-                        });
-                      }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor={loveId} className="block text-xs text-slate-600 font-medium mb-1">Amor (0 a 20.000)</label>
-                    <input
-                      id={loveId}
-                      type="number"
-                      min={0}
-                      max={20000}
-                      disabled={isEditingEsterilOrSenil}
-                      value={isEditingEsterilOrSenil ? 0 : (editingMount.love ?? 20000)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingMount({
-                          ...editingMount,
-                          love: val === '' ? '' : Number(val),
-                        });
-                      }}
-                      onBlur={() => {
-                        setEditingMount({
-                          ...editingMount,
-                          love: Math.min(20000, Math.max(0, toNum(editingMount.love))),
-                        });
-                      }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor={maturityId} className="block text-xs text-slate-600 font-medium mb-1">Madurez (0 a 20.000)</label>
-                    <input
-                      id={maturityId}
-                      type="number"
-                      min={0}
-                      max={20000}
-                      disabled={isEditingEsterilOrSenil}
-                      value={isEditingEsterilOrSenil ? 0 : (editingMount.maturity ?? 20000)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingMount({
-                          ...editingMount,
-                          maturity: val === '' ? '' : Number(val),
-                        });
-                      }}
-                      onBlur={() => {
-                        setEditingMount({
-                          ...editingMount,
-                          maturity: Math.min(20000, Math.max(0, toNum(editingMount.maturity))),
-                        });
-                      }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor={staminaId} className="block text-xs text-slate-600 font-medium mb-1">Resistencia (0 a 20.000)</label>
-                    <input
-                      id={staminaId}
-                      type="number"
-                      min={0}
-                      max={20000}
-                      disabled={isEditingEsterilOrSenil}
-                      value={isEditingEsterilOrSenil ? 0 : (editingMount.stamina ?? 20000)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setEditingMount({
-                          ...editingMount,
-                          stamina: val === '' ? '' : Number(val),
-                        });
-                      }}
-                      onBlur={() => {
-                        setEditingMount({
-                          ...editingMount,
-                          stamina: Math.min(20000, Math.max(0, toNum(editingMount.stamina))),
-                        });
-                      }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-1.5 font-mono disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Notas */}
-              <div>
-                <label htmlFor={notesId} className="block text-[11px] font-bold text-slate-500  mb-1">
-                  Notas u Observaciones
-                </label>
-                <textarea
-                  id={notesId}
-                  value={editingMount.notes || ''}
-                  onChange={(e) => setEditingMount({ ...editingMount, notes: e.target.value })}
-                  rows={2}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Detalles sobre cruces previstos, árbol genealógico, etc."
-                />
-              </div>
-
-              {/* Botones de acción */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditModalOpen(false);
-                    setEditingMount(null);
-                  }}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-extrabold bg-blue-800 hover:bg-blue-900 text-white shadow-sm transition cursor-pointer"
-                >
-                  Guardar Montura
-                </button>
-              </div>
-            </form>
+          <div className="formulario-montura bg-white rounded-3xl max-w-2xl w-full border-2 border-slate-300 overflow-hidden my-auto">
+            <MountForm
+              draft={editingMount}
+              setDraft={setEditingMount}
+              onSubmit={handleSaveMount}
+              onCancel={() => {
+                setIsEditModalOpen(false);
+                setEditingMount(null);
+              }}
+              titleId={modalTitleId}
+              error={statusMessage?.type === 'error' ? statusMessage.text : null}
+              onDismissError={() => setStatusMessage(null)}
+            />
           </div>
         </div>
       )}

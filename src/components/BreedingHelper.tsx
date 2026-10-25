@@ -1,188 +1,87 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { IconMedallon } from './DofusIcons';
-import { GenFilter } from './GenFilter';
-import type { SpeciesType } from '../types/mount';
-import { DRAGODINDES_DATA } from '../data/dragodindes';
-import { MULDOS_DATA } from '../data/muldos';
-import { VOLKORNES_DATA } from '../data/volkornes';
-import { ALL_MOUNTS_DATA, getMountCrosses } from '../data/allMounts';
-import { MountAvatar } from './MountAvatar';
+import type { MountDefinition, SpeciesType, UserMount } from '../types/mount';
+import { getMountCrosses } from '../data/allMounts';
+import { db } from '../db/mountsDb';
+import { MountGrid } from './MountGrid';
+import { MountDetailModal } from './MountDetailModal';
+import { SpeciesTabs } from './SpeciesTabs';
+import { CATALOGO_POR_ESPECIE, coincide, ejemplaresDe } from '../utils/mountCatalog';
 
-// \u00AD = guion opcional: solo parte la palabra si no cabe (pantallas de ~320 px)
-const SPECIES_OPTIONS: { key: SpeciesType; label: string }[] = [
-  { key: 'dragopavo', label: 'Drago\u00ADpavos' },
-  { key: 'muluaga', label: 'Mula\u00ADguas' },
-  { key: 'vueloceronte', label: 'Vuelo\u00ADcerontes' },
-];
-
-/** Lista de cruces de una montura: muestra el primero y despliega el resto. */
-const CrossList: React.FC<{ crosses: [string, string][]; getName: (id: string) => string }> = ({ crosses, getName }) => {
-  const [open, setOpen] = useState(false);
-  if (crosses.length === 0) return null;
-  const shown = open ? crosses : crosses.slice(0, 1);
-  return (
-    <div className="p-2 bg-blue-50/90 border border-blue-200/80 rounded-xl text-blue-950 space-y-1.5">
-      <span className="font-semibold text-slate-600 block text-[11px] ">
-        {crosses.length === 1 ? 'Cruce' : `${crosses.length} cruces posibles`}
-      </span>
-      <ul className="divide-y divide-blue-200/70">
-        {shown.map(([a, b], i) => (
-          <li key={i} className="flex flex-wrap items-center gap-1 text-[11px] py-1.5 first:pt-0 last:pb-0">
-            <span className="font-extrabold text-blue-800 bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(a)}</span>
-            <span className="text-slate-600 font-bold" aria-label="con">×</span>
-            <span className="font-extrabold text-blue-800 bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(b)}</span>
-          </li>
-        ))}
-      </ul>
-      {crosses.length > 1 && (
-        <button
-          type="button"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-          className="text-[11px] font-bold text-blue-700 hover:text-blue-900 cursor-pointer rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-        >
-          {open ? 'Ver solo uno' : `Ver los otros ${crosses.length - 1}`}
-        </button>
-      )}
-    </div>
-  );
-};
-
+/**
+ * Cruces: todas las razas de una especie en una sola página, agrupadas por generación.
+ * Al pulsar una raza se abre su ficha con los progenitores posibles, como el árbol genético del juego.
+ */
 export const BreedingHelper: React.FC = () => {
   const [species, setSpecies] = useState<SpeciesType>('dragopavo');
-  const [selectedGen, setSelectedGen] = useState<number | 'all'>('all');
+  const [busqueda, setBusqueda] = useState('');
+  const [abierta, setAbierta] = useState<MountDefinition | null>(null);
+  const [userMounts, setUserMounts] = useState<UserMount[]>([]);
 
-  const catalog =
-    species === 'dragopavo'
-      ? DRAGODINDES_DATA
-      : species === 'muluaga'
-      ? MULDOS_DATA
-      : VOLKORNES_DATA;
+  // Las monturas del establo solo sirven para marcar qué progenitores ya tienes
+  useEffect(() => {
+    db.mounts
+      .toArray()
+      .then(setUserMounts)
+      .catch(() => setUserMounts([]));
+  }, []);
 
-  const generations = Array.from(new Set(catalog.map((m) => m.generation))).sort((a, b) => a - b);
-  const visibleCatalog =
-    selectedGen === 'all' ? catalog : catalog.filter((m) => m.generation === selectedGen);
-
-  const getParentName = (parentId: string) => {
-    const parent = ALL_MOUNTS_DATA.find((m) => m.id === parentId);
-    return parent ? parent.name : parentId;
-  };
+  const catalogo = CATALOGO_POR_ESPECIE[species];
+  const visibles = useMemo(() => catalogo.filter((d) => coincide(d, busqueda)), [catalogo, busqueda]);
+  const tienes = (d: MountDefinition) => ejemplaresDe(userMounts, d).length > 0;
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto sm:px-4 lg:px-6">
-      <div className="bg-slate-50 text-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 p-3 sm:p-5 md:p-6 shadow-xl space-y-4 sm:space-y-6">
-        {/* Cabecera Principal */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3 sm:pb-4">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+    <div className="space-y-4 max-w-7xl mx-auto">
+      <div className="bg-white text-slate-900 rounded-3xl border border-slate-200 p-3.5 sm:p-6 space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <IconMedallon name="cruces" />
             <div>
-              <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-                Árbol de cruces y guía de hibridaciones
-              </h1>
-              <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
-                Consulta cómo obtener cada generación a partir de cruces. Algunas monturas tienen varios cruces posibles.
+              <h1 className="text-xl sm:text-2xl text-slate-900 leading-tight">Árbol de cruces</h1>
+              <p className="text-sm text-slate-600 mt-1 max-w-[60ch]">
+                Pulsa una raza para ver qué parejas la dan. Desde ahí puedes saltar a cada progenitor y seguir el árbol hacia atrás.
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Catálogo de Cruces */}
-        <div className="sm:bg-white sm:rounded-2xl sm:border sm:border-slate-200 sm:p-5 sm:shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
-            <h2 className="text-xs sm:text-sm font-extrabold text-slate-900">
-              Catálogo completo de cruces ({catalog.length} razas)
-            </h2>
-            {/* Pestañas simétricas en mobile, compactas en desktop */}
-            <div role="group" aria-label="Especie" className="grid grid-cols-3 w-full sm:w-auto sm:flex gap-1 bg-slate-200/60 p-1 rounded-xl border border-slate-200">
-              {SPECIES_OPTIONS.map((opt) => {
-                const isActive = species === opt.key;
-                return (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    aria-pressed={isActive}
-                    onClick={() => {
-                      setSpecies(opt.key);
-                      setSelectedGen('all');
-                    }}
-                    className={`min-h-[44px] sm:min-h-0 py-1.5 px-1.5 sm:px-3.5 rounded-lg text-[11px] sm:text-xs font-bold transition text-center leading-tight [hyphens:manual] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
-                      isActive
-                        ? 'bg-blue-800 text-white shadow-sm font-extrabold'
-                        : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Filtro por generación (desliza en horizontal en móvil) */}
-          <GenFilter
-            generations={generations}
-            selected={selectedGen}
-            onChange={setSelectedGen}
-            allLabel="Todas"
-            counts={Object.fromEntries(generations.map((g) => [g, catalog.filter((m) => m.generation === g).length]))}
+          <SpeciesTabs
+            value={species}
+            onChange={(s) => {
+              setSpecies(s);
+              setBusqueda('');
+            }}
           />
-
-          {/* Grid responsivo adaptable: 1 col (mobile), 2 cols (tablet), 3 cols (desktop), 4 cols (wide) */}
-          <div
-            role="list"
-            aria-label={`Cruces${selectedGen === 'all' ? '' : ` de generación ${selectedGen}`}`}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3"
-          >
-            {visibleCatalog.map((m) => (
-              <div
-                key={m.id}
-                role="listitem"
-                className="p-3 sm:p-3.5 bg-slate-50/70 rounded-2xl border border-slate-200 hover:border-slate-300 hover:bg-white transition space-y-2.5 hover:shadow-md flex flex-col justify-between"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2.5">
-                    <MountAvatar
-                      species={species}
-                      breed={m.name}
-                      imageUrl={m.imageUrl}
-                      size="sm"
-                      generation={m.generation}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start gap-1">
-                        <h3 className="font-extrabold text-xs text-slate-900 leading-snug">
-                          {m.name}
-                        </h3>
-                        <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 font-bold border border-slate-300/60 flex-shrink-0">
-                          G{m.generation}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {getMountCrosses(m).length > 0 ? (
-                    <CrossList crosses={getMountCrosses(m)} getName={getParentName} />
-                  ) : (
-                    <a
-                      href="/#donde-capturar"
-                      className="block p-2 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950 hover:bg-amber-100"
-                    >
-                      <span className="font-semibold text-amber-900 block">Salvaje</span>
-                      Se captura con una red; no sale de ningún cruce.
-                    </a>
-                  )}
-                </div>
-
-                <div className="pt-2 border-t border-slate-200/60 text-[11px] text-slate-600 space-y-0.5 font-medium">
-                  {m.bonuses.map((b, idx) => (
-                    <p key={idx}>• {b}</p>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
+
+        <MountGrid
+          catalogo={catalogo}
+          visibles={visibles}
+          busqueda={busqueda}
+          onBusqueda={setBusqueda}
+          onSelect={setAbierta}
+          resumenGen={(g, defs) => (g === 1 ? 'Salvajes, se capturan' : `${defs.length} razas`)}
+          distintivo={(d) => {
+            const n = getMountCrosses(d).length;
+            return (
+              <span className="flex flex-col items-end gap-0.5">
+                {n > 1 && (
+                  <span className="text-[9px] font-extrabold px-1 rounded bg-blue-100 text-blue-900" title={`${n} parejas posibles`}>
+                    {n} cruces
+                  </span>
+                )}
+                {tienes(d) && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" title="La tienes en tu establo" />
+                )}
+              </span>
+            );
+          }}
+        />
+
+        <p className="flex items-center gap-2 text-xs text-slate-600">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" /> La tienes en tu establo
+        </p>
       </div>
+
+      <MountDetailModal montura={abierta} onClose={() => setAbierta(null)} userMounts={userMounts} enfoque="cruces" />
     </div>
   );
 };
