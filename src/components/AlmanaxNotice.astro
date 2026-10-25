@@ -1,0 +1,121 @@
+---
+/**
+ * Aviso del Almanax: aparece arriba (nunca abajo, donde está el menú del móvil)
+ * la víspera y el mismo día de un bonus de crianza. Se cierra y no vuelve a salir ese día.
+ * Para probarlo: añade ?fecha=AAAA-MM-DD a la URL.
+ */
+import { ALMANAX_BONUSES, ALMANAX_TIPS, MONTH_NAMES, MONTH_SHORT } from '../data/almanax';
+const payload = { bonuses: ALMANAX_BONUSES, tips: ALMANAX_TIPS, months: MONTH_NAMES, monthsShort: MONTH_SHORT };
+---
+
+<script type="application/json" id="almanax-data" set:html={JSON.stringify(payload)} />
+
+<div
+  id="almanax-notice"
+  role="status"
+  aria-live="polite"
+  hidden
+  class="almanax-notice fixed z-[60] top-2 inset-x-2 sm:inset-x-auto sm:top-4 sm:right-4 sm:w-[23rem]"
+>
+  <div class="flex gap-3 items-start p-3 sm:p-3.5 rounded-2xl bg-white text-slate-700 border border-slate-200 shadow-2xl shadow-black/40">
+    <!-- Hoja de calendario: mes arriba, día grande -->
+    <div class="flex-shrink-0 w-12 rounded-lg overflow-hidden border border-blue-900/20 text-center" aria-hidden="true">
+      <div data-n="month" class="bg-[#1e3a8a] text-white text-[11px] font-bold leading-5"></div>
+      <div data-n="day" class="text-[22px] font-black text-slate-900 leading-8"></div>
+    </div>
+    <div class="flex-1 min-w-0">
+      <p data-n="when" class="text-[12px] font-bold text-blue-800"></p>
+      <p data-n="bonus" class="text-sm font-extrabold text-slate-900 leading-snug"></p>
+      <p data-n="tip" class="text-[12px] leading-snug mt-0.5 text-slate-600"></p>
+      <a
+        href="/#recompensas"
+        class="inline-block mt-2 text-[12px] font-bold text-blue-700 hover:text-blue-900 underline underline-offset-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      >Ver el Almanax en la guía</a>
+    </div>
+    <button
+      type="button"
+      data-n="close"
+      aria-label="Cerrar aviso del Almanax"
+      class="flex-shrink-0 -mt-1 -mr-1 w-9 h-9 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </button>
+  </div>
+</div>
+
+<style>
+  .almanax-notice:not([hidden]) {
+    animation: almanax-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes almanax-in {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .almanax-notice:not([hidden]) {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  type Bonus = { id: string; month: number; day: number; year?: number; bonus: string; kind: string };
+  const el = document.getElementById('almanax-notice');
+  const raw = document.getElementById('almanax-data')?.textContent;
+  if (el && raw) {
+    const { bonuses, tips, months, monthsShort } = JSON.parse(raw) as {
+      bonuses: Bonus[];
+      tips: Record<string, string>;
+      months: string[];
+      monthsShort: string[];
+    };
+
+    // Fecha local (o la de ?fecha=AAAA-MM-DD para probar)
+    const param = new URLSearchParams(location.search).get('fecha');
+    const today = param && /^\d{4}-\d{2}-\d{2}$/.test(param) ? new Date(`${param}T12:00:00`) : new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const on = (d: Date) =>
+      bonuses.find(
+        (b) => b.month === d.getMonth() + 1 && b.day === d.getDate() && (!b.year || b.year === d.getFullYear())
+      );
+    const hit = on(today) ? { b: on(today)!, when: 'Hoy', date: today } : on(tomorrow) ? { b: on(tomorrow)!, when: 'Mañana', date: tomorrow } : null;
+
+    if (hit) {
+      const key = `almanax-cerrado-${hit.b.id}-${hit.date.getFullYear()}-${hit.when}`;
+      let closed = false;
+      try {
+        closed = localStorage.getItem(key) === '1';
+      } catch {
+        closed = false;
+      }
+      if (!closed) {
+        const set = (n: string, text: string) => {
+          const node = el.querySelector(`[data-n="${n}"]`);
+          if (node) node.textContent = text;
+        };
+        set('month', monthsShort[hit.b.month - 1]);
+        set('day', String(hit.b.day));
+        set('when', `${hit.when}, ${hit.b.day} de ${months[hit.b.month - 1]}`);
+        set('bonus', hit.b.bonus);
+        set('tip', tips[hit.b.kind] ?? '');
+        el.hidden = false;
+        el.querySelector('[data-n="close"]')?.addEventListener('click', () => {
+          el.hidden = true;
+          try {
+            localStorage.setItem(key, '1');
+          } catch {
+            // sin almacenamiento: solo se oculta en esta visita
+          }
+        });
+      }
+    }
+  }
+</script>

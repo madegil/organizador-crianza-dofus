@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { Navbar } from '../components/Navbar';
+import AlmanaxNotice from '../components/AlmanaxNotice.astro';
 
 interface Props {
   title: string;
@@ -59,6 +60,7 @@ const ogImageUrl = new URL('/og-image.jpg', Astro.site ?? Astro.url).href;
       Saltar al contenido
     </a>
     <Navbar client:load currentPath={currentPath} />
+    <AlmanaxNotice />
     
     <main id="contenido" tabindex="-1" class="flex-1 focus:outline-none max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-2 pb-8 md:pb-12">
       <slot />

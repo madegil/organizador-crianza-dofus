@@ -5,6 +5,7 @@ import GuideTable from '../components/guide/GuideTable.astro';
 import ToolLink from '../components/guide/ToolLink.astro';
 import { SerenityChart } from '../components/guide/SerenityChart';
 import { TargetGenCalculator } from '../components/guide/TargetGenCalculator';
+import { ALMANAX_BONUSES, MONTH_NAMES } from '../data/almanax';
 
 // Índice: grupos y secciones en el orden de la página
 const toc = [
@@ -51,23 +52,15 @@ const quickPath = [
   { id: 'experiencia', step: '5', title: 'Nivel 200', text: 'Experiencia y carburante' },
 ];
 
-const almanax = [
-  ['10 de enero', 'Medidor de madurez al doble'],
-  ['10 de febrero', 'Los bebés nacen Resistentes'],
-  ['10 de marzo', 'Medidor de aguante al doble'],
-  ['10 de abril', 'Medidor de pérdida de serenidad al doble'],
-  ['10 de mayo', 'Los ganaderos ahorran un 15 % de ingredientes'],
-  ['10 de junio', 'Medidor de experiencia al doble'],
-  ['10 de julio', 'Los bebés nacen Enamoradizos'],
-  ['10 de agosto', '25 % de probabilidad de fabricar un objeto extra'],
-  ['10 de septiembre', 'Medidor de aumento de serenidad al doble'],
-  ['10 de octubre', 'Los bebés nacen Sabios'],
-  ['Fecha variable (12 de octubre en 2026)', '+20 % de generación objetivo'],
-  ['10 de noviembre', 'Los bebés nacen Precoces'],
-  ['10 de diciembre', 'Medidor de amor al doble'],
-];
+// Almanax: misma fuente que el calendario .ics y el aviso de la página
+const almanax = ALMANAX_BONUSES.map((b) => [
+  b.year ? `Fecha variable (${b.day} de ${MONTH_NAMES[b.month - 1]} en ${b.year})` : `${b.day} de ${MONTH_NAMES[b.month - 1]}`,
+  b.bonus,
+]);
 // Mes (1-12) de cada fila, para marcar el bonus del mes actual; la fecha variable no se marca
-const almanaxMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '', 11, 12];
+const almanaxMonths = ALMANAX_BONUSES.map((b) => (b.year ? '' : b.month));
+const icsPath = '/almanax-crianza.ics';
+const googleCalendarUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent('webcal://organizador-crianza-dofus.vercel.app' + icsPath)}`;
 
 const p = 'text-sm leading-relaxed';
 ---
@@ -623,6 +616,35 @@ const p = 'text-sm leading-relaxed';
           <div class="almanax">
             <GuideTable caption="Bonus de crianza del Almanax" head={['Fecha', 'Bonus']} rows={almanax} rowData={almanaxMonths} />
           </div>
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-3.5 rounded-xl border border-blue-200/80 bg-blue-50/70 text-blue-950">
+            <div class="flex-shrink-0 w-11 rounded-md overflow-hidden border border-blue-900/20 text-center bg-white" aria-hidden="true">
+              <div class="bg-[#1e3a8a] text-white text-[10px] font-bold leading-4">día</div>
+              <div class="text-lg font-black text-slate-900 leading-7">10</div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[13px] font-extrabold text-blue-950">Añade el Almanax a tu calendario</p>
+              <p class="text-[12px] leading-snug text-blue-900/80">
+                Te avisa la víspera a las 20:00 y el mismo día a las 08:00. Además, la web te muestra un aviso arriba esos dos días.
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
+              <a
+                href={icsPath}
+                download="almanax-crianza.ics"
+                class="inline-flex justify-center items-center min-h-[40px] px-3.5 rounded-xl bg-[#1e3a8a] text-white text-[13px] font-bold hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >Descargar calendario</a>
+              <a
+                href={googleCalendarUrl}
+                target="_blank"
+                rel="noopener"
+                class="inline-flex justify-center items-center min-h-[40px] px-3.5 rounded-xl bg-white border border-blue-200 text-blue-900 text-[13px] font-bold hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >Google Calendar</a>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-500 -mt-1">
+            El archivo funciona en el calendario del móvil, Apple Calendar y Outlook. En Google Calendar los avisos siguen tu propia
+            configuración de notificaciones.
+          </p>
         </GuideSection>
 
         <GuideSection id="consejos" title="Consejos para empezar">
