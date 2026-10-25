@@ -13,9 +13,9 @@ interface Props {
   onResumen?: (hechos: number, total: number) => void;
 }
 
-/** Un logro meta se completa solo cuando están hechos todos los de su categoría */
+/** Un logro meta se completa solo cuando están hechos todos sus requisitos (que pueden ser otros metas) */
 export const estaHecho = (l: Logro, marcados: Record<string, boolean>): boolean =>
-  l.tipo === 'meta' ? requisitosDeMeta(l).every((r) => marcados[r.id]) : Boolean(marcados[l.id]);
+  l.tipo === 'meta' ? requisitosDeMeta(l).every((r) => estaHecho(r, marcados)) : Boolean(marcados[l.id]);
 
 export const contarHechos = (marcados: Record<string, boolean>) => LOGROS.filter((l) => estaHecho(l, marcados)).length;
 
@@ -129,10 +129,10 @@ export const LogrosGanaderia: React.FC<Props> = ({ userMounts, onResumen }) => {
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1">
           {requisitosDeMeta(l).map((r) => (
             <li key={r.id} className="flex items-center gap-2 text-xs">
-              <span className={`grid place-items-center w-4 h-4 rounded ${marcados[r.id] ? 'bg-emerald-600 text-white' : 'border-2 border-slate-300'}`} aria-hidden="true">
-                {marcados[r.id] && <Check className="w-3 h-3" strokeWidth={3.5} />}
+              <span className={`grid place-items-center w-4 h-4 rounded ${estaHecho(r, marcados) ? 'bg-emerald-600 text-white' : 'border-2 border-slate-300'}`} aria-hidden="true">
+                {estaHecho(r, marcados) && <Check className="w-3 h-3" strokeWidth={3.5} />}
               </span>
-              <span className={marcados[r.id] ? 'text-slate-900 font-semibold' : 'text-slate-600'}>{r.nombre}</span>
+              <span className={estaHecho(r, marcados) ? 'text-slate-900 font-semibold' : 'text-slate-600'}>{r.nombre}</span>
             </li>
           ))}
         </ul>
@@ -219,7 +219,7 @@ export const LogrosGanaderia: React.FC<Props> = ({ userMounts, onResumen }) => {
                     return { tienes: defs.filter((d) => ejemplaresDe(userMounts, d).length > 0).length, total: defs.length };
                   })()
                 : esMeta
-                ? { tienes: requisitosDeMeta(l).filter((r) => marcados[r.id]).length, total: requisitosDeMeta(l).length }
+                ? { tienes: requisitosDeMeta(l).filter((r) => estaHecho(r, marcados)).length, total: requisitosDeMeta(l).length }
                 : null;
               return (
                 <li key={l.id} className={`rounded-xl border-2 ${hecho ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200'}`}>
@@ -261,7 +261,7 @@ export const LogrosGanaderia: React.FC<Props> = ({ userMounts, onResumen }) => {
                       {esMeta ? (
                         <span
                           className={`grid place-items-center w-9 h-9 rounded-lg ${hecho ? 'bg-emerald-600 text-white' : 'border-2 border-dashed border-slate-300'}`}
-                          title="Se completa al conseguir los demás logros de esta categoría"
+                          title="Se completa solo al conseguir los logros que agrupa"
                         >
                           {hecho && <Check aria-hidden="true" className="w-5 h-5" strokeWidth={3} />}
                           <span className="sr-only">{hecho ? 'Conseguido' : 'Se completa solo'}</span>
@@ -291,7 +291,7 @@ export const LogrosGanaderia: React.FC<Props> = ({ userMounts, onResumen }) => {
       </section>
 
       <p className="text-xs text-slate-600">
-        Márcalos tú cuando el juego te los dé; el logro final de cada categoría se completa solo. Las barras cuentan las razas registradas en tu
+        Márcalos tú cuando el juego te los dé; los logros que agrupan a otros (los de «Conseguir los siguientes logros») se completan solos. Las barras cuentan las razas registradas en tu
         Establo. Todo se guarda en este navegador y va en la copia de seguridad .json.
       </p>
     </div>

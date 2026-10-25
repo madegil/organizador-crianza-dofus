@@ -18,6 +18,8 @@ export interface Logro {
   numero?: number;
   /** Razas que exige: generación de esa especie */
   medible?: { especie: SpeciesType; generacion: number };
+  /** Logros que agrupa un logro meta */
+  requisitos?: string[];
 }
 
 export const CATEGORIAS: { id: CategoriaLogro; nombre: string; icono: string }[] = [
@@ -77,6 +79,8 @@ const porEspecie = (especie: SpeciesType): Logro[] => {
       descripcion: 'Conseguir los siguientes logros.',
       puntos: 50,
       tipo: 'meta',
+      // Las nueve generaciones; la captura cuenta aparte, en Señor ganadero
+      requisitos: Array.from({ length: 9 }, (_, i) => `${especie}-gen-${i + 2}`),
     },
   ];
 };
@@ -87,14 +91,30 @@ export const LOGROS: Logro[] = [
   { id: 'general-nacimientos-100', categoria: 'general', nombre: 'Matrona', descripcion: 'Hacer que nazcan 100 monturas.', puntos: 20, tipo: 'nacimientos', numero: 100 },
   // Conserva el id de la primera versión de esta lista
   { id: 'general-nacimientos-1000', categoria: 'general', nombre: 'Hiperfértil', descripcion: 'Hacer que nazcan 1000 monturas.', puntos: 30, tipo: 'nacimientos', numero: 1000 },
-  { id: 'general-meta', categoria: 'general', nombre: 'Señor ganadero', descripcion: 'Conseguir los siguientes logros.', puntos: 100, tipo: 'meta' },
+  {
+    id: 'general-meta',
+    categoria: 'general',
+    nombre: 'Señor ganadero',
+    descripcion: 'Conseguir los siguientes logros.',
+    puntos: 100,
+    tipo: 'meta',
+    requisitos: [
+      'dragopavo-captura',
+      'muluaga-captura',
+      'vueloceronte-captura',
+      'general-nacimientos-1000',
+      'dragopavo-meta',
+      'muluaga-meta',
+      'vueloceronte-meta',
+    ],
+  },
   ...porEspecie('dragopavo'),
   ...porEspecie('muluaga'),
   ...porEspecie('vueloceronte'),
 ];
 
-/** Logros que cuenta un logro meta: los demás de su misma categoría */
-export const requisitosDeMeta = (meta: Logro) =>
-  LOGROS.filter((l) => l.categoria === meta.categoria && l.tipo !== 'meta');
+/** Logros que agrupa un logro meta, en el orden del juego */
+export const requisitosDeMeta = (meta: Logro): Logro[] =>
+  (meta.requisitos ?? []).map((id) => LOGROS.find((l) => l.id === id)).filter((l): l is Logro => Boolean(l));
 
 export const PUNTOS_TOTALES = LOGROS.reduce((s, l) => s + l.puntos, 0);
