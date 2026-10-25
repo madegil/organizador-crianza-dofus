@@ -1,4 +1,6 @@
 import { getDefaultMaxReproductions } from '../utils/mountRules';
+import { EstadoVacio } from './EstadoVacio';
+import { formatNumber, formatSigned } from '../utils/formatNumber';
 import React, { useState, useRef, useEffect, useId } from 'react';
 import {
   FolderUp,
@@ -157,10 +159,10 @@ function MountCard({
         >
           Nvl {mount.currentLevel}
           {mount.currentLevel >= 200 && <Sparkles className="w-3 h-3 text-emerald-500" />}
-          <span className="font-normal text-slate-600">· {mount.currentXp.toLocaleString()} XP</span>
+          <span className="font-normal text-slate-600">· {formatNumber(mount.currentXp)} XP</span>
         </span>
         <span
-          className={`inline-block text-[11px] px-2 py-1 rounded-full font-bold uppercase tracking-wider ${
+          className={`inline-block text-[11px] px-2 py-1 rounded-full font-bold ${
             mount.fertility === 'fecunda'
               ? 'bg-amber-100 text-amber-800 border border-amber-200'
               : mount.fertility === 'esteril'
@@ -190,15 +192,15 @@ function MountCard({
                 mount.serenity > 0 ? 'text-sky-600' : mount.serenity < 0 ? 'text-amber-600' : 'text-slate-600'
               }`}
             >
-              {mount.serenity > 0 ? `+${mount.serenity}` : mount.serenity}
+              {formatSigned(mount.serenity)}
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2.5">
             {bars.map((b) => (
               <div key={b.label}>
-                <div className="flex justify-between gap-1 text-[11px] text-slate-600 font-medium">
+                <div className="flex flex-col text-[11px] leading-tight text-slate-600 font-medium mb-1">
                   <span className="truncate">{b.label}</span>
-                  <span className="font-mono">{Math.round(b.value / 1000)}k</span>
+                  <span className="font-bold text-slate-900">{formatNumber(b.value)}</span>
                 </div>
                 <div
                   role="progressbar"
@@ -660,59 +662,57 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const isEditingEsterilOrSenil = editingMount?.fertility === 'esteril' || editingMount?.fertility === 'senil';
 
   return (
-    <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
+    <div className="bg-slate-50 text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
       <h1 className="sr-only">Establo</h1>
 
       {/* 1. SECCIÓN SUPERIOR: Botón Seleccionar Archivo y Botón Descargar Plantilla CSV */}
       <div className="space-y-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-          {/* Botón Seleccionar Archivo */}
-          <div className="flex flex-col gap-1">
-            <label htmlFor={fileInputId} className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
-              <input
-                id={fileInputId}
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                accept=".xlsx,.xls,.csv,.json"
-                className="sr-only"
-              />
-              {isUploading ? (
-                <RefreshCw className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />
-              ) : (
-                <FolderUp className="w-5 h-5 text-[#1e3a8a] flex-shrink-0" />
-              )}
-              <span>Seleccionar archivo</span>
-            </label>
-            <p className="text-[11px] text-slate-500 text-center">
-              Acepta .xlsx, .xls, .csv y backup .json
-            </p>
-          </div>
-
-          {/* Botón Descargar Plantilla CSV */}
-          <button
-            onClick={downloadCsvTemplate}
-            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
-            title="Descargar plantilla CSV (.csv) universal para Google Sheets y Excel"
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Importar: acción principal */}
+          <label
+            htmlFor={fileInputId}
+            className="group cursor-pointer flex items-center gap-3 min-h-[64px] px-4 py-3 rounded-2xl border-2 border-blue-800 bg-blue-600 text-white hover:bg-[#568c16] hover:-translate-y-0.5 active:translate-y-0.5 shadow-[inset_0_1px_0_rgba(214,240,160,0.45),0_3px_0_#1a2a09] active:shadow-[inset_0_2px_3px_rgba(0,0,0,0.3)] focus-within:outline focus-within:outline-[3px] focus-within:outline-kama focus-within:outline-offset-2"
           >
-            <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />
-            <span>Descargar plantilla CSV</span>
+            <input
+              id={fileInputId}
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".xlsx,.xls,.csv,.json"
+              className="sr-only"
+            />
+            <span className="grid place-items-center w-10 h-10 rounded-xl bg-black/15 shrink-0">
+              {isUploading ? (
+                <RefreshCw aria-hidden="true" className="w-5 h-5 animate-spin" />
+              ) : (
+                <FolderUp aria-hidden="true" className="w-5 h-5 duration-300 ease-resorte group-hover:-translate-y-0.5" />
+              )}
+            </span>
+            <span className="flex flex-col text-left leading-tight">
+              <span className="text-sm font-extrabold">{isUploading ? 'Importando…' : 'Importar monturas'}</span>
+              <span className="text-xs font-medium text-blue-100">Excel, CSV o copia de seguridad .json</span>
+            </span>
+          </label>
+
+          {/* Plantilla: acción secundaria, misma forma y altura */}
+          <button
+            type="button"
+            onClick={downloadCsvTemplate}
+            className="group flex items-center gap-3 min-h-[64px] px-4 py-3 rounded-2xl border-2 border-slate-300 bg-white text-slate-900 hover:border-blue-500 hover:bg-blue-50 hover:-translate-y-0.5 shadow-[0_3px_0_#c4ac80]"
+          >
+            <span className="grid place-items-center w-10 h-10 rounded-xl bg-slate-100 text-blue-700 shrink-0 group-hover:bg-blue-100">
+              <Download aria-hidden="true" className="w-5 h-5 duration-300 ease-resorte group-hover:translate-y-0.5" />
+            </span>
+            <span className="flex flex-col text-left leading-tight">
+              <span className="text-sm font-extrabold">Descargar plantilla</span>
+              <span className="text-xs font-medium text-slate-600">CSV listo para Google Sheets o Excel</span>
+            </span>
           </button>
         </div>
 
         {/* Acciones de respaldo y exportación discretas */}
         <div className="flex items-center justify-between text-xs text-slate-500 pt-1 px-1">
-          <div className="flex items-center gap-2">
-            <span>Plantilla compatible con Google Sheets y Excel.</span>
-            {mounts.length > 0 && (
-              <button
-                onClick={handleClearAll}
-                className="text-rose-700 hover:text-rose-800 hover:underline font-semibold transition"
-              >
-                Vaciar establo
-              </button>
-            )}
-          </div>
+          <span />
 
           <div ref={exportMenuRef} className="relative">
             <button
@@ -720,7 +720,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
               onClick={() => setShowExportMenu(!showExportMenu)}
               aria-expanded={showExportMenu}
               aria-haspopup="menu"
-              className="font-bold text-[#1e3a8a] hover:underline flex items-center gap-1 cursor-pointer"
+              className="font-bold text-blue-800 hover:underline flex items-center gap-1 cursor-pointer"
             >
               Exportar datos
             </button>
@@ -805,7 +805,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         <button
           type="button"
           onClick={(e) => handleOpenNewMountModal(e.currentTarget)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1e3a8a] hover:bg-[#172554] text-white rounded-2xl text-xs font-extrabold transition shadow-sm cursor-pointer flex-shrink-0"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-800 hover:bg-blue-900 text-white rounded-2xl text-xs font-extrabold transition shadow-sm cursor-pointer flex-shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Añadir montura</span>
@@ -826,7 +826,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             <Filter className="w-4 h-4 text-slate-500" aria-hidden="true" />
             <span>Filtros</span>
             {activeFilterCount > 0 && (
-              <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#1e3a8a] text-white text-[11px] font-extrabold inline-flex items-center justify-center">
+              <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-blue-800 text-white text-[11px] font-extrabold inline-flex items-center justify-center">
                 {activeFilterCount}
                 <span className="sr-only"> activos</span>
               </span>
@@ -837,7 +837,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             />
           </button>
           {/* Escritorio: título fijo */}
-          <span className="hidden md:flex text-[11px] font-bold text-slate-600 uppercase tracking-wider items-center gap-1.5">
+          <span className="hidden md:flex text-[11px] font-bold text-slate-600  items-center gap-1.5">
             <Filter className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" /> Filtros
             {activeFilterCount > 0 && (
               <span className="normal-case tracking-normal font-semibold text-slate-500">
@@ -958,7 +958,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[760px]">
-            <thead className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+            <thead className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold text-slate-500 select-none">
               <tr>
                 <th
                   aria-sort={getAriaSort('nickname')}
@@ -967,7 +967,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   <button
                     type="button"
                     onClick={() => handleSort('nickname')}
-                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold text-[11px] text-inherit cursor-pointer"
                   >
                     <span>Nombre / Raza</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
@@ -980,7 +980,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   <button
                     type="button"
                     onClick={() => handleSort('generation')}
-                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold text-[11px] text-inherit cursor-pointer"
                   >
                     <span>Gen</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
@@ -993,7 +993,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   <button
                     type="button"
                     onClick={() => handleSort('currentLevel')}
-                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold text-[11px] text-inherit cursor-pointer"
                   >
                     <span>Nivel / XP</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
@@ -1006,7 +1006,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   <button
                     type="button"
                     onClick={() => handleSort('fertility')}
-                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold uppercase tracking-wider text-[11px] text-inherit cursor-pointer"
+                    className="flex items-center gap-1.5 hover:text-slate-800 transition font-bold text-[11px] text-inherit cursor-pointer"
                   >
                     <span>Fertilidad</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
@@ -1019,10 +1019,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             <tbody className="divide-y divide-slate-100 text-xs">
               {paginatedMounts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-600 text-sm">
-                    {mounts.length === 0
-                      ? 'Tu establo está vacío. Importa un archivo o pulsa «Añadir montura».'
-                      : 'No se encontraron monturas que coincidan con los filtros.'}
+                  <td colSpan={6} className="text-center text-slate-600 text-sm">
+                    {mounts.length === 0 ? (
+                      <EstadoVacio titulo="Tu establo está vacío">
+                        Importa tu hoja de cálculo o pulsa «Añadir montura» para registrar la primera.
+                      </EstadoVacio>
+                    ) : (
+                      <p className="py-12">Ninguna montura coincide con estos filtros.</p>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -1102,7 +1106,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                           )}
                         </div>
                         <span className="text-xs text-slate-600 font-mono block">
-                          {mount.currentXp.toLocaleString()} XP
+                          {formatNumber(mount.currentXp)} XP
                         </span>
                       </td>
 
@@ -1110,7 +1114,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                       <td className="py-2.5 px-3">
                         <div className="space-y-1">
                           <span
-                            className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                            className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold ${
                               mount.fertility === 'fecunda'
                                 ? 'bg-amber-100 text-amber-800 border border-amber-200'
                                 : mount.fertility === 'esteril'
@@ -1155,7 +1159,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                                     : 'text-slate-600'
                                 }`}
                               >
-                                {mount.serenity > 0 ? `+${mount.serenity}` : mount.serenity}
+                                {formatSigned(mount.serenity)}
                               </span>
                             </div>
 
@@ -1163,7 +1167,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                             <div>
                               <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Amor</span>
-                                <span>{mount.love}/20k</span>
+                                <span><strong className="font-bold text-slate-900">{formatNumber(mount.love)}</strong><span className="text-slate-500"> / 20.000</span></span>
                               </div>
                               <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
                                 <div
@@ -1177,7 +1181,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                             <div>
                               <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Madurez</span>
-                                <span>{mount.maturity}/20k</span>
+                                <span><strong className="font-bold text-slate-900">{formatNumber(mount.maturity)}</strong><span className="text-slate-500"> / 20.000</span></span>
                               </div>
                               <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
                                 <div
@@ -1191,7 +1195,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                             <div>
                               <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Resistencia</span>
-                                <span>{mount.stamina}/20k</span>
+                                <span><strong className="font-bold text-slate-900">{formatNumber(mount.stamina)}</strong><span className="text-slate-500"> / 20.000</span></span>
                               </div>
                               <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
                                 <div
@@ -1267,11 +1271,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
           </div>
 
           {paginatedMounts.length === 0 ? (
-            <p className="py-12 px-4 text-center text-slate-600 text-sm">
-              {mounts.length === 0
-                ? 'Tu establo está vacío. Importa un archivo o pulsa «Añadir montura».'
-                : 'No se encontraron monturas que coincidan con los filtros.'}
-            </p>
+            mounts.length === 0 ? (
+              <EstadoVacio titulo="Tu establo está vacío">
+                Importa tu hoja de cálculo o pulsa «Añadir montura» para registrar la primera.
+              </EstadoVacio>
+            ) : (
+              <p className="py-12 px-4 text-center text-slate-600 text-sm">Ninguna montura coincide con estos filtros.</p>
+            )
           ) : (
             <ul className="divide-y divide-slate-100">
               {paginatedMounts.map((mount) => (
@@ -1321,6 +1327,18 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         </div>
       </div>
 
+      {mounts.length > 0 && (
+        <div className="flex justify-end px-1">
+          <button
+            type="button"
+            onClick={handleClearAll}
+            className="text-xs text-rose-700 hover:text-rose-800 hover:underline font-semibold"
+          >
+            Vaciar establo
+          </button>
+        </div>
+      )}
+
       {/* MODAL DE EDICIÓN / CREACIÓN MANUAL */}
       {isEditModalOpen && editingMount && (
         <div
@@ -1364,7 +1382,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Especie */}
                 <div>
-                  <label htmlFor={speciesId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={speciesId} className="block text-[11px] font-bold text-slate-500  mb-1">
                     Especie
                   </label>
                   <select
@@ -1394,7 +1412,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Raza / Color */}
                 <div>
-                  <label htmlFor={breedId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={breedId} className="block text-[11px] font-bold text-slate-500  mb-1">
                     Raza
                   </label>
                   <select
@@ -1424,7 +1442,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Apodo */}
                 <div>
-                  <label htmlFor={nicknameId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={nicknameId} className="block text-[11px] font-bold text-slate-500  mb-1">
                     Apodo / Nombre
                   </label>
                   <input
@@ -1440,7 +1458,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Sexo */}
                 <div>
-                  <label id={genderLabelId} htmlFor={genderMachoId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label id={genderLabelId} htmlFor={genderMachoId} className="block text-[11px] font-bold text-slate-500  mb-1">
                     Sexo
                   </label>
                   <div role="group" aria-labelledby={genderLabelId} className="grid grid-cols-2 gap-2">
@@ -1472,7 +1490,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Nivel Actual */}
                 <div>
-                  <label htmlFor={levelId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={levelId} className="block text-[11px] font-bold text-slate-500  mb-1">
                     Nivel (1 - 200)
                   </label>
                   <input
@@ -1502,7 +1520,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* XP Actual */}
                 <div>
-                  <label htmlFor={xpId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={xpId} className="block text-[11px] font-bold text-slate-500  mb-1">
                     XP Actual
                   </label>
                   <input
@@ -1532,7 +1550,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Fertilidad */}
                 <div>
-                  <label htmlFor={fertilityId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={fertilityId} className="block text-[11px] font-bold text-slate-500  mb-1">
                     Fertilidad
                   </label>
                   <select
@@ -1551,7 +1569,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
                 {/* Capacidad Especial */}
                 <div>
-                  <label htmlFor={capacityId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  <label htmlFor={capacityId} className="block text-[11px] font-bold text-slate-500  mb-1">
                     Capacidad
                   </label>
                   <select
@@ -1571,7 +1589,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
               {/* Medidores de Cría */}
               <div className="pt-2 border-t border-slate-100">
-                <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <span className="block text-[11px] font-bold text-slate-500  mb-2">
                   Medidores Reproductivos {isEditingEsterilOrSenil && '(Bloqueados por estado infértil)'}
                 </span>
 
@@ -1603,7 +1621,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label htmlFor={loveId} className="block text-xs text-slate-600 font-medium mb-1">Amor (0-20k)</label>
+                    <label htmlFor={loveId} className="block text-xs text-slate-600 font-medium mb-1">Amor (0 a 20.000)</label>
                     <input
                       id={loveId}
                       type="number"
@@ -1629,7 +1647,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label htmlFor={maturityId} className="block text-xs text-slate-600 font-medium mb-1">Madurez (0-20k)</label>
+                    <label htmlFor={maturityId} className="block text-xs text-slate-600 font-medium mb-1">Madurez (0 a 20.000)</label>
                     <input
                       id={maturityId}
                       type="number"
@@ -1655,7 +1673,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label htmlFor={staminaId} className="block text-xs text-slate-600 font-medium mb-1">Resist. (0-20k)</label>
+                    <label htmlFor={staminaId} className="block text-xs text-slate-600 font-medium mb-1">Resistencia (0 a 20.000)</label>
                     <input
                       id={staminaId}
                       type="number"
@@ -1684,7 +1702,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
 
               {/* Notas */}
               <div>
-                <label htmlFor={notesId} className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                <label htmlFor={notesId} className="block text-[11px] font-bold text-slate-500  mb-1">
                   Notas u Observaciones
                 </label>
                 <textarea
@@ -1711,7 +1729,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-extrabold bg-[#1e3a8a] hover:bg-[#172554] text-white shadow-sm transition cursor-pointer"
+                  className="px-5 py-2 rounded-xl text-xs font-extrabold bg-blue-800 hover:bg-blue-900 text-white shadow-sm transition cursor-pointer"
                 >
                   Guardar Montura
                 </button>

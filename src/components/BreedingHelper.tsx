@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { GitFork } from 'lucide-react';
+import { IconMedallon } from './DofusIcons';
+import { GenFilter } from './GenFilter';
 import type { SpeciesType } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
@@ -21,15 +22,15 @@ const CrossList: React.FC<{ crosses: [string, string][]; getName: (id: string) =
   const shown = open ? crosses : crosses.slice(0, 1);
   return (
     <div className="p-2 bg-blue-50/90 border border-blue-200/80 rounded-xl text-blue-950 space-y-1.5">
-      <span className="font-semibold text-slate-600 block text-[11px] uppercase tracking-wider">
+      <span className="font-semibold text-slate-600 block text-[11px] ">
         {crosses.length === 1 ? 'Cruce' : `${crosses.length} cruces posibles`}
       </span>
       <ul className="divide-y divide-blue-200/70">
         {shown.map(([a, b], i) => (
           <li key={i} className="flex flex-wrap items-center gap-1 text-[11px] py-1.5 first:pt-0 last:pb-0">
-            <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(a)}</span>
+            <span className="font-extrabold text-blue-800 bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(a)}</span>
             <span className="text-slate-600 font-bold" aria-label="con">×</span>
-            <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(b)}</span>
+            <span className="font-extrabold text-blue-800 bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(b)}</span>
           </li>
         ))}
       </ul>
@@ -69,16 +70,14 @@ export const BreedingHelper: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto sm:px-4 lg:px-6">
-      <div className="bg-[#f8fafc] text-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 p-3 sm:p-5 md:p-6 shadow-xl space-y-4 sm:space-y-6">
+      <div className="bg-slate-50 text-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 p-3 sm:p-5 md:p-6 shadow-xl space-y-4 sm:space-y-6">
         {/* Cabecera Principal */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3 sm:pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
-              <GitFork className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
-            </div>
+            <IconMedallon name="cruces" />
             <div>
               <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-                Árbol de Cruces &amp; Guía de Hibridaciones
+                Árbol de cruces y guía de hibridaciones
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
                 Consulta cómo obtener cada generación a partir de cruces. Algunas monturas tienen varios cruces posibles.
@@ -91,7 +90,7 @@ export const BreedingHelper: React.FC = () => {
         <div className="sm:bg-white sm:rounded-2xl sm:border sm:border-slate-200 sm:p-5 sm:shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
             <h2 className="text-xs sm:text-sm font-extrabold text-slate-900">
-              Catálogo Completo de Cruces ({catalog.length} Razas)
+              Catálogo completo de cruces ({catalog.length} razas)
             </h2>
             {/* Pestañas simétricas en mobile, compactas en desktop */}
             <div role="group" aria-label="Especie" className="grid grid-cols-3 w-full sm:w-auto sm:flex gap-1 bg-slate-200/60 p-1 rounded-xl border border-slate-200">
@@ -108,7 +107,7 @@ export const BreedingHelper: React.FC = () => {
                     }}
                     className={`min-h-[44px] sm:min-h-0 py-1.5 px-1.5 sm:px-3.5 rounded-lg text-[11px] sm:text-xs font-bold transition text-center leading-tight [hyphens:manual] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                       isActive
-                        ? 'bg-[#1e3a8a] text-white shadow-sm font-extrabold'
+                        ? 'bg-blue-800 text-white shadow-sm font-extrabold'
                         : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
                     }`}
                   >
@@ -120,31 +119,13 @@ export const BreedingHelper: React.FC = () => {
           </div>
 
           {/* Filtro por generación (desliza en horizontal en móvil) */}
-          <div
-            role="group"
-            aria-label="Filtrar por generación"
-            className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none"
-          >
-            {(['all', ...generations] as (number | 'all')[]).map((g) => {
-              const isActive = selectedGen === g;
-              return (
-                <button
-                  key={g}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setSelectedGen(g)}
-                  title={g === 'all' ? undefined : `Generación ${g}`}
-                  className={`min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
-                    isActive
-                      ? 'bg-[#1e3a8a] text-white'
-                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  {g === 'all' ? 'Todas' : `G${g}`}
-                </button>
-              );
-            })}
-          </div>
+          <GenFilter
+            generations={generations}
+            selected={selectedGen}
+            onChange={setSelectedGen}
+            allLabel="Todas"
+            counts={Object.fromEntries(generations.map((g) => [g, catalog.filter((m) => m.generation === g).length]))}
+          />
 
           {/* Grid responsivo adaptable: 1 col (mobile), 2 cols (tablet), 3 cols (desktop), 4 cols (wide) */}
           <div
@@ -179,7 +160,17 @@ export const BreedingHelper: React.FC = () => {
                     </div>
                   </div>
 
-                  <CrossList crosses={getMountCrosses(m)} getName={getParentName} />
+                  {getMountCrosses(m).length > 0 ? (
+                    <CrossList crosses={getMountCrosses(m)} getName={getParentName} />
+                  ) : (
+                    <a
+                      href="/#donde-capturar"
+                      className="block p-2 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-950 hover:bg-amber-100"
+                    >
+                      <span className="font-semibold text-amber-900 block">Salvaje</span>
+                      Se captura con una red; no sale de ningún cruce.
+                    </a>
+                  )}
                 </div>
 
                 <div className="pt-2 border-t border-slate-200/60 text-[11px] text-slate-600 space-y-0.5 font-medium">

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState, useId } from 'react';
-import { Clock, Check, Zap, Layers, Hourglass, Gauge, Flame } from 'lucide-react';
+import { IconMedallon } from './DofusIcons';
+import { EstadoVacio } from './EstadoVacio';
+import { Clock, Check, Zap, Hourglass, Gauge, Flame } from 'lucide-react';
 import {
   FUEL_VARIANTS,
   MAX_MOUNT_XP,
@@ -156,9 +158,9 @@ export const FuelCalculator: React.FC = () => {
 
   if (mounts.length === 0) {
     return (
-      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-200/90 text-center max-w-2xl mx-auto my-8 space-y-4">
-        <p className="text-sm sm:text-base font-semibold text-slate-700">
-          Aún no tienes monturas. Regístralas en{' '}
+      <div className="bg-white text-slate-900 rounded-3xl border border-slate-200 text-center max-w-2xl mx-auto my-8">
+        <EstadoVacio titulo="Aún no hay monturas que calcular">
+          Regístralas en{' '}
           <a href="/coleccion" className="text-blue-600 hover:text-blue-800 font-bold underline">
             Colección
           </a>{' '}
@@ -167,7 +169,7 @@ export const FuelCalculator: React.FC = () => {
             Establo
           </a>
           .
-        </p>
+        </EstadoVacio>
       </div>
     );
   }
@@ -175,12 +177,10 @@ export const FuelCalculator: React.FC = () => {
   return (
     <div className="space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
       {/* 1. SECCIÓN SUPERIOR: ESTABLO DONDE EL USUARIO ESCOGE LA MONTURA */}
-      <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
+      <div className="bg-slate-50 text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3 sm:pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
-              <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
+            <IconMedallon name="calculadora" />
             <div>
               <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Tus monturas</h2>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
@@ -267,7 +267,7 @@ export const FuelCalculator: React.FC = () => {
                 </div>
 
                 {isSelected && (
-                  <div className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center shadow-md">
+                  <div className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-blue-800 text-white flex items-center justify-center shadow-md">
                     <Check className="w-3.5 h-3.5 stroke-[3]" />
                   </div>
                 )}
@@ -280,7 +280,7 @@ export const FuelCalculator: React.FC = () => {
 
       {/* 2. SECCIÓN INFERIOR: MEDIDOR XP Y PANEL DE INFORMACIÓN UNIFICADO */}
       {selectedMount && (
-        <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
+        <div className="bg-slate-50 text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
         {/* Cabecera del cálculo para la montura activa */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
           <div className="flex items-center gap-3">
@@ -314,7 +314,7 @@ export const FuelCalculator: React.FC = () => {
               onClick={() => setTargetMode('nextLevel')}
               className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'nextLevel'
-                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  ? 'bg-blue-800 text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -326,7 +326,7 @@ export const FuelCalculator: React.FC = () => {
               onClick={() => setTargetMode('level200')}
               className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'level200'
-                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  ? 'bg-blue-800 text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -339,7 +339,7 @@ export const FuelCalculator: React.FC = () => {
               title="Llenar el medidor completo (200.000 XP)"
               className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'gauge200k'
-                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  ? 'bg-blue-800 text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -352,7 +352,7 @@ export const FuelCalculator: React.FC = () => {
               title="Elegir manualmente cuánta XP cargar en el medidor"
               className={`min-h-[40px] sm:min-h-0 px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold leading-tight transition cursor-pointer ${
                 targetMode === 'custom'
-                  ? 'bg-[#1e3a8a] text-white shadow-md shadow-blue-950/20'
+                  ? 'bg-blue-800 text-white shadow-md shadow-blue-950/20'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
@@ -401,7 +401,7 @@ export const FuelCalculator: React.FC = () => {
                         step={1000}
                         value={customXp === '' ? 1000 : customXp}
                         onChange={(e) => setCustomXp(Number(e.target.value))}
-                        className="flex-1 accent-[#1e3a8a]"
+                        className="flex-1 accent-blue-800"
                       />
                       <input
                         type="number"
@@ -497,7 +497,7 @@ export const FuelCalculator: React.FC = () => {
                           : 'bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600'
                       }`}
                     >
-                      <Hourglass className={`w-4 h-4 mt-0.5 flex-shrink-0 ${strategy === 'cascade' ? 'text-[#1e3a8a]' : 'text-slate-400'}`} />
+                      <Hourglass className={`w-4 h-4 mt-0.5 flex-shrink-0 ${strategy === 'cascade' ? 'text-blue-800' : 'text-slate-400'}`} />
                       <div>
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-extrabold text-slate-900">Llenarlo y dejar que se vacíe</span>
@@ -541,7 +541,7 @@ export const FuelCalculator: React.FC = () => {
                               onClick={() => setStrategy(stratKey)}
                               className={`px-1.5 py-1 rounded-xl text-[11px] font-extrabold text-center transition flex flex-col items-center cursor-pointer ${
                                 isTierActive
-                                  ? 'bg-[#1e3a8a] text-white shadow-sm'
+                                  ? 'bg-blue-800 text-white shadow-sm'
                                   : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                               }`}
                             >
@@ -563,7 +563,7 @@ export const FuelCalculator: React.FC = () => {
                   <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 via-amber-50/50 to-orange-50/30 border border-amber-200 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between text-xs text-amber-900/80 mb-1">
-                        <span className="font-extrabold text-amber-900 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                        <span className="font-extrabold text-amber-900 flex items-center gap-1.5  text-[11px]">
                           <Clock className="w-4 h-4 text-amber-600" />
                           Tiempo para subir
                         </span>
@@ -593,10 +593,10 @@ export const FuelCalculator: React.FC = () => {
                   </div>
 
                   {/* Tarjeta 2: Tiempo de vaciado físico del carburante (Autonomía del medidor de experiencia) */}
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-indigo-50/30 border border-blue-200 shadow-sm flex flex-col justify-between">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-blue-50/50 to-blue-100/30 border border-blue-200 shadow-sm flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between text-xs text-blue-900/80 mb-1">
-                        <span className="font-extrabold text-[#1e3a8a] flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                        <span className="font-extrabold text-blue-800 flex items-center gap-1.5  text-[11px]">
                           <Gauge className="w-4 h-4 text-blue-600" />
                           Duración del carburante
                         </span>
@@ -605,7 +605,7 @@ export const FuelCalculator: React.FC = () => {
                         </span>
                       </div>
 
-                      <p className="text-xl sm:text-2xl font-black text-[#1e3a8a] font-mono tracking-tight mt-1">
+                      <p className="text-xl sm:text-2xl font-black text-blue-800 font-mono tracking-tight mt-1">
                         {strategy === 'cascade' && xpNeeded >= MAX_ENCLOS_GAUGE
                           ? '35 h 39 min'
                           : breakdown.formattedFuelDrainTime}
@@ -648,7 +648,7 @@ export const FuelCalculator: React.FC = () => {
                           onClick={() => setSelectedVariant(v)}
                           className={`${i < 3 ? 'col-span-2' : 'col-span-3'} min-h-[40px] sm:min-h-0 px-2 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                             selectedVariant === v
-                              ? 'bg-[#1e3a8a] text-white'
+                              ? 'bg-blue-800 text-white'
                               : 'text-slate-600 hover:text-slate-900 hover:bg-white'
                           }`}
                         >
@@ -703,7 +703,7 @@ export const FuelCalculator: React.FC = () => {
                               <span className="text-slate-500 font-medium">
                                 Gasta <strong className="text-slate-700 font-mono">{t.consumptionRatePer10s}</strong> cada 10 s
                               </span>
-                              <span className="font-mono font-bold text-[#1e3a8a]">
+                              <span className="font-mono font-bold text-blue-800">
                                 +{t.effectiveXpPerSec} XP/s {isSage ? '✨' : ''}
                               </span>
                             </div>
@@ -730,7 +730,7 @@ export const FuelCalculator: React.FC = () => {
                           <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
                             <span>El tramo dura: <strong className="text-slate-700">{t.drainDurationText}</strong></span>
                             {isThisTierSelected && (
-                              <span className="text-[#1e3a8a] font-extrabold flex items-center gap-1">
+                              <span className="text-blue-800 font-extrabold flex items-center gap-1">
                                 <Check className="w-3 h-3 stroke-[3]" /> Activo
                               </span>
                             )}
@@ -795,7 +795,7 @@ export const FuelCalculator: React.FC = () => {
                     <span className="text-slate-700 font-bold">
                       Total de carburante ({strategy === 'cascade' ? 'una carga completa' : `manteniendo ${TIER_NAMES[Number(strategy.slice(-1)) as FuelTier]}`}):
                     </span>
-                    <span className="font-mono font-black text-[#1e3a8a] text-sm sm:text-base">
+                    <span className="font-mono font-black text-blue-800 text-sm sm:text-base">
                       {breakdown.totalItemsNeeded} {breakdown.totalItemsNeeded === 1 ? 'unidad' : 'unidades'} ({FUEL_VARIANTS[selectedVariant].name})
                     </span>
                   </div>

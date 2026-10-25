@@ -14,8 +14,11 @@ const { id, title, eyebrow } = Astro.props;
   class="guide-section scroll-mt-24 bg-white text-slate-700 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm p-4 sm:p-6 space-y-3.5 text-sm leading-relaxed"
 >
   <header>
-    {eyebrow && <p class="text-[11px] font-bold uppercase tracking-wider text-blue-700">{eyebrow}</p>}
-    <h2 id={`${id}-titulo`} class="text-lg sm:text-xl font-extrabold text-slate-900 leading-tight">{title}</h2>
+    {eyebrow && <p class="text-xs font-bold text-blue-700">{eyebrow}</p>}
+    <h2 id={`${id}-titulo`} class="flex items-center gap-2 text-xl sm:text-2xl text-slate-900 leading-tight">
+      <svg aria-hidden="true" viewBox="0 0 24 24" class="w-5 h-5 shrink-0 text-blue-500" fill="currentColor"><path d="M20 4c-7.5 0-13.6 3.4-14.9 10.6L3 20.3l1.6.6 1.6-3.6C13.9 18 19.2 12.4 20 4Z"/></svg>
+      <span>{title}</span>
+    </h2>
   </header>
   <slot />
 </section>
