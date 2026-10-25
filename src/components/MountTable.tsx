@@ -1,5 +1,6 @@
 import { getDefaultMaxReproductions } from '../utils/mountRules';
 import { EstadoVacio } from './EstadoVacio';
+import { formatNumber, formatSigned } from '../utils/formatNumber';
 import React, { useState, useRef, useEffect, useId } from 'react';
 import {
   FolderUp,
@@ -158,7 +159,7 @@ function MountCard({
         >
           Nvl {mount.currentLevel}
           {mount.currentLevel >= 200 && <Sparkles className="w-3 h-3 text-emerald-500" />}
-          <span className="font-normal text-slate-600">· {mount.currentXp.toLocaleString()} XP</span>
+          <span className="font-normal text-slate-600">· {formatNumber(mount.currentXp)} XP</span>
         </span>
         <span
           className={`inline-block text-[11px] px-2 py-1 rounded-full font-bold ${
@@ -191,15 +192,15 @@ function MountCard({
                 mount.serenity > 0 ? 'text-sky-600' : mount.serenity < 0 ? 'text-amber-600' : 'text-slate-600'
               }`}
             >
-              {mount.serenity > 0 ? `+${mount.serenity}` : mount.serenity}
+              {formatSigned(mount.serenity)}
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2.5">
             {bars.map((b) => (
               <div key={b.label}>
-                <div className="flex justify-between gap-1 text-[11px] text-slate-600 font-medium">
+                <div className="flex flex-col text-[11px] leading-tight text-slate-600 font-medium mb-1">
                   <span className="truncate">{b.label}</span>
-                  <span className="font-mono">{Math.round(b.value / 1000)}k</span>
+                  <span className="font-bold text-slate-900">{formatNumber(b.value)}</span>
                 </div>
                 <div
                   role="progressbar"
@@ -1105,7 +1106,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                           )}
                         </div>
                         <span className="text-xs text-slate-600 font-mono block">
-                          {mount.currentXp.toLocaleString()} XP
+                          {formatNumber(mount.currentXp)} XP
                         </span>
                       </td>
 
@@ -1158,7 +1159,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                                     : 'text-slate-600'
                                 }`}
                               >
-                                {mount.serenity > 0 ? `+${mount.serenity}` : mount.serenity}
+                                {formatSigned(mount.serenity)}
                               </span>
                             </div>
 
@@ -1166,7 +1167,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                             <div>
                               <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Amor</span>
-                                <span>{mount.love}/20k</span>
+                                <span><strong className="font-bold text-slate-900">{formatNumber(mount.love)}</strong><span className="text-slate-500"> / 20.000</span></span>
                               </div>
                               <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
                                 <div
@@ -1180,7 +1181,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                             <div>
                               <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Madurez</span>
-                                <span>{mount.maturity}/20k</span>
+                                <span><strong className="font-bold text-slate-900">{formatNumber(mount.maturity)}</strong><span className="text-slate-500"> / 20.000</span></span>
                               </div>
                               <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
                                 <div
@@ -1194,7 +1195,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                             <div>
                               <div className="flex justify-between text-xs text-slate-600 font-medium">
                                 <span>Resistencia</span>
-                                <span>{mount.stamina}/20k</span>
+                                <span><strong className="font-bold text-slate-900">{formatNumber(mount.stamina)}</strong><span className="text-slate-500"> / 20.000</span></span>
                               </div>
                               <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
                                 <div
@@ -1620,7 +1621,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label htmlFor={loveId} className="block text-xs text-slate-600 font-medium mb-1">Amor (0-20k)</label>
+                    <label htmlFor={loveId} className="block text-xs text-slate-600 font-medium mb-1">Amor (0 a 20.000)</label>
                     <input
                       id={loveId}
                       type="number"
@@ -1646,7 +1647,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label htmlFor={maturityId} className="block text-xs text-slate-600 font-medium mb-1">Madurez (0-20k)</label>
+                    <label htmlFor={maturityId} className="block text-xs text-slate-600 font-medium mb-1">Madurez (0 a 20.000)</label>
                     <input
                       id={maturityId}
                       type="number"
@@ -1672,7 +1673,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                   </div>
 
                   <div>
-                    <label htmlFor={staminaId} className="block text-xs text-slate-600 font-medium mb-1">Resist. (0-20k)</label>
+                    <label htmlFor={staminaId} className="block text-xs text-slate-600 font-medium mb-1">Resistencia (0 a 20.000)</label>
                     <input
                       id={staminaId}
                       type="number"
