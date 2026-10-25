@@ -1,4 +1,5 @@
 import type { UserMount, SpeciesType, FertilityStatus, SpecialCapacity } from '../types/mount';
+import { db, type LogroMarcado } from '../db/mountsDb';
 import { ALL_MOUNTS_DATA, findMountByBreedAndSpecies } from '../data/allMounts';
 import { calculateLevelFromXp, calculateXpForLevel, MAX_MOUNT_XP, clampSerenity } from '../data/fuelData';
 import { sanitizeMount, getDefaultMaxReproductions } from './mountRules';
@@ -144,8 +145,15 @@ export async function exportMountsToExcel(mounts: UserMount[]): Promise<void> {
   XLSX.writeFile(wb, `mis_monturas_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
-export function exportMountsToJson(mounts: UserMount[]) {
-  const jsonStr = JSON.stringify(mounts, null, 2);
+export async function exportMountsToJson(mounts: UserMount[]) {
+  // Desde la v2 la copia también guarda los logros marcados; sigue siendo compatible con { mounts: [...] }
+  let logros: LogroMarcado[] = [];
+  try {
+    logros = await db.logros.toArray();
+  } catch {
+    logros = [];
+  }
+  const jsonStr = JSON.stringify({ version: 2, mounts, logros }, null, 2);
   const blob = new Blob([jsonStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -161,7 +169,9 @@ export function exportMountsToJson(mounts: UserMount[]) {
  * Lee y valida un archivo de copia de seguridad JSON (.json).
  * Acepta un array directo o un objeto con la propiedad { mounts: [...] }.
  */
-export async function parseBackupFile(file: File): Promise<{ mounts: UserMount[]; invalid: number }> {
+export async function parseBackupFile(
+  file: File
+): Promise<{ mounts: UserMount[]; invalid: number; logros: LogroMarcado[] }> {
   let text: string;
   try {
     text = await file.text();
@@ -202,7 +212,14 @@ export async function parseBackupFile(file: File): Promise<{ mounts: UserMount[]
     throw new Error('No se encontró ninguna montura válida en el archivo.');
   }
 
-  return { mounts, invalid };
+  // Logros (copias v2): solo se aceptan entradas con id de texto
+  const logros: LogroMarcado[] = Array.isArray(parsed?.logros)
+    ? parsed.logros
+        .filter((l: any) => l && typeof l.id === 'string')
+        .map((l: any) => ({ id: l.id, hecho: Boolean(l.hecho), fecha: Number(l.fecha) || Date.now() }))
+    : [];
+
+  return { mounts, invalid, logros };
 }
 
 export async function parseExcelFile(file: File): Promise<UserMount[]> {

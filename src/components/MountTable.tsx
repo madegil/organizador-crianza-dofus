@@ -376,7 +376,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
       const isJson = file.name.toLowerCase().endsWith('.json');
 
       if (isJson) {
-        const { mounts: backupMounts, invalid } = await parseBackupFile(file);
+        const { mounts: backupMounts, invalid, logros: backupLogros } = await parseBackupFile(file);
         const currentIds = new Set(mounts.map((m) => m.id));
         const existingCount = backupMounts.filter((m) => currentIds.has(m.id)).length;
 
@@ -392,6 +392,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         }
 
         await db.mounts.bulkPut(backupMounts);
+        if (backupLogros.length > 0) await db.logros.bulkPut(backupLogros);
         setStatusMessage({
           type: 'success',
           text: `Se importaron ${backupMounts.length} monturas, 0 omitidas por duplicadas y ${invalid} inválidas.`,

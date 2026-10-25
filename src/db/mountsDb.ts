@@ -5,13 +5,26 @@ import { MAX_MOUNT_XP, calculateLevelFromXp } from '../data/mountXpTable';
 import { clampSerenity } from '../data/fuelData';
 import { findMountByBreedAndSpecies } from '../data/allMounts';
 
+/** Logro de ganadería marcado como hecho por el usuario */
+export interface LogroMarcado {
+  id: string;
+  hecho: boolean;
+  fecha: number;
+}
+
 export class BreedingDatabase extends Dexie {
   mounts!: EntityTable<UserMount, 'id'>;
+  logros!: EntityTable<LogroMarcado, 'id'>;
 
   constructor() {
     super('DofusBreedingDB');
     this.version(1).stores({
       mounts: 'id, nickname, species, breed, generation, gender, currentLevel, fertility, capacity',
+    });
+    // v2: tabla de logros; las monturas no cambian
+    this.version(2).stores({
+      mounts: 'id, nickname, species, breed, generation, gender, currentLevel, fertility, capacity',
+      logros: 'id',
     });
   }
 }

@@ -194,6 +194,36 @@ kbd.tecla {
   }
 }
 
+/* ---------- Ficha de montura (ventana emergente) ---------- */
+
+dialog.ficha-montura {
+  margin: auto;
+  background-image: var(--grano);
+  box-shadow:
+    0 6px 0 -1px #c4ac80,
+    0 30px 60px -20px rgb(0 0 0 / 0.9);
+}
+dialog.ficha-montura::backdrop {
+  background: rgb(19 18 9 / 0.72);
+  backdrop-filter: blur(2px);
+}
+dialog.ficha-montura[open] {
+  animation: fichaEntra 320ms var(--rebote);
+}
+@keyframes fichaEntra {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 /* ---------- Botones e interacciones ---------- */
 
 button:not(:disabled),

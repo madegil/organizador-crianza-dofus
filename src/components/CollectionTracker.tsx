@@ -1,104 +1,120 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Star } from 'lucide-react';
 import { getDefaultMaxReproductions } from '../utils/mountRules';
-import React, { useState, useEffect, useRef } from 'react';
 import { IconMedallon } from './DofusIcons';
-import { GenFilter } from './GenFilter';
-import { CheckCircle2, Eye, Plus } from 'lucide-react';
-import type { SpeciesType, UserMount } from '../types/mount';
-import { DRAGODINDES_DATA } from '../data/dragodindes';
-import { MULDOS_DATA } from '../data/muldos';
-import { VOLKORNES_DATA } from '../data/volkornes';
-import { normalizeBreedParts } from '../data/allMounts';
+import type { MountDefinition, SpeciesType, UserMount } from '../types/mount';
 import { db, normalizeStoredMounts } from '../db/mountsDb';
-import { MAX_MOUNT_XP } from '../data/fuelData';
-import { MountAvatar } from './MountAvatar';
+import { MountGrid } from './MountGrid';
+import { MountDetailModal } from './MountDetailModal';
+import { SpeciesTabs } from './SpeciesTabs';
+import { LogrosGanaderia } from './LogrosGanaderia';
+import { LOGROS } from '../data/logros';
+import { CATALOGO_POR_ESPECIE, NOMBRE_ESPECIE, coincide, ejemplaresDe, esNivel200 } from '../utils/mountCatalog';
 
-// \u00AD = guion opcional: solo se parte la palabra si no cabe (pantallas de ~320 px)
-const SPECIES_NAMES: Record<SpeciesType, { one: string; many: string }> = {
-  dragopavo: { one: 'dragopavo', many: 'dragopavos' },
-  muluaga: { one: 'mulagua', many: 'mulaguas' },
-  vueloceronte: { one: 'vueloceronte', many: 'vuelocerontes' },
-};
+type Vista = 'razas' | 'logros';
+type Filtro = 'todas' | 'faltan' | 'tienes';
 
-const SPECIES_OPTIONS: { key: SpeciesType; label: string; count: number }[] = [
-  { key: 'dragopavo', label: 'Drago\u00ADpavos', count: DRAGODINDES_DATA.length },
-  { key: 'muluaga', label: 'Mula\u00ADguas', count: MULDOS_DATA.length },
-  { key: 'vueloceronte', label: 'Vuelo\u00ADcerontes', count: VOLKORNES_DATA.length },
+const FILTROS: { id: Filtro; label: string }[] = [
+  { id: 'todas', label: 'Todas' },
+  { id: 'faltan', label: 'Me faltan' },
+  { id: 'tienes', label: 'Las tengo' },
 ];
 
-export const CollectionTracker: React.FC = () => {
-  const [activeSpecies, setActiveSpecies] = useState<SpeciesType>('dragopavo');
-  const [selectedGen, setSelectedGen] = useState<number | 'all'>('all');
-  const [userMounts, setUserMounts] = useState<UserMount[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
-  const [registeringId, setRegisteringId] = useState<string | null>(null);
-  const [registerError, setRegisterError] = useState<string | null>(null);
-  const [statusText, setStatusText] = useState('');
-  // Bloqueo síncrono: evita registros duplicados por doble clic antes de que React re-renderice
-  const registeringRef = useRef(false);
+const nuevoId = () =>
+  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? `mount_${crypto.randomUUID()}`
+    : `mount_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
-  const loadMounts = async () => {
-    setLoadError(false);
+/** Barra de progreso de la cabecera */
+const Progreso: React.FC<{ titulo: string; valor: number; total: number; color: string; ayuda: string }> = ({
+  titulo,
+  valor,
+  total,
+  color,
+  ayuda,
+}) => {
+  const pct = total > 0 ? Math.round((valor / total) * 100) : 0;
+  return (
+    <div>
+      <div className="flex justify-between items-baseline gap-2 text-sm font-bold mb-1.5">
+        <span className="text-slate-900">{titulo}</span>
+        <span className="whitespace-nowrap">
+          {valor} de {total}
+          <span className="ml-2 text-slate-500 font-semibold">{pct} %</span>
+        </span>
+      </div>
+      <div
+        className="w-full bg-slate-200 h-3 rounded-full overflow-hidden"
+        role="progressbar"
+        aria-label={titulo}
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-valuenow={valor}
+      >
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+      <p className="text-xs text-slate-600 mt-1.5">{ayuda}</p>
+    </div>
+  );
+};
+
+export const CollectionTracker: React.FC = () => {
+  const [vista, setVista] = useState<Vista>('razas');
+  const [especie, setEspecie] = useState<SpeciesType>('dragopavo');
+  const [filtro, setFiltro] = useState<Filtro>('todas');
+  const [busqueda, setBusqueda] = useState('');
+  const [abierta, setAbierta] = useState<MountDefinition | null>(null);
+  const [userMounts, setUserMounts] = useState<UserMount[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState(false);
+  const [registrando, setRegistrando] = useState(false);
+  const [estado, setEstado] = useState('');
+  const [resumenLogros, setResumenLogros] = useState({ hechos: 0, total: LOGROS.length });
+  // Bloqueo síncrono: evita registros duplicados por doble clic
+  const bloqueo = useRef(false);
+
+  const cargar = async () => {
+    setErrorCarga(false);
     try {
       await normalizeStoredMounts();
-      const all = await db.mounts.toArray();
-      setUserMounts(all);
+      setUserMounts(await db.mounts.toArray());
     } catch (err) {
       console.error(err);
-      setLoadError(true);
+      setErrorCarga(true);
     } finally {
-      setLoading(false);
+      setCargando(false);
     }
   };
 
   useEffect(() => {
-    loadMounts();
+    cargar();
   }, []);
 
-  const catalog =
-    activeSpecies === 'dragopavo'
-      ? DRAGODINDES_DATA
-      : activeSpecies === 'muluaga'
-      ? MULDOS_DATA
-      : VOLKORNES_DATA;
+  const catalogo = CATALOGO_POR_ESPECIE[especie];
+  const tienes = (d: MountDefinition) => ejemplaresDe(userMounts, d).length > 0;
+  const en200 = (d: MountDefinition) => ejemplaresDe(userMounts, d).some(esNivel200);
+  const conseguidas = catalogo.filter(tienes).length;
+  const de200 = catalogo.filter(en200).length;
 
-  const isMountOfDef = (m: UserMount, def: any) => {
-    if (m.species !== activeSpecies) return false;
-    if (m.definitionId && m.definitionId === def.id) return true;
-    return normalizeBreedParts(m.breed) === normalizeBreedParts(def.name);
-  };
+  const visibles = useMemo(
+    () =>
+      catalogo.filter(
+        (d) => coincide(d, busqueda) && (filtro === 'todas' || (filtro === 'tienes' ? tienes(d) : !tienes(d)))
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [catalogo, busqueda, filtro, userMounts]
+  );
 
-  const generations = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-  const totalSpeciesBreeds = catalog.length;
-  const ownedBreedsCount = catalog.filter((def) =>
-    userMounts.some((m) => isMountOfDef(m, def))
-  ).length;
-
-  const level200BreedsCount = catalog.filter((def) =>
-    userMounts.some(
-      (m) =>
-        isMountOfDef(m, def) &&
-        (m.currentLevel >= 200 || m.currentXp >= MAX_MOUNT_XP)
-    )
-  ).length;
-
-  const createMountId = () =>
-    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? `mount_${crypto.randomUUID()}`
-      : `mount_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-
-  const quickRegisterMount = async (def: any) => {
-    if (registeringRef.current) return;
-    registeringRef.current = true;
-    setRegisteringId(def.id);
-    setRegisterError(null);
-
-    const newMount: UserMount = {
-      id: createMountId(),
+  const registrar = async (def: MountDefinition) => {
+    if (bloqueo.current) return;
+    bloqueo.current = true;
+    setRegistrando(true);
+    const ahora = Date.now();
+    const nueva: UserMount = {
+      id: nuevoId(),
       nickname: def.name,
       definitionId: def.id,
-      species: activeSpecies,
+      species: def.species,
       breed: def.name,
       generation: def.generation,
       gender: 'M',
@@ -107,70 +123,70 @@ export const CollectionTracker: React.FC = () => {
       fertility: 'fertil',
       capacity: 'ninguna',
       reproductionCount: 0,
-      maxReproductions: getDefaultMaxReproductions(activeSpecies),
+      maxReproductions: getDefaultMaxReproductions(def.species),
+      // Mismos valores que el registro rápido anterior
       serenity: 2000,
       love: 20000,
       maturity: 20000,
       stamina: 20000,
       imageUrl: def.imageUrl || '',
-      notes: 'Registrada desde Catálogo',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      notes: 'Registrada desde Colección',
+      createdAt: ahora,
+      updatedAt: ahora,
     };
-
     try {
-      // Si ya existe un ejemplar de esta raza (p. ej. registrado en otra pestaña), no duplicar
-      const existing = await db.mounts.toArray();
-      if (!existing.some((m) => isMountOfDef(m, def))) {
-        await db.mounts.add(newMount);
-      }
-      await loadMounts();
-      setStatusText(`${def.name} registrada en tu establo.`);
+      await db.mounts.add(nueva);
+      await cargar();
+      setEstado(`${def.name} registrada en tu establo. Edita sus datos desde el Establo.`);
     } catch (err) {
       console.error(err);
-      setRegisterError(`No se pudo registrar «${def.name}». Inténtalo de nuevo.`);
+      setEstado(`No se pudo registrar ${def.name}. Inténtalo de nuevo.`);
     } finally {
-      registeringRef.current = false;
-      setRegisteringId(null);
+      bloqueo.current = false;
+      setRegistrando(false);
     }
   };
 
-  const percentageOwned =
-    totalSpeciesBreeds > 0
-      ? Math.round((ownedBreedsCount / totalSpeciesBreeds) * 100)
-      : 0;
+  const quitar = async (id: string) => {
+    const m = userMounts.find((x) => x.id === id);
+    try {
+      await db.mounts.delete(id);
+      await cargar();
+      setEstado(`${m?.nickname || m?.breed || 'La montura'} se quitó del establo.`);
+    } catch (err) {
+      console.error(err);
+      setEstado('No se pudo quitar la montura. Inténtalo de nuevo.');
+    }
+  };
 
-  const percentage200 =
-    totalSpeciesBreeds > 0
-      ? Math.round((level200BreedsCount / totalSpeciesBreeds) * 100)
-      : 0;
+  const onResumen = useCallback((hechos: number, total: number) => setResumenLogros({ hechos, total }), []);
 
-  const filteredCatalog =
-    selectedGen === 'all'
-      ? catalog
-      : catalog.filter((m) => m.generation === selectedGen);
-
-  if (loading) {
+  if (cargando) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="max-w-7xl mx-auto bg-white rounded-3xl border border-slate-200 p-6 space-y-3" aria-busy="true">
+        <div className="h-7 w-56 rounded-lg bg-slate-200 animate-pulse" />
+        <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-8 gap-2">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <div key={i} className="h-24 rounded-xl bg-slate-100 animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }
 
-  if (loadError) {
+  if (errorCarga) {
     return (
       <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center space-y-3 max-w-lg mx-auto my-12 text-rose-900">
         <p className="text-sm font-semibold">
-          No se pudo acceder al almacenamiento local (¿modo privado o almacenamiento bloqueado?)
+          No se pudo abrir el almacenamiento de este navegador. Si estás en modo privado o lo tienes bloqueado, ábrelo en una ventana normal.
         </p>
         <button
           type="button"
           onClick={() => {
-            setLoading(true);
-            loadMounts();
+            setCargando(true);
+            cargar();
           }}
-          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition cursor-pointer"
+          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm"
         >
           Reintentar
         </button>
@@ -179,246 +195,161 @@ export const CollectionTracker: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
-      {/* Encabezado */}
-      <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm">
+    <div className="space-y-4 max-w-7xl mx-auto">
+      <p className="sr-only" role="status" aria-live="polite">
+        {estado}
+      </p>
+
+      <div className="bg-white text-slate-900 rounded-3xl border border-slate-200 p-3.5 sm:p-6 space-y-5">
+        {/* Cabecera y cambio de vista */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <IconMedallon name="coleccion" />
             <div>
               <h1 className="text-xl sm:text-2xl text-slate-900 leading-tight">
-                Tu colección de {SPECIES_NAMES[activeSpecies].many}
+                {vista === 'razas' ? `Tu colección de ${NOMBRE_ESPECIE[especie].varios}` : 'Logros de ganadería'}
               </h1>
               <p className="text-sm text-slate-600 mt-1 max-w-[56ch]">
-                Hay {totalSpeciesBreeds} razas de {SPECIES_NAMES[activeSpecies].one}. Registra las que consigas y súbelas a
-                nivel 200 para completar la colección.
+                {vista === 'razas'
+                  ? `Hay ${catalogo.length} razas de ${NOMBRE_ESPECIE[especie].uno}. Pulsa una para ver tus ejemplares, registrarla o quitarla.`
+                  : 'Marca los logros que ya tienes en el juego y mira cuáles te faltan.'}
               </p>
             </div>
           </div>
-
-          {/* Selector de Especie: 3 columnas iguales en móvil, en línea desde sm */}
-          <div
-            role="group"
-            aria-label="Especie"
-            className="grid grid-cols-3 gap-1 w-full sm:w-auto sm:self-start lg:self-auto sm:flex sm:items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 flex-shrink-0"
-          >
-            {SPECIES_OPTIONS.map((opt) => {
-              const isActive = activeSpecies === opt.key;
-              return (
-                <button
-                  key={opt.key}
-                  type="button"
-                  onClick={() => setActiveSpecies(opt.key)}
-                  aria-pressed={isActive}
-                  className={`min-h-[44px] sm:min-h-0 px-1.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center sm:gap-1 leading-tight cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
-                    isActive
-                      ? 'bg-blue-800 text-white'
-                      : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
-                  }`}
-                >
-                  <span className="max-w-full text-center [hyphens:manual]">{opt.label}</span>
-                  <span className={`text-[10px] sm:text-xs font-semibold ${isActive ? 'text-blue-100' : 'text-slate-600'}`}>
-                    ({opt.count})
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Barras de Progreso Globales */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-5 pt-5 border-t border-slate-100">
-          <div>
-            <div className="flex justify-between items-baseline gap-2 text-xs font-bold mb-1.5">
-              <span className="text-sm text-slate-900">Razas conseguidas</span>
-              <span className="whitespace-nowrap text-sm">
-                <span className="text-blue-800">{ownedBreedsCount} de {totalSpeciesBreeds}</span>
-                <span className="ml-2 text-slate-500 font-semibold">{percentageOwned} %</span>
-              </span>
-            </div>
-            <div
-              className="w-full bg-slate-200 h-3 rounded-full overflow-hidden"
-              role="progressbar"
-              aria-label="Razas obtenidas"
-              aria-valuemin={0}
-              aria-valuemax={totalSpeciesBreeds}
-              aria-valuenow={ownedBreedsCount}
-              aria-valuetext={`${ownedBreedsCount} de ${totalSpeciesBreeds} razas (${percentageOwned}%)`}
-            >
-              <div
-                className="h-full bg-blue-800 rounded-full transition-all"
-                style={{ width: `${percentageOwned}%` }}
-              />
-            </div>
-            <p className="text-xs text-slate-600 mt-1.5">Cada raza cuenta una vez, aunque tengas varios ejemplares.</p>
-          </div>
-
-          <div>
-            <div className="flex justify-between items-baseline gap-2 text-xs font-bold mb-1.5">
-              <span className="text-sm text-slate-900">Razas en nivel 200</span>
-              <span className="whitespace-nowrap text-sm">
-                <span className="text-emerald-700">{level200BreedsCount} de {totalSpeciesBreeds}</span>
-                <span className="ml-2 text-slate-500 font-semibold">{percentage200} %</span>
-              </span>
-            </div>
-            <div
-              className="w-full bg-slate-200 h-3 rounded-full overflow-hidden"
-              role="progressbar"
-              aria-label="Razas en nivel 200"
-              aria-valuemin={0}
-              aria-valuemax={totalSpeciesBreeds}
-              aria-valuenow={level200BreedsCount}
-              aria-valuetext={`${level200BreedsCount} de ${totalSpeciesBreeds} razas en nivel 200 (${percentage200}%)`}
-            >
-              <div
-                className="h-full bg-emerald-600 rounded-full transition-all"
-                style={{ width: `${percentage200}%` }}
-              />
-            </div>
-            <p className="text-xs text-slate-600 mt-1.5">Una montura llega a nivel 200 al acumular 867.582 puntos de experiencia.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid por Generaciones */}
-      <div className="space-y-4 sm:space-y-6">
-        {/* Filtro por Generación */}
-        <GenFilter
-          generations={generations}
-          selected={selectedGen}
-          onChange={setSelectedGen}
-          allLabel="Todas las generaciones"
-          counts={Object.fromEntries(generations.map((g) => [g, catalog.filter((m) => m.generation === g).length]))}
-        />
-
-        {registerError && (
-          <div
-            role="alert"
-            className="flex items-start justify-between gap-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs font-semibold"
-          >
-            <span>{registerError}</span>
-            <button
-              type="button"
-              onClick={() => setRegisterError(null)}
-              className="text-rose-700 hover:text-rose-900 font-bold cursor-pointer"
-              aria-label="Cerrar aviso"
-            >
-              ×
-            </button>
-          </div>
-        )}
-
-        <p className="sr-only" role="status" aria-live="polite">
-          {statusText}
-        </p>
-
-        {/* Grid de Razas adaptable (1 col en xs, 2 en sm, 3 en lg, 4 en xl) */}
-        <div
-          role="list"
-          aria-label={`Razas${selectedGen === 'all' ? '' : ` de generación ${selectedGen}`}`}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3"
-        >
-          {filteredCatalog.map((def) => {
-            const matches = userMounts.filter((m) => isMountOfDef(m, def));
-            const isOwned = matches.length > 0;
-            const hasLvl200 = matches.some(
-              (m) => m.currentLevel >= 200 || m.currentXp >= MAX_MOUNT_XP
-            );
-
-            return (
-              <div
-                key={def.id}
-                role="listitem"
-                className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex flex-col justify-between space-y-2.5 ${
-                  hasLvl200
-                    ? 'bg-emerald-50 border-emerald-300'
-                    : isOwned
-                    ? 'bg-blue-50 border-blue-300'
-                    : 'bg-white border-slate-200/90 hover:border-slate-300'
-                }`}
+          <div role="tablist" aria-label="Vista" className="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-slate-100 border border-slate-200 w-full lg:w-auto">
+            {(
+              [
+                ['razas', 'Razas'],
+                ['logros', `Logros ${resumenLogros.hechos}/${resumenLogros.total}`],
+              ] as [Vista, string][]
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={vista === id}
+                onClick={() => setVista(id)}
+                className={`min-h-[44px] px-4 rounded-xl text-sm font-bold ${vista === id ? 'bg-blue-800 text-white' : 'text-slate-700'}`}
               >
-                {/* Cabecera de la Tarjeta */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <MountAvatar
-                      species={activeSpecies}
-                      breed={def.name}
-                      imageUrl={def.imageUrl}
-                      size="sm"
-                      generation={def.generation}
-                    />
-                    <div className="min-w-0">
-                      <h2 className="font-extrabold text-xs text-slate-900 block truncate leading-tight">
-                        {def.name}
-                      </h2>
-                      <span className="text-[11px] text-slate-600 font-medium">
-                        Gen {def.generation}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Estado de posesión */}
-                  <div className="flex-shrink-0">
-                    {hasLvl200 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" aria-hidden="true" /> Nvl 200
-                      </span>
-                    ) : isOwned ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold border border-blue-200">
-                        <Eye className="w-3 h-3 text-blue-600" aria-hidden="true" /> Obtenida
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => quickRegisterMount(def)}
-                        disabled={registeringId !== null}
-                        aria-busy={registeringId === def.id}
-                        title="Registrar montura en tu establo"
-                        aria-label={`Registrar ${def.name} en tu establo`}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-800 text-[10px] font-bold border border-slate-200 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-                      >
-                        <Plus className="w-3 h-3" aria-hidden="true" />
-                        {registeringId === def.id ? 'Registrando…' : 'Registrar'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Lista de ejemplares en establo */}
-                <div className="pt-2 border-t border-slate-100 space-y-1">
-                  {matches.length === 0 ? (
-                    <span className="text-[10px] text-slate-500 italic block">
-                      Sin ejemplares en establo
-                    </span>
-                  ) : (
-                    <div className="space-y-1">
-                      {matches.map((m) => (
-                        <div
-                          key={m.id}
-                          className="flex items-center justify-between text-[11px] bg-white/80 px-2 py-1 rounded-lg border border-slate-200/60 font-medium"
-                        >
-                          <span className="text-slate-800 truncate font-semibold">
-                            {m.nickname}
-                          </span>
-                          <span
-                            className={`font-mono text-[10px] font-bold ${
-                              m.currentLevel >= 200
-                                ? 'text-emerald-700'
-                                : 'text-slate-500'
-                            }`}
-                          >
-                            Nvl {m.currentLevel}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {vista === 'razas' ? (
+          <>
+            <SpeciesTabs
+              value={especie}
+              onChange={(s) => {
+                setEspecie(s);
+                setBusqueda('');
+              }}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+              <Progreso
+                titulo="Razas conseguidas"
+                valor={conseguidas}
+                total={catalogo.length}
+                color="bg-blue-700"
+                ayuda="Cada raza cuenta una vez, aunque tengas varios ejemplares."
+              />
+              <Progreso
+                titulo="Razas en nivel 200"
+                valor={de200}
+                total={catalogo.length}
+                color="bg-emerald-600"
+                ayuda="Una montura llega a nivel 200 al acumular 867.582 puntos de experiencia."
+              />
+            </div>
+
+            <MountGrid
+              catalogo={catalogo}
+              visibles={visibles}
+              busqueda={busqueda}
+              onBusqueda={setBusqueda}
+              onSelect={setAbierta}
+              apagada={(d) => !tienes(d)}
+              resumenGen={(_, defs) => `${defs.filter(tienes).length} de ${defs.length}`}
+              distintivo={(d) => {
+                const n = ejemplaresDe(userMounts, d).length;
+                if (!n) return null;
+                return (
+                  <span className="flex items-center gap-0.5">
+                    {en200(d) && (
+                      <span title="Tienes una en nivel 200" className="grid place-items-center w-4 h-4 rounded-full bg-kama">
+                        <Star aria-hidden="true" className="w-2.5 h-2.5 text-slate-900" fill="currentColor" />
+                      </span>
+                    )}
+                    <span className="text-[10px] font-extrabold px-1 rounded bg-emerald-600 text-white" title={`${n} en tu establo`}>
+                      ×{n}
+                    </span>
+                  </span>
+                );
+              }}
+              extra={
+                <div role="group" aria-label="Mostrar" className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-white border-2 border-slate-300">
+                  {FILTROS.map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      aria-pressed={filtro === f.id}
+                      onClick={() => setFiltro(f.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${
+                        filtro === f.id ? 'bg-slate-800 text-white' : 'text-slate-700'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              }
+              vacio={
+                <p className="text-sm text-slate-600 text-center py-10">
+                  {filtro === 'tienes'
+                    ? `Aún no tienes ningún ${NOMBRE_ESPECIE[especie].uno}${busqueda ? ' con ese nombre' : ''}. Pulsa una raza en «Todas» para registrarla.`
+                    : filtro === 'faltan'
+                    ? 'No te falta ninguna raza con ese criterio.'
+                    : 'Ninguna raza coincide con la búsqueda.'}
+                </p>
+              }
+            />
+          </>
+        ) : (
+          <LogrosGanaderia userMounts={userMounts} onResumen={onResumen} />
+        )}
       </div>
+
+      {/* Mantiene el contador de logros aunque la vista de logros no esté montada */}
+      {vista === 'razas' && <ResumenLogrosOculto onResumen={onResumen} />}
+
+      {estado && (
+        <p className="text-sm text-slate-200 text-center" aria-hidden="true">
+          {estado}
+        </p>
+      )}
+
+      <MountDetailModal
+        montura={abierta}
+        onClose={() => setAbierta(null)}
+        userMounts={userMounts}
+        enfoque="coleccion"
+        onRegistrar={registrar}
+        onQuitar={quitar}
+        registrando={registrando}
+      />
     </div>
   );
+};
+
+/** Lee cuántos logros hay marcados para mostrarlo en la pestaña sin montar la vista completa */
+const ResumenLogrosOculto: React.FC<{ onResumen: (h: number, t: number) => void }> = ({ onResumen }) => {
+  useEffect(() => {
+    db.logros
+      .toArray()
+      .then((l) => onResumen(l.filter((x) => x.hecho && LOGROS.some((d) => d.id === x.id)).length, LOGROS.length))
+      .catch(() => {});
+  }, [onResumen]);
+  return null;
 };
