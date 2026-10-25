@@ -207,6 +207,17 @@ progress {
   animation: subeTablon 700ms var(--resorte) 250ms both;
 }
 
+/* Iconos de juego: sombra corta debajo para que se despeguen de la madera y del pergamino */
+.icono-juego {
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.45));
+}
+.tablon .icono-juego {
+  filter: drop-shadow(0 0 1px rgb(255 236 190 / 0.55)) drop-shadow(0 2px 0 rgb(0 0 0 / 0.6));
+}
+.icono-relieve {
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.75));
+}
+
 /* El icono del menú se balancea al pasar el ratón, como una hoja */
 .nav-item:hover .nav-icono {
   animation: balanceo 600ms var(--resorte);
