@@ -78,6 +78,122 @@ main header[class~='bg-white'] {
     0 22px 36px -22px rgb(0 0 0 / 0.85);
 }
 
+/* ---------- Guía: énfasis, objetos y posiciones ---------- */
+
+.guide-section strong,
+.guide-section b {
+  font-weight: 800;
+  color: #2a1f12;
+}
+/* Resaltado de marcador: una franja dorada bajo el texto, sin cubrirlo entero */
+mark.resaltado {
+  color: inherit;
+  background: linear-gradient(transparent 58%, #f8da8c 58%, #f8da8c 92%, transparent 92%);
+  padding: 0 0.1em;
+  font-weight: 700;
+}
+.objeto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  vertical-align: -0.35em;
+  white-space: nowrap;
+}
+.objeto img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.25));
+}
+
+kbd.tecla {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 0.35em;
+  border-radius: 0.375rem;
+  border: 1.5px solid #c4ac80;
+  border-bottom-width: 3px;
+  background: #fbf4e1;
+  font: 800 0.85em/1.5 'Manrope Variable', Manrope, sans-serif;
+  text-align: center;
+}
+
+/* Posición del mapa: botón secundario que copia el comando /travel */
+.pos-travel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.4rem;
+  margin: 0 0.05rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid #c4ac80;
+  background: #f4e9cc;
+  color: #2a1f12;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: copy;
+  box-shadow: 0 2px 0 #c4ac80;
+  vertical-align: 0.05em;
+}
+.pos-travel::before {
+  content: '';
+  width: 0.8em;
+  height: 0.8em;
+  background: currentColor;
+  opacity: 0.7;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.pos-travel:hover {
+  background: #dfedbd;
+  border-color: #88b43a;
+  box-shadow: 0 2px 0 #4a7a12;
+  transform: translateY(-1px);
+}
+.pos-travel:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 #4a7a12;
+}
+.pos-travel[data-copiado] {
+  background: #4a7a12;
+  border-color: #33550f;
+  color: #fbf4e1;
+  box-shadow: 0 2px 0 #1a2a09;
+}
+.aviso-copia {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  z-index: 60;
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  pointer-events: none;
+  padding: 0.6rem 1rem;
+  border-radius: 0.875rem;
+  background: #25180c;
+  color: #fbf4e1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.8);
+  transition: opacity 220ms var(--resorte), transform 320ms var(--rebote);
+}
+.aviso-copia[data-visible] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.aviso-copia code {
+  color: var(--kama);
+  font-family: inherit;
+  font-weight: 800;
+}
+@media (max-width: 767px) {
+  .aviso-copia {
+    bottom: 5.5rem;
+  }
+}
+
 /* ---------- Botones e interacciones ---------- */
 
 button:not(:disabled),

@@ -1,0 +1,101 @@
+---
+/*
+  Convierte cada posición escrita como [x,y] dentro del contenido en un botón secundario.
+  Se ve como [-19,1], pero al pulsarlo copia "/travel -19,1" para pegarlo en el chat del juego.
+  Se hace en el navegador para cubrir párrafos, tablas y el plano sin tocar cada texto.
+*/
+---
+
+<div class="aviso-copia" role="status" aria-live="polite"></div>
+
+<script>
+  const PATRON = /\[\s*([-−]?\d+)\s*,\s*([-−]?\d+)\s*\]/g;
+  // Comprobación sin /g para que lastIndex no cambie entre nodos
+  const HAY_POSICION = /\[\s*[-−]?\d+\s*,\s*[-−]?\d+\s*\]/;
+  // Los componentes de React (astro-island) se dejan intactos para no romper su hidratación
+  const EXCLUIR = 'astro-island, button, a, script, style, code, textarea, input, select, .pos-travel, [data-sin-travel]';
+
+  const crearBoton = (x: string, y: string, original: string) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pos-travel';
+    b.dataset.travel = `/travel ${x},${y}`;
+    b.textContent = original.replace(/\s+/g, '');
+    b.setAttribute('aria-label', `Posición ${x},${y}. Copiar comando /travel ${x},${y}`);
+    b.title = `Copiar /travel ${x},${y}`;
+    return b;
+  };
+
+  const convertir = (raiz: Element) => {
+    const walker = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) =>
+        HAY_POSICION.test(n.nodeValue ?? '') && !n.parentElement?.closest(EXCLUIR)
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT,
+    });
+    const nodos: Text[] = [];
+    while (walker.nextNode()) nodos.push(walker.currentNode as Text);
+
+    for (const nodo of nodos) {
+      const texto = nodo.nodeValue ?? '';
+      const frag = document.createDocumentFragment();
+      let ultimo = 0;
+      PATRON.lastIndex = 0;
+      for (const m of texto.matchAll(PATRON)) {
+        const i = m.index ?? 0;
+        frag.append(texto.slice(ultimo, i));
+        const x = m[1].replace('−', '-');
+        const y = m[2].replace('−', '-');
+        frag.append(crearBoton(x, y, m[0]));
+        ultimo = i + m[0].length;
+      }
+      frag.append(texto.slice(ultimo));
+      nodo.replaceWith(frag);
+    }
+  };
+
+  const aviso = document.querySelector<HTMLElement>('.aviso-copia');
+  let temporizador: number | undefined;
+
+  const mostrarAviso = (html: string) => {
+    if (!aviso) return;
+    aviso.innerHTML = html;
+    aviso.dataset.visible = '';
+    window.clearTimeout(temporizador);
+    temporizador = window.setTimeout(() => delete aviso.dataset.visible, 2200);
+  };
+
+  const copiar = async (texto: string) => {
+    try {
+      await navigator.clipboard.writeText(texto);
+      return true;
+    } catch {
+      // Respaldo para navegadores sin permiso de portapapeles
+      const t = document.createElement('textarea');
+      t.value = texto;
+      t.setAttribute('readonly', '');
+      t.style.position = 'fixed';
+      t.style.opacity = '0';
+      document.body.append(t);
+      t.select();
+      const ok = document.execCommand('copy');
+      t.remove();
+      return ok;
+    }
+  };
+
+  document.addEventListener('click', async (e) => {
+    const b = (e.target as Element).closest<HTMLButtonElement>('.pos-travel');
+    if (!b?.dataset.travel) return;
+    const ok = await copiar(b.dataset.travel);
+    if (ok) {
+      b.dataset.copiado = '';
+      window.setTimeout(() => delete b.dataset.copiado, 1200);
+      mostrarAviso(`Copiado <code>${b.dataset.travel}</code>. Pégalo en el chat del juego.`);
+    } else {
+      mostrarAviso(`No se pudo copiar. Escribe <code>${b.dataset.travel}</code> en el chat.`);
+    }
+  });
+
+  document.querySelectorAll('main').forEach(convertir);
+</script>

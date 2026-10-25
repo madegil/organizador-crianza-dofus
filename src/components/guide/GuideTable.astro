@@ -1,7 +1,12 @@
 ---
+import { GUIDE_ITEMS, type GuideItemId } from '../../data/guideItems';
+
+/** Una celda puede ser texto (admite **negrita**), un número o un objeto del juego con su imagen */
+type Cell = string | number | { item: GuideItemId; text?: string };
+
 interface Props {
   head: string[];
-  rows: (string | number)[][];
+  rows: Cell[][];
   /** Descripción breve para lectores de pantalla */
   caption?: string;
   /** Atributo data-* opcional por fila (p. ej. el mes en el Almanax) */
@@ -10,6 +15,10 @@ interface Props {
 const { head, rows, caption, rowData } = Astro.props;
 // En móvil, las tablas de 3 o más columnas se muestran como fichas apiladas
 const stack = head.length >= 3;
+
+const escape = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/** Convierte **texto** en negrita, sin permitir otro HTML */
+const rich = (c: string | number) => escape(String(c)).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 ---
 
 <table class:list={['guide-table w-full text-left text-[13px] border-collapse', { 'gt-stack': stack }]}>
@@ -22,12 +31,28 @@ const stack = head.length >= 3;
   <tbody>
     {
       rows.map((r, i) => (
-        <tr class="border-b border-slate-100 last:border-0 align-top" data-row={rowData?.[i]}>
+        <tr class="border-b border-slate-100 last:border-0 align-middle" data-row={rowData?.[i]}>
           {r.map((c, j) =>
-            j === 0 ? (
-              <th scope="row" class="py-2 pr-3 font-semibold text-slate-900 min-w-[7rem]">{c}</th>
+            typeof c === 'object' ? (
+              j === 0 ? (
+                <th scope="row" class="py-2 pr-3 font-semibold text-slate-900 min-w-[7rem]">
+                  <span class="celda-objeto" title={GUIDE_ITEMS[c.item].name}>
+                    <img src={GUIDE_ITEMS[c.item].img} alt="" width="36" height="36" loading="lazy" />
+                    <span>{c.text ?? GUIDE_ITEMS[c.item].name}</span>
+                  </span>
+                </th>
+              ) : (
+                <td class="py-2 pr-3" data-label={head[j]}>
+                  <span class="celda-objeto" title={GUIDE_ITEMS[c.item].name}>
+                    <img src={GUIDE_ITEMS[c.item].img} alt="" width="36" height="36" loading="lazy" />
+                    <span>{c.text ?? GUIDE_ITEMS[c.item].name}</span>
+                  </span>
+                </td>
+              )
+            ) : j === 0 ? (
+              <th scope="row" class="py-2 pr-3 font-semibold text-slate-900 min-w-[7rem]" set:html={rich(c)} />
             ) : (
-              <td class="py-2 pr-3" data-label={head[j]}>{c}</td>
+              <td class="py-2 pr-3" data-label={head[j]} set:html={rich(c)} />
             )
           )}
         </tr>
@@ -37,6 +62,18 @@ const stack = head.length >= 3;
 </table>
 
 <style is:global>
+  .celda-objeto {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .celda-objeto img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.2));
+  }
   @media (max-width: 639px) {
     .gt-stack thead {
       position: absolute;
@@ -57,7 +94,7 @@ const stack = head.length >= 3;
       gap: 0.5rem;
     }
     .gt-stack tr {
-      border: 1px solid #e2e8f0;
+      border: 1px solid #dfcb9f;
       border-radius: 0.75rem;
       padding: 0.625rem 0.75rem;
     }
@@ -75,9 +112,16 @@ const stack = head.length >= 3;
       gap: 0.5rem;
       padding: 0.2rem 0;
     }
+    .gt-stack td .celda-objeto,
+    .gt-stack th .celda-objeto {
+      align-items: center;
+    }
+    .gt-stack td > .pos-travel {
+      justify-self: start;
+    }
     .gt-stack td::before {
       content: attr(data-label);
-      color: #64748b;
+      color: #5e4a30;
       font-weight: 600;
       font-size: 12px;
     }

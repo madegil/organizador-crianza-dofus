@@ -1,0 +1,29 @@
+---
+/** Objeto del juego dentro del texto: su imagen junto al nombre, en negrita */
+import { GUIDE_ITEMS, type GuideItemId } from '../../data/guideItems';
+interface Props {
+  id: GuideItemId;
+  /** Imagen grande (ficha) en lugar de en línea */
+  size?: 'linea' | 'ficha';
+}
+const { id, size = 'linea' } = Astro.props;
+const item = GUIDE_ITEMS[id];
+---
+
+{
+  size === 'ficha' ? (
+    <figure class="objeto-ficha flex flex-col items-center gap-1 text-center">
+      <span class="grid place-items-center w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200">
+        <img src={item.img} alt="" width="56" height="56" loading="lazy" class="w-14 h-14 object-contain" />
+      </span>
+      <figcaption class="text-xs font-bold text-slate-900 leading-tight max-w-[8rem]">
+        <slot>{item.name}</slot>
+      </figcaption>
+    </figure>
+  ) : (
+    <span class="objeto" title={item.name}>
+      <img src={item.img} alt="" width="22" height="22" loading="lazy" />
+      <strong><slot>{item.name}</slot></strong>
+    </span>
+  )
+}
