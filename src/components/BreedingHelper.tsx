@@ -27,9 +27,9 @@ const CrossList: React.FC<{ crosses: [string, string][]; getName: (id: string) =
       <ul className="divide-y divide-blue-200/70">
         {shown.map(([a, b], i) => (
           <li key={i} className="flex flex-wrap items-center gap-1 text-[11px] py-1.5 first:pt-0 last:pb-0">
-            <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(a)}</span>
+            <span className="font-extrabold text-blue-800 bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(a)}</span>
             <span className="text-slate-600 font-bold" aria-label="con">×</span>
-            <span className="font-extrabold text-[#1e3a8a] bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(b)}</span>
+            <span className="font-extrabold text-blue-800 bg-white px-1.5 py-0.5 rounded-md border border-blue-200">{getName(b)}</span>
           </li>
         ))}
       </ul>
@@ -69,16 +69,16 @@ export const BreedingHelper: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto sm:px-4 lg:px-6">
-      <div className="bg-[#f8fafc] text-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 p-3 sm:p-5 md:p-6 shadow-xl space-y-4 sm:space-y-6">
+      <div className="bg-slate-50 text-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 p-3 sm:p-5 md:p-6 shadow-xl space-y-4 sm:space-y-6">
         {/* Cabecera Principal */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3 sm:pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-blue-800 flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
               <GitFork className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-                Árbol de Cruces &amp; Guía de Hibridaciones
+                Árbol de cruces y guía de hibridaciones
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
                 Consulta cómo obtener cada generación a partir de cruces. Algunas monturas tienen varios cruces posibles.
@@ -91,7 +91,7 @@ export const BreedingHelper: React.FC = () => {
         <div className="sm:bg-white sm:rounded-2xl sm:border sm:border-slate-200 sm:p-5 sm:shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
             <h2 className="text-xs sm:text-sm font-extrabold text-slate-900">
-              Catálogo Completo de Cruces ({catalog.length} Razas)
+              Catálogo completo de cruces ({catalog.length} razas)
             </h2>
             {/* Pestañas simétricas en mobile, compactas en desktop */}
             <div role="group" aria-label="Especie" className="grid grid-cols-3 w-full sm:w-auto sm:flex gap-1 bg-slate-200/60 p-1 rounded-xl border border-slate-200">
@@ -108,7 +108,7 @@ export const BreedingHelper: React.FC = () => {
                     }}
                     className={`min-h-[44px] sm:min-h-0 py-1.5 px-1.5 sm:px-3.5 rounded-lg text-[11px] sm:text-xs font-bold transition text-center leading-tight [hyphens:manual] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                       isActive
-                        ? 'bg-[#1e3a8a] text-white shadow-sm font-extrabold'
+                        ? 'bg-blue-800 text-white shadow-sm font-extrabold'
                         : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
                     }`}
                   >
@@ -136,7 +136,7 @@ export const BreedingHelper: React.FC = () => {
                   title={g === 'all' ? undefined : `Generación ${g}`}
                   className={`min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                     isActive
-                      ? 'bg-[#1e3a8a] text-white'
+                      ? 'bg-blue-800 text-white'
                       : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
                   }`}
                 >

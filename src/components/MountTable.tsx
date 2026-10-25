@@ -1,4 +1,5 @@
 import { getDefaultMaxReproductions } from '../utils/mountRules';
+import { EstadoVacio } from './EstadoVacio';
 import React, { useState, useRef, useEffect, useId } from 'react';
 import {
   FolderUp,
@@ -660,7 +661,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
   const isEditingEsterilOrSenil = editingMount?.fertility === 'esteril' || editingMount?.fertility === 'senil';
 
   return (
-    <div className="bg-[#f8fafc] text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
+    <div className="bg-slate-50 text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 w-full max-w-7xl mx-auto relative">
       <h1 className="sr-only">Establo</h1>
 
       {/* 1. SECCIÓN SUPERIOR: Botón Seleccionar Archivo y Botón Descargar Plantilla CSV */}
@@ -668,7 +669,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
           {/* Botón Seleccionar Archivo */}
           <div className="flex flex-col gap-1">
-            <label htmlFor={fileInputId} className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-[#1e3a8a] font-extrabold text-sm transition shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
+            <label htmlFor={fileInputId} className="cursor-pointer flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-dashed border-blue-400 bg-blue-50/70 hover:bg-blue-100/90 text-blue-800 font-extrabold text-sm transition shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
               <input
                 id={fileInputId}
                 type="file"
@@ -680,7 +681,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
               {isUploading ? (
                 <RefreshCw className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />
               ) : (
-                <FolderUp className="w-5 h-5 text-[#1e3a8a] flex-shrink-0" />
+                <FolderUp className="w-5 h-5 text-blue-800 flex-shrink-0" />
               )}
               <span>Seleccionar archivo</span>
             </label>
@@ -692,7 +693,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
           {/* Botón Descargar Plantilla CSV */}
           <button
             onClick={downloadCsvTemplate}
-            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-[#1e3a8a] hover:bg-[#172554] text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
+            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-blue-800 hover:bg-blue-900 text-white font-extrabold text-sm transition shadow-md shadow-blue-950/20"
             title="Descargar plantilla CSV (.csv) universal para Google Sheets y Excel"
           >
             <Download className="w-5 h-5 text-blue-200 flex-shrink-0" />
@@ -720,7 +721,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
               onClick={() => setShowExportMenu(!showExportMenu)}
               aria-expanded={showExportMenu}
               aria-haspopup="menu"
-              className="font-bold text-[#1e3a8a] hover:underline flex items-center gap-1 cursor-pointer"
+              className="font-bold text-blue-800 hover:underline flex items-center gap-1 cursor-pointer"
             >
               Exportar datos
             </button>
@@ -805,7 +806,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
         <button
           type="button"
           onClick={(e) => handleOpenNewMountModal(e.currentTarget)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1e3a8a] hover:bg-[#172554] text-white rounded-2xl text-xs font-extrabold transition shadow-sm cursor-pointer flex-shrink-0"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-800 hover:bg-blue-900 text-white rounded-2xl text-xs font-extrabold transition shadow-sm cursor-pointer flex-shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Añadir montura</span>
@@ -826,7 +827,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             <Filter className="w-4 h-4 text-slate-500" aria-hidden="true" />
             <span>Filtros</span>
             {activeFilterCount > 0 && (
-              <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#1e3a8a] text-white text-[11px] font-extrabold inline-flex items-center justify-center">
+              <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-blue-800 text-white text-[11px] font-extrabold inline-flex items-center justify-center">
                 {activeFilterCount}
                 <span className="sr-only"> activos</span>
               </span>
@@ -1019,10 +1020,14 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
             <tbody className="divide-y divide-slate-100 text-xs">
               {paginatedMounts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-600 text-sm">
-                    {mounts.length === 0
-                      ? 'Tu establo está vacío. Importa un archivo o pulsa «Añadir montura».'
-                      : 'No se encontraron monturas que coincidan con los filtros.'}
+                  <td colSpan={6} className="text-center text-slate-600 text-sm">
+                    {mounts.length === 0 ? (
+                      <EstadoVacio titulo="Tu establo está vacío">
+                        Importa tu hoja de cálculo o pulsa «Añadir montura» para registrar la primera.
+                      </EstadoVacio>
+                    ) : (
+                      <p className="py-12">Ninguna montura coincide con estos filtros.</p>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -1267,11 +1272,13 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
           </div>
 
           {paginatedMounts.length === 0 ? (
-            <p className="py-12 px-4 text-center text-slate-600 text-sm">
-              {mounts.length === 0
-                ? 'Tu establo está vacío. Importa un archivo o pulsa «Añadir montura».'
-                : 'No se encontraron monturas que coincidan con los filtros.'}
-            </p>
+            mounts.length === 0 ? (
+              <EstadoVacio titulo="Tu establo está vacío">
+                Importa tu hoja de cálculo o pulsa «Añadir montura» para registrar la primera.
+              </EstadoVacio>
+            ) : (
+              <p className="py-12 px-4 text-center text-slate-600 text-sm">Ninguna montura coincide con estos filtros.</p>
+            )
           ) : (
             <ul className="divide-y divide-slate-100">
               {paginatedMounts.map((mount) => (
@@ -1711,7 +1718,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-extrabold bg-[#1e3a8a] hover:bg-[#172554] text-white shadow-sm transition cursor-pointer"
+                  className="px-5 py-2 rounded-xl text-xs font-extrabold bg-blue-800 hover:bg-blue-900 text-white shadow-sm transition cursor-pointer"
                 >
                   Guardar Montura
                 </button>

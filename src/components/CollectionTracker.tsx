@@ -176,12 +176,12 @@ export const CollectionTracker: React.FC = () => {
       <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center border border-blue-100 flex-shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-800 flex items-center justify-center border border-blue-100 flex-shrink-0">
               <Layers className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
-                Catálogo &amp; Meta Nivel 200
+                Catálogo y meta de nivel 200
               </h1>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
                 Seguimiento de las {totalSpeciesBreeds} razas. Registra ejemplares y completa tu colección.
@@ -205,7 +205,7 @@ export const CollectionTracker: React.FC = () => {
                   aria-pressed={isActive}
                   className={`min-h-[44px] sm:min-h-0 px-1.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition flex flex-col sm:flex-row items-center justify-center sm:gap-1 leading-tight cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                     isActive
-                      ? 'bg-[#1e3a8a] text-white'
+                      ? 'bg-blue-800 text-white'
                       : 'text-slate-700 hover:text-slate-900 hover:bg-white/80'
                   }`}
                 >
@@ -223,8 +223,8 @@ export const CollectionTracker: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-5 pt-5 border-t border-slate-100">
           <div>
             <div className="flex justify-between items-baseline gap-2 text-xs font-bold mb-1.5">
-              <span className="text-slate-700">Razas Obtenidas</span>
-              <span className="text-[#1e3a8a] font-mono whitespace-nowrap">
+              <span className="text-slate-700">Razas obtenidas</span>
+              <span className="text-blue-800 font-mono whitespace-nowrap">
                 {ownedBreedsCount} / {totalSpeciesBreeds} ({percentageOwned}%)
               </span>
             </div>
@@ -238,7 +238,7 @@ export const CollectionTracker: React.FC = () => {
               aria-valuetext={`${ownedBreedsCount} de ${totalSpeciesBreeds} razas (${percentageOwned}%)`}
             >
               <div
-                className="h-full bg-[#1e3a8a] rounded-full transition-all"
+                className="h-full bg-blue-800 rounded-full transition-all"
                 style={{ width: `${percentageOwned}%` }}
               />
             </div>
@@ -246,7 +246,7 @@ export const CollectionTracker: React.FC = () => {
 
           <div>
             <div className="flex justify-between items-baseline gap-2 text-xs font-bold mb-1.5">
-              <span className="text-slate-700">Meta Nivel 200 (867.582 XP)</span>
+              <span className="text-slate-700">Meta de nivel 200 (867.582 XP)</span>
               <span className="text-emerald-700 font-mono whitespace-nowrap">
                 {level200BreedsCount} / {totalSpeciesBreeds} ({percentage200}%)
               </span>
@@ -283,11 +283,11 @@ export const CollectionTracker: React.FC = () => {
             aria-pressed={selectedGen === 'all'}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
               selectedGen === 'all'
-                ? 'bg-[#1e3a8a] text-white'
+                ? 'bg-blue-800 text-white'
                 : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
           >
-            Todas las Generaciones
+            Todas las generaciones
           </button>
           {generations.map((g) => {
             return (
@@ -299,7 +299,7 @@ export const CollectionTracker: React.FC = () => {
                 title={`Generación ${g}`}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
                   selectedGen === g
-                    ? 'bg-[#1e3a8a] text-white'
+                    ? 'bg-blue-800 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >

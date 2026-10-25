@@ -9,8 +9,8 @@ const { href, label } = Astro.props;
 
 <a
   href={href}
-  class="flex items-start gap-2.5 p-3 rounded-xl bg-blue-50/80 border border-blue-200/80 text-blue-950 hover:bg-blue-100/80 transition text-[13px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+  class="group flex items-start gap-2.5 p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-950 hover:bg-blue-100 hover:border-blue-300 hover:-translate-y-0.5 text-[13px]"
 >
-  <span aria-hidden="true" class="mt-px text-blue-600 font-bold">→</span>
+  <svg aria-hidden="true" viewBox="0 0 24 24" class="mt-0.5 w-4 h-4 shrink-0 text-blue-600 duration-300 ease-resorte group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
   <span><strong class="font-bold text-blue-900">{label}.</strong> <slot /></span>
 </a>

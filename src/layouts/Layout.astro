@@ -1,4 +1,6 @@
 ---
+import '@fontsource/lilita-one/400.css';
+import '@fontsource-variable/manrope';
 import '../styles/global.css';
 import { Navbar } from '../components/Navbar';
 import AlmanaxNotice from '../components/AlmanaxNotice.astro';
@@ -33,7 +35,7 @@ const ogImageUrl = new URL('/og-image.jpg', Astro.site ?? Astro.url).href;
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
-    <meta name="theme-color" content="#0b0d11" />
+    <meta name="theme-color" content="#131209" />
 
     <!-- Previsualización al compartir (WhatsApp, Discord, Facebook, X) -->
     <meta property="og:type" content="website" />
@@ -52,10 +54,10 @@ const ogImageUrl = new URL('/og-image.jpg', Astro.site ?? Astro.url).href;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
   </head>
-  <body class="bg-[#0b0d11] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white antialiased">
+  <body class="min-h-screen flex flex-col font-sans antialiased">
     <a
       href="#contenido"
-      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-xl focus:bg-blue-600 focus:text-white focus:font-bold focus:text-sm"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-xl focus:bg-kama focus:text-slate-900 focus:font-bold focus:text-sm"
     >
       Saltar al contenido
     </a>
@@ -66,12 +68,19 @@ const ogImageUrl = new URL('/og-image.jpg', Astro.site ?? Astro.url).href;
       <slot />
     </main>
 
-    <footer class="bg-dofus-card/80 border-t border-dofus-border mt-auto pt-5 pb-24 md:py-6 px-4 text-center text-xs text-slate-400 space-y-1.5">
-      <p class="text-slate-300 font-medium">
+    <footer class="mt-auto pt-6 pb-24 md:pb-8 px-4 text-center text-xs text-[#cdb98f] space-y-2">
+      <div class="max-w-3xl mx-auto flex items-center gap-3 mb-4" aria-hidden="true">
+        <span class="clavo"></span>
+        <span class="flex-1 h-px bg-[#4a321d]"></span>
+        <svg viewBox="0 0 24 24" class="w-5 h-5 text-[#88b43a]" fill="currentColor"><path d="M12 2c-1.6 3.1-5.5 4.2-5.5 8.6 0 3.2 2.4 5.6 5.5 5.6s5.5-2.4 5.5-5.6C17.5 6.2 13.6 5.1 12 2Zm0 15.6V22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span class="flex-1 h-px bg-[#4a321d]"></span>
+        <span class="clavo"></span>
+      </div>
+      <p class="text-[#f3e7c9] font-medium max-w-3xl mx-auto">
         Tus datos se guardan solo en este navegador. Exporta una copia de seguridad desde el Establo de vez en cuando:
         si borras los datos del navegador o cambias de dispositivo, se pierden.
       </p>
-      <p>Gestor de monturas • Proyecto de fans, sin relación con Ankama</p>
+      <p>Gestor de monturas, proyecto de fans sin relación con Ankama</p>
     </footer>
   </body>
 </html>

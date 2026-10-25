@@ -2,10 +2,259 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Tema "Cuaderno del ganadero"
+  - Fondo: noche de Amakna con un sembrado de tréboles muy tenue.
+  - Paneles: pergamino con grano de papel.
+  - Acciones: botones verdes con relieve que se hunden al pulsarlos, como en la interfaz del juego.
+  Las reglas que van después de @tailwind utilities ganan a las utilidades de igual especificidad.
+*/
+
+:root {
+  --noche: #131209;
+  --madera: #3b2817;
+  --madera-oscura: #25180c;
+  --madera-clara: #6b4a2b;
+  --kama: #f2c14e;
+  --tinta: #2a1f12;
+  --pergamino: #fbf4e1;
+  --hoja: #4a7a12;
+  --hoja-borde: #1a2a09;
+  --resorte: cubic-bezier(0.32, 0.72, 0, 1);
+  --rebote: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .32 0 0 0 0 .15 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --treboles: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%2388b43a' fill-opacity='.03'%3E%3Cpath d='M20 22c-3-6 4-9 6-4 2-5 9-2 6 4 6 3 3 10-3 7l2 7h-2l-2-7c-4 5-11 1-7-7z'/%3E%3Cpath d='M86 78c-2-5 3-7 5-3 2-4 7-2 5 3 5 2 2 8-3 5l2 6h-2l-1-6c-3 4-9 1-6-5z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
   body {
-    background-color: #0b0d11;
-    color: #e2e8f0;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--noche);
+    background-image: var(--treboles);
+    color: #f3e7c9;
+    font-family: 'Manrope Variable', Manrope, ui-sans-serif, system-ui, sans-serif;
+    font-weight: 500;
+  }
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* Títulos: tipografía gruesa y redonda, cercana al rótulo del logo. Lilita One tiene un solo peso. */
+h1,
+h2,
+h1[class],
+h2[class] {
+  font-family: 'Lilita One', 'Manrope Variable', ui-sans-serif, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  font-synthesis: none;
+}
+
+/* Paneles de pergamino: grano de papel y canto inferior, solo en contenedores principales */
+main [class~='bg-white'][class~='border'][class*='rounded-'] {
+  background-image: var(--grano);
+}
+main > div > [class~='bg-white'][class*='rounded-'],
+main section[class~='bg-white'],
+main header[class~='bg-white'] {
+  box-shadow:
+    0 1px 0 rgb(255 250 235 / 0.7) inset,
+    0 5px 0 -1px #c4ac80,
+    0 22px 36px -22px rgb(0 0 0 / 0.85);
+}
+
+/* ---------- Botones e interacciones ---------- */
+
+button:not(:disabled),
+a,
+summary,
+select,
+input,
+textarea,
+[role='button'] {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 220ms;
+  transition-timing-function: var(--resorte);
+}
+
+/* Toda pulsación se siente física */
+button:not(:disabled):active,
+[role='button']:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Botón principal "de juego": verde hoja con relieve, se hunde al pulsar */
+:is(button, a)[class~='bg-blue-600'],
+:is(button, a)[class~='bg-blue-700'],
+:is(button, a)[class~='bg-blue-800'] {
+  background-color: var(--hoja);
+  color: var(--pergamino);
+  border-color: transparent;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
+  box-shadow:
+    inset 0 1px 0 rgb(214 240 160 / 0.45),
+    inset 0 -2px 0 rgb(0 0 0 / 0.22),
+    0 3px 0 var(--hoja-borde),
+    0 8px 14px -8px rgb(0 0 0 / 0.6);
+}
+:is(button, a)[class~='bg-blue-600']:not(:disabled):hover,
+:is(button, a)[class~='bg-blue-700']:not(:disabled):hover,
+:is(button, a)[class~='bg-blue-800']:not(:disabled):hover {
+  background-color: #568c16;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgb(214 240 160 / 0.55),
+    inset 0 -2px 0 rgb(0 0 0 / 0.22),
+    0 4px 0 var(--hoja-borde),
+    0 12px 18px -10px rgb(0 0 0 / 0.65);
+}
+:is(button, a)[class~='bg-blue-600']:not(:disabled):active,
+:is(button, a)[class~='bg-blue-700']:not(:disabled):active,
+:is(button, a)[class~='bg-blue-800']:not(:disabled):active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 2px 3px rgb(0 0 0 / 0.3),
+    0 0 0 var(--hoja-borde);
+  transition-duration: 60ms;
+}
+
+/* Botones secundarios claros: se levantan un poco */
+button[class~='border']:not([class~='bg-blue-600']):not([class~='bg-blue-700']):not([class~='bg-blue-800']):not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+/* Foco visible en dorado kama, legible tanto en pergamino como en madera */
+:focus-visible {
+  outline: 3px solid var(--kama);
+  outline-offset: 2px;
+}
+[class*='focus-visible:ring']:focus-visible {
+  outline: none;
+}
+
+/* Casillas y deslizadores con el color del tema */
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'],
+progress {
+  accent-color: var(--hoja);
+}
+
+::selection {
+  background: #88b43a;
+  color: var(--tinta);
+}
+
+/* ---------- Coreografía de carga: una sola, en la cabecera ---------- */
+
+@keyframes eclosion {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.92) rotate(-2deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.02) rotate(0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes subeTablon {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes balanceo {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-9deg);
+  }
+  65% {
+    transform: rotate(6deg);
+  }
+}
+
+.logo-eclosion {
+  animation: eclosion 900ms var(--rebote) both;
+  transform-origin: 50% 80%;
+}
+.cercado-entrada {
+  animation: subeTablon 700ms var(--resorte) 250ms both;
+}
+
+/* El huevo del estado vacío se tambalea al pasar el ratón, como a punto de eclosionar */
+.estado-vacio:hover .huevo {
+  animation: balanceo 700ms var(--resorte);
+  transform-origin: 50% 92%;
+}
+
+/* El icono del menú se balancea al pasar el ratón, como una hoja */
+.nav-item:hover .nav-icono {
+  animation: balanceo 600ms var(--resorte);
+}
+
+/* Tablones del menú: veta de madera dibujada con líneas, sin degradados */
+.tablon {
+  background-color: var(--madera);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 9px,
+      rgb(0 0 0 / 0.12) 9px 10px,
+      transparent 10px 23px,
+      rgb(255 220 160 / 0.05) 23px 24px
+    ),
+    var(--grano);
+  box-shadow:
+    inset 0 1px 0 rgb(255 214 150 / 0.18),
+    inset 0 -3px 0 rgb(0 0 0 / 0.35),
+    0 10px 24px -12px rgb(0 0 0 / 0.9);
+}
+
+/* Clavo decorativo en los extremos del cercado */
+.clavo {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: #c9b07c;
+  box-shadow:
+    inset -1px -1px 0 rgb(0 0 0 / 0.45),
+    0 1px 0 rgb(255 255 255 / 0.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  button:not(:disabled):active,
+  :is(button, a)[class~='bg-blue-600']:not(:disabled):hover,
+  :is(button, a)[class~='bg-blue-700']:not(:disabled):hover,
+  :is(button, a)[class~='bg-blue-800']:not(:disabled):hover {
+    transform: none;
   }
 }
