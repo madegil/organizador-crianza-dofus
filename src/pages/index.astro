@@ -57,8 +57,10 @@ const almanax = ALMANAX_BONUSES.map((b) => [
   b.year ? `Fecha variable (${b.day} de ${MONTH_NAMES[b.month - 1]} en ${b.year})` : `${b.day} de ${MONTH_NAMES[b.month - 1]}`,
   b.bonus,
 ]);
-// Mes (1-12) de cada fila, para marcar el bonus del mes actual; la fecha variable no se marca
-const almanaxMonths = ALMANAX_BONUSES.map((b) => (b.year ? '' : b.month));
+// Fecha de cada fila (MM-DD, o AAAA-MM-DD si solo vale un año) para marcar el próximo bonus
+const almanaxMonths = ALMANAX_BONUSES.map((b) =>
+  `${b.year ? `${b.year}-` : ''}${String(b.month).padStart(2, '0')}-${String(b.day).padStart(2, '0')}`
+);
 const icsPath = '/almanax-crianza.ics';
 const googleCalendarUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent('webcal://organizador-crianza-dofus.vercel.app' + icsPath)}`;
 
@@ -687,8 +689,11 @@ const p = 'text-sm leading-relaxed';
   .almanax tr[data-current='true'] td {
     background-color: #fffbeb;
   }
+  .almanax tr[data-today='true'] th::after {
+    content: ' · hoy' !important;
+  }
   .almanax tr[data-current='true'] th::after {
-    content: ' · este mes';
+    content: ' · próximo';
     color: #b45309;
     font-weight: 700;
   }
@@ -726,9 +731,22 @@ const p = 'text-sm leading-relaxed';
     d.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => (d.open = false)))
   );
 
-  // Almanax: resalta el bonus del mes actual
-  const month = String(new Date().getMonth() + 1);
+  // Almanax: resalta el próximo bonus (hoy incluido); las fechas pasadas no se marcan
+  const param = new URLSearchParams(location.search).get('fecha');
+  const now = param && /^\d{4}-\d{2}-\d{2}$/.test(param) ? new Date(`${param}T12:00:00`) : new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let next: { tr: HTMLElement; date: Date } | null = null;
   document.querySelectorAll<HTMLElement>('.almanax tr[data-row]').forEach((tr) => {
-    if (tr.dataset.row === month) tr.dataset.current = 'true';
+    const parts = (tr.dataset.row ?? '').split('-').map(Number);
+    const [y, m, d] = parts.length === 3 ? parts : [today.getFullYear(), parts[0], parts[1]];
+    let date = new Date(y, m - 1, d);
+    // Los bonus anuales ya pasados este año cuentan para el año siguiente
+    if (parts.length === 2 && date < today) date = new Date(y + 1, m - 1, d);
+    if (date >= today && (!next || date < next.date)) next = { tr, date };
   });
+  if (next) {
+    const { tr, date } = next as { tr: HTMLElement; date: Date };
+    tr.dataset.current = 'true';
+    if (date.getTime() === today.getTime()) tr.dataset.today = 'true';
+  }
 </script>
