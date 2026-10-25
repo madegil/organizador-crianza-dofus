@@ -47,7 +47,7 @@ export const TargetGenCalculator: React.FC = () => {
         </label>
         <label htmlFor={ids.alm} className="flex items-center gap-2 cursor-pointer">
           <input id={ids.alm} type="checkbox" checked={almanax} onChange={(e) => setAlmanax(e.target.checked)} className="w-4 h-4 accent-blue-600" />
-          Día del bono de Almanax (+20 %)
+          Día del bonus de Almanax (+20 %)
         </label>
       </div>
       <div className="space-y-1.5" aria-live="polite" id={ids.out}>

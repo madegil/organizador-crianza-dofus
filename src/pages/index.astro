@@ -44,11 +44,11 @@ const toc = [
 
 // Ruta rápida: lo que más se consulta
 const quickPath = [
-  { id: 'donde-capturar', step: '1', title: 'Captura', text: 'Dónde está cada montura y qué red usar' },
+  { id: 'donde-capturar', step: '1', title: 'Captura', text: 'Zonas y redes de captura' },
   { id: 'serenidad', step: '2', title: 'Serenidad', text: 'Qué medidor sube en cada zona' },
-  { id: 'medidores', step: '3', title: 'Medidores', text: 'Tramos, gasto y tiempos del cercado' },
-  { id: 'cruce', step: '4', title: 'Cruce', text: 'Fecundas, mákinas y generación objetivo' },
-  { id: 'experiencia', step: '5', title: 'Nivel 200', text: 'Experiencia y carburante necesario' },
+  { id: 'medidores', step: '3', title: 'Medidores', text: 'Carburantes, gasto y tiempos' },
+  { id: 'cruce', step: '4', title: 'Cruce', text: 'Mákinas y generación objetivo' },
+  { id: 'experiencia', step: '5', title: 'Nivel 200', text: 'Experiencia y carburante' },
 ];
 
 const almanax = [
@@ -56,7 +56,7 @@ const almanax = [
   ['10 de febrero', 'Los bebés nacen Resistentes'],
   ['10 de marzo', 'Medidor de aguante al doble'],
   ['10 de abril', 'Medidor de pérdida de serenidad al doble'],
-  ['10 de mayo', 'Los criadores ahorran un 15 % de ingredientes'],
+  ['10 de mayo', 'Los ganaderos ahorran un 15 % de ingredientes'],
   ['10 de junio', 'Medidor de experiencia al doble'],
   ['10 de julio', 'Los bebés nacen Enamoradizos'],
   ['10 de agosto', '25 % de probabilidad de fabricar un objeto extra'],
@@ -66,7 +66,7 @@ const almanax = [
   ['10 de noviembre', 'Los bebés nacen Precoces'],
   ['10 de diciembre', 'Medidor de amor al doble'],
 ];
-// Mes (1-12) de cada fila, para marcar el bono del mes actual; la fecha variable no se marca
+// Mes (1-12) de cada fila, para marcar el bonus del mes actual; la fecha variable no se marca
 const almanaxMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '', 11, 12];
 
 const p = 'text-sm leading-relaxed';
@@ -81,23 +81,23 @@ const p = 'text-sm leading-relaxed';
     <header class="bg-white text-slate-700 rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-sm p-4 sm:p-6 space-y-4">
       <div class="space-y-1.5">
         <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">Guía de crianza de monturas</h1>
-        <p class="text-sm leading-relaxed max-w-3xl">
+        <p class="text-sm leading-relaxed text-balance">
           Todo lo que necesitas para criar dragopavos, mulaguas y vuelocerontes desde la actualización 3.5: dónde
           capturarlos, cómo funcionan los cercados y los carburantes, y cómo llegar a la generación 10.
         </p>
       </div>
       <nav aria-label="Ruta rápida">
-        <ol class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+        <ol class="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {
             quickPath.map((q) => (
-              <li>
+              <li class="max-sm:last:col-span-2">
                 <a
                   href={`#${q.id}`}
                   class="h-full flex flex-col gap-0.5 p-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-300 hover:bg-blue-50/60 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   <span class="text-[11px] font-bold text-blue-700">Paso {q.step}</span>
                   <span class="text-sm font-extrabold text-slate-900">{q.title}</span>
-                  <span class="text-[12px] text-slate-600 leading-snug">{q.text}</span>
+                  <span class="text-[12px] text-slate-600 leading-snug text-balance">{q.text}</span>
                 </a>
               </li>
             ))
@@ -165,7 +165,7 @@ const p = 'text-sm leading-relaxed';
             {
               [
                 ['Actualización 3.7', 'Ajustes al sistema', 'La capacidad de cada medidor del cercado se duplicó, la Optimákina pasó a dar +20 % de probabilidad de generación objetivo, los carburantes cambiaron de nombre (no de precio ni efecto) y la interfaz marca las monturas que aún te faltan en los logros.'],
-                ['Actualización 3.5', 'Reforma completa de la crianza', 'Nace el oficio de criador, desaparecen los certificados y los cercados privados, las monturas ganan experiencia solo en el cercado, el nivel máximo sube a 200 y cada cruce da un único bebé. Todas las monturas anteriores quedan seniles. Las mulaguas ganan dos generaciones nuevas.'],
+                ['Actualización 3.5', 'Reforma completa de la crianza', 'Nace el oficio de ganadero, desaparecen los certificados y los cercados privados, las monturas ganan experiencia solo en el cercado, el nivel máximo sube a 200 y cada cruce da un único bebé. Todas las monturas anteriores quedan seniles. Las mulaguas ganan dos generaciones nuevas.'],
                 ['Junio de 2018', 'Llegan los vuelocerontes', 'Se introducen con la actualización de los Nimbos. Dan 1 PA desde el nivel 100.'],
                 ['Junio de 2016', 'Llegan las mulaguas', 'Se introducen con la actualización de los Abismos de Sufokia. Dan 1 PM desde el nivel 100.'],
                 ['Septiembre de 2006', 'Llegan los dragopavos', 'Aparecen con la Montaña de los Koalaks. Son la primera y única montura del juego durante diez años.'],
@@ -188,13 +188,13 @@ const p = 'text-sm leading-relaxed';
 
         <GuideSection id="caracteristicas" title="Características">
           <p class={p}>
-            Hay tres tipos de montura y todos se crían igual; lo que cambia entre ellos es el bono fijo que dan y cuántos colores
+            Hay tres tipos de montura y todos se crían igual; lo que cambia entre ellos es el bonus fijo que dan y cuántos colores
             se pueden obtener. Una montura se equipa en el mismo lugar de la mascota o mascotura, exige nivel 60 de personaje y te
             deja moverte más rápido que a pie.
           </p>
           <GuideTable
             caption="Comparación de los tres tipos de montura"
-            head={['Tipo', 'Bono común', 'Colores capturables (gen. 1)', 'Colores criables', 'Recurso al extraer']}
+            head={['Tipo', 'Bonus común', 'Colores capturables (gen. 1)', 'Colores criables', 'Recurso al extraer']}
             rows={[
               ['Dragopavo', 'Vitalidad: 300 a nivel 100, 400 a nivel 200', '3: Almendrado, Dorado, Pelirrojo', '66 (+2 especiales que no se reproducen)', 'Neurona de dragopavo'],
               ['Mulagua', '1 PM desde el nivel 100', '5: Ébano, Índigo, Púrpura, Orquídea, Dorada', '120', 'Ámbar de mulagua'],
@@ -203,7 +203,7 @@ const p = 'text-sm leading-relaxed';
           />
           <p class={p}>
             Además del bonus común, cada color aporta su propia característica. Una montura de un solo color da el bonus común
-            más la característica de ese color. Una bicolor da el bono común más las dos características de sus colores, pero cada
+            más la característica de ese color. Una bicolor da el bonus común más las dos características de sus colores, pero cada
             una con un valor más bajo que en la monocolor.
           </p>
           <p class={p}>
@@ -214,7 +214,7 @@ const p = 'text-sm leading-relaxed';
             Los dos dragopavos especiales (en armadura y de plumas) se compran a Gladiagob en la Feria del Trool, en [-11,-37], por
             50 gladiatones cada uno. Solo pueden subir de nivel.
           </p>
-          <ToolLink href="/coleccion" label="Colección">Mira los bonos de cada color y marca las que ya tienes.</ToolLink>
+          <ToolLink href="/coleccion" label="Colección">Mira los bonus de cada color y marca las que ya tienes.</ToolLink>
         </GuideSection>
 
         <GuideSection id="donde-capturar" title="Dónde encontrar cada montura salvaje">
@@ -252,7 +252,7 @@ const p = 'text-sm leading-relaxed';
           </p>
           <GuideTable
             caption="Redes de captura"
-            head={['Red', 'Nivel de criador', 'Para qué tipo', 'Efecto del hechizo']}
+            head={['Red', 'Nivel de ganadero', 'Para qué tipo', 'Efecto del hechizo']}
             rows={[
               ['Red de captura universal', 1, 'Cualquier tipo', 'Captura la montura que apuntas.'],
               ['Red multiplicadora', 100, 'Una por tipo', 'Captura la montura apuntada y te da una copia.'],
@@ -289,7 +289,7 @@ const p = 'text-sm leading-relaxed';
           </p>
           <p class={p}>
             Las monturas capturadas salen de nivel 1 y generación 1, y ya se pueden equipar. Cada captura da 30 de experiencia de
-            criador por montura.
+            ganadero por montura.
           </p>
           <ToolLink href="/establo" label="Establo">Registra tus capturas para seguir su serenidad y sus medidores.</ToolLink>
         </GuideSection>
@@ -298,8 +298,9 @@ const p = 'text-sm leading-relaxed';
         <GuideSection id="carburantes" title="Carburantes">
           <p class={p}>
             Los carburantes llenan los medidores del cercado y son lo que realmente cría a tus monturas. Hay seis medidores
-            (pérdida de serenidad, aumento de serenidad, resistencia, madurez, amor y experiencia de montura) y cada uno tiene sus
-            carburantes, que se diferencian por tipo y por tamaño.
+            (pérdida de serenidad, aumento de serenidad, aguante, madurez, amor y experiencia de montura) y cada uno tiene sus
+            carburantes, que se diferencian por tipo y por tamaño. Los que llenan el medidor de aguante se llaman carburantes de
+            resistencia.
           </p>
           <p class={p}>
             El tipo decide hasta dónde puede llenar el medidor. Un carburante nunca pasa el tope de su tramo, pero uno superior sí
@@ -307,17 +308,17 @@ const p = 'text-sm leading-relaxed';
           </p>
           <GuideTable
             caption="Tipos de carburante"
-            head={['Tipo', 'Llena hasta', 'Tramo del medidor', 'Nivel de criador para fabricarlo', 'Precio del gigantesco en polvo de crianza']}
+            head={['Tipo', 'Llena el medidor hasta', 'Nivel de ganadero para fabricarlo', 'Precio del gigantesco en polvo de crianza']}
             rows={[
-              ['Extracto', '80.000', 1, 5, 50],
-              ['Filtro', '140.000', 2, 55, 200],
-              ['Poción', '180.000', 3, 105, 800],
-              ['Elixir', '200.000', 4, 155, '3.200'],
+              ['Extracto', '80.000', 5, 50],
+              ['Filtro', '140.000', 55, 200],
+              ['Poción', '180.000', 105, 800],
+              ['Elixir', '200.000', 155, '3.200'],
             ]}
           />
           <p class={p}>
             El tamaño decide cuánto carga cada unidad: minúsculo 2.000, pequeño 4.000, normal 6.000, grande 8.000 y gigantesco
-            10.000. Cada diez niveles de criador se desbloquea un tamaño nuevo.
+            10.000. Cada diez niveles de ganadero se desbloquea un tamaño nuevo.
           </p>
           <p class={p}>
             No hace falta tener el oficio para usarlos; puedes comprarlos en el mercadillo. El polvo de crianza se cambia por
@@ -369,7 +370,7 @@ const p = 'text-sm leading-relaxed';
         <GuideSection id="cercados" title="Cercados: dónde están y cómo se accede">
           <p class={p}>
             Todos los cercados del juego están en el Pueblo de los Ganaderos, a la izquierda del zaap [-16,1]; no hay ninguno más en
-            el Mundo de los Doce. Se desbloquean con el nivel del oficio de criador, hasta un máximo de 6, y cada uno tiene 10 plazas.
+            el Mundo de los Doce. Se desbloquean con el nivel del oficio de ganadero, hasta un máximo de 6, y cada uno tiene 10 plazas.
           </p>
           <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_16rem] gap-4 items-start">
             <GuideTable
@@ -408,7 +409,7 @@ const p = 'text-sm leading-relaxed';
             otro personaje de la misma cuenta no te da cercados extra.
           </p>
           <p class={p}>
-            Para llegar rápido existe la Poción de teletransporte: Pueblo de los Criadores, que te deja en [-18,1]. La fabrican los
+            Para llegar rápido existe la Poción de teletransporte: Pueblo de los Ganaderos, que te deja en [-18,1]. La fabrican los
             alquimistas de nivel 60 con 2 Pez gatito, 2 Avena y 2 Menta salvaje. Cada mapa de cercado tiene además un zaapi: si haces
             doble clic en un cercado del minimapa, el personaje va solo por el camino más corto.
           </p>
@@ -457,7 +458,7 @@ const p = 'text-sm leading-relaxed';
                 ['bg-rose-500', 'Rojo', 'Amor', 'Sube el amor si la serenidad es positiva.'],
                 ['bg-amber-200', 'Beige', 'Experiencia de montura', 'Da experiencia, sin condición de serenidad.'],
               ].map(([dot, color, name, what]) => (
-                <li class="flex gap-2.5 p-2.5 rounded-xl border border-slate-200">
+                <li class="flex gap-2.5 p-2.5 rounded-xl border border-slate-200 sm:last:col-span-2">
                   <span class={`mt-1 w-3 h-3 rounded-full flex-shrink-0 ${dot}`} aria-hidden="true" />
                   <span><span class="font-bold text-slate-900">{name}</span> <span class="text-slate-500">({color})</span>. {what}</span>
                 </li>
@@ -468,7 +469,7 @@ const p = 'text-sm leading-relaxed';
           <p class={p}>
             Al pasar el ratón por una montura ves, de arriba abajo: nombre, colores, nivel, sexo, tipo y generación; sus barras de
             serenidad, aguante (rayo), madurez (gota) y amor (corazón), que se iluminan al llegar al máximo; su experiencia, su
-            capacidad si tiene una y su estado de fertilidad; los bonos que da equipada; y por último su genealogía (padres y
+            capacidad si tiene una y su estado de fertilidad; los bonus que da equipada; y por último su genealogía (padres y
             abuelos), que no aparece en las recién capturadas.
           </p>
           <GuideTable
@@ -540,18 +541,18 @@ const p = 'text-sm leading-relaxed';
               <div class="bg-blue-600" style="width:20%"></div>
               <div class="bg-blue-900" style="width:10%"></div>
             </div>
-            <div class="flex text-[10.5px] font-mono text-slate-500">
-              <span style="width:40%">Tramo 1 · Extracto</span><span style="width:30%">Tramo 2 · Filtro</span><span style="width:20%">3 · Poción</span><span style="width:10%">4</span>
+            <div class="flex text-[11px] font-semibold text-slate-600 whitespace-nowrap">
+              <span style="width:40%">Extracto</span><span style="width:30%">Filtro</span><span style="width:20%">Poción</span><span style="width:10%" class="text-right">Elixir</span>
             </div>
           </div>
           <GuideTable
-            caption="Tramos del medidor"
-            head={['Tramo', 'Rango del medidor', 'Gasto y ganancia cada 10 s', 'Tiempo en vaciar el tramo']}
+            caption="Tramos del medidor según el carburante"
+            head={['Carburante', 'Rango del medidor', 'Gasto y ganancia cada 10 s', 'Tiempo en vaciar el tramo']}
             rows={[
-              [1, '0 a 80.000', 10, '22 h 13 min'],
-              [2, '80.001 a 140.000', 20, '8 h 20 min'],
-              [3, '140.001 a 180.000', 30, '3 h 42 min'],
-              [4, '180.001 a 200.000', 40, '1 h 23 min'],
+              ['Extracto', '0 a 80.000', 10, '22 h 13 min'],
+              ['Filtro', '80.001 a 140.000', 20, '8 h 20 min'],
+              ['Poción', '140.001 a 180.000', 30, '3 h 42 min'],
+              ['Elixir', '180.001 a 200.000', 40, '1 h 23 min'],
             ]}
           />
           <p class={p}>
@@ -565,7 +566,7 @@ const p = 'text-sm leading-relaxed';
           <p class={p}>
             Abre la vista de cruce, pon un macho y una hembra fecundos del mismo tipo (tienen que estar en el establo, no en el
             inventario ni en un cercado) y, si quieres, una mákina en el centro. La interfaz muestra la probabilidad de cada bebé
-            posible y la experiencia de criador que ganarás: 30 por generación de cada padre.
+            posible y la experiencia de ganadero que ganarás: 30 por generación de cada padre.
           </p>
           <p class={p}>
             El bebé nace al instante, de nivel 1, con los medidores a 0 y sexo al azar (salvo con Animákina). Cada pareja da un solo
@@ -588,7 +589,7 @@ const p = 'text-sm leading-relaxed';
           </p>
           <p class={p}>
             Dos padres de nivel 200 dan un 90 %, y dos de nivel 167 con Optimákina llegan al 100 %. Subir monturas a 200 lleva mucho
-            tiempo, así que muchos criadores se quedan en un punto medio, entre nivel 50 y 100.
+            tiempo, así que muchos ganaderos se quedan en un punto medio, entre nivel 50 y 100.
           </p>
           <TargetGenCalculator client:visible />
           <ToolLink href="/cruces" label="Cruces">Consulta qué pareja necesitas para cada color y generación.</ToolLink>
@@ -615,12 +616,12 @@ const p = 'text-sm leading-relaxed';
           <p class={p}>
             Las genetichas son fichas de cuenta que ganas cuando el bebé supera en generación a todas las monturas del árbol de sus
             padres. Recibes, por cada padre, según su generación: 2, 4, 8, 16, 30, 60, 120, 240 y 500 genetichas de la generación 1 a
-            la 9. Un padre de generación 9 y otro de 1 dan 502. Eugen Eticha los cambia por pergaminos de características, turmalinas,
+            la 9. Un padre de generación 9 y otro de 1 dan 502. Eugen Eticha las cambia por pergaminos de características, turmalinas,
             alichas y apariencias Camaleón.
           </p>
-          <p class={p}>El día 10 de cada mes el Almanax da un bono de crianza:</p>
+          <p class={p}>El día 10 de cada mes el Almanax da un bonus de crianza:</p>
           <div class="almanax">
-            <GuideTable caption="Bonos de crianza del Almanax" head={['Fecha', 'Bono']} rows={almanax} rowData={almanaxMonths} />
+            <GuideTable caption="Bonus de crianza del Almanax" head={['Fecha', 'Bonus']} rows={almanax} rowData={almanaxMonths} />
           </div>
         </GuideSection>
 
@@ -643,6 +644,14 @@ const p = 'text-sm leading-relaxed';
 </Layout>
 
 <style is:global>
+  .guide-section p,
+  .guide-section li {
+    text-wrap: pretty;
+  }
+  .guide-section h2,
+  .guide-section h3 {
+    text-wrap: balance;
+  }
   .toc-link[aria-current='true'] {
     color: #1d4ed8;
     background-color: #eff6ff;
@@ -691,7 +700,7 @@ const p = 'text-sm leading-relaxed';
     d.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => (d.open = false)))
   );
 
-  // Almanax: resalta el bono del mes actual
+  // Almanax: resalta el bonus del mes actual
   const month = String(new Date().getMonth() + 1);
   document.querySelectorAll<HTMLElement>('.almanax tr[data-row]').forEach((tr) => {
     if (tr.dataset.row === month) tr.dataset.current = 'true';

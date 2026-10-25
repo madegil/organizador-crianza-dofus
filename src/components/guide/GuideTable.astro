@@ -8,32 +8,78 @@ interface Props {
   rowData?: (string | number)[];
 }
 const { head, rows, caption, rowData } = Astro.props;
-// Solo las tablas anchas necesitan desplazamiento horizontal en móvil
-const minWidth = head.length >= 4 ? 'min-w-[32rem]' : '';
+// En móvil, las tablas de 3 o más columnas se muestran como fichas apiladas
+const stack = head.length >= 3;
 ---
 
-<div class="overflow-x-auto -mx-1 px-1">
-  <table class={`w-full text-left text-[13px] border-collapse ${minWidth}`}>
-    {caption && <caption class="sr-only">{caption}</caption>}
-    <thead>
-      <tr class="border-b border-slate-200">
-        {head.map((h) => <th scope="col" class="py-2 pr-3 font-bold text-slate-900 align-bottom">{h}</th>)}
-      </tr>
-    </thead>
-    <tbody>
-      {
-        rows.map((r, i) => (
-          <tr class="border-b border-slate-100 last:border-0 align-top" data-row={rowData?.[i]}>
-            {r.map((c, j) =>
-              j === 0 ? (
-                <th scope="row" class="py-2 pr-3 font-semibold text-slate-900 min-w-[7rem]">{c}</th>
-              ) : (
-                <td class="py-2 pr-3">{c}</td>
-              )
-            )}
-          </tr>
-        ))
-      }
-    </tbody>
-  </table>
-</div>
+<table class:list={['guide-table w-full text-left text-[13px] border-collapse', { 'gt-stack': stack }]}>
+  {caption && <caption class="sr-only">{caption}</caption>}
+  <thead>
+    <tr class="border-b border-slate-200">
+      {head.map((h) => <th scope="col" class="py-2 pr-3 font-bold text-slate-900 align-bottom">{h}</th>)}
+    </tr>
+  </thead>
+  <tbody>
+    {
+      rows.map((r, i) => (
+        <tr class="border-b border-slate-100 last:border-0 align-top" data-row={rowData?.[i]}>
+          {r.map((c, j) =>
+            j === 0 ? (
+              <th scope="row" class="py-2 pr-3 font-semibold text-slate-900 min-w-[7rem]">{c}</th>
+            ) : (
+              <td class="py-2 pr-3" data-label={head[j]}>{c}</td>
+            )
+          )}
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
+
+<style is:global>
+  @media (max-width: 639px) {
+    .gt-stack thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+    .gt-stack,
+    .gt-stack tbody,
+    .gt-stack tr,
+    .gt-stack th,
+    .gt-stack td {
+      display: block;
+    }
+    .gt-stack tbody {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .gt-stack tr {
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      padding: 0.625rem 0.75rem;
+    }
+    .gt-stack tr:last-child {
+      border-width: 1px;
+    }
+    .gt-stack th[scope='row'] {
+      padding: 0 0 0.25rem;
+      min-width: 0;
+      font-size: 14px;
+    }
+    .gt-stack td {
+      display: grid;
+      grid-template-columns: 8.75rem 1fr;
+      gap: 0.5rem;
+      padding: 0.2rem 0;
+    }
+    .gt-stack td::before {
+      content: attr(data-label);
+      color: #64748b;
+      font-weight: 600;
+      font-size: 12px;
+    }
+  }
+</style>
