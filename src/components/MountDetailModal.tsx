@@ -4,8 +4,6 @@ import type { MountDefinition, UserMount } from '../types/mount';
 import { getMountCrosses } from '../data/allMounts';
 import { MountAvatar } from './MountAvatar';
 import { definicion, ejemplaresDe, esNivel200, hijos, NOMBRE_ESPECIE } from '../utils/mountCatalog';
-import { formatNumber } from '../utils/formatNumber';
-import { FERTILITY_LABELS } from '../data/labels';
 
 interface Props {
   /** Montura abierta; null cierra la ventana */
@@ -148,10 +146,13 @@ export const MountDetailModal: React.FC<Props> = ({
                     {m.gender === 'F' ? '♀' : '♂'}
                   </span>
                 </span>
-                <span className="block text-xs text-slate-600">
-                  Nivel {m.currentLevel} · {formatNumber(m.currentXp)} XP · {FERTILITY_LABELS[m.fertility] ?? m.fertility}
-                  {esNivel200(m) && <span className="ml-1 font-bold text-emerald-700">Nivel 200</span>}
-                </span>
+                {esNivel200(m) ? (
+                  <span className="inline-flex items-center gap-1 mt-0.5 text-xs font-bold text-emerald-800">
+                    <Check aria-hidden="true" className="w-3.5 h-3.5" strokeWidth={3} /> Subió a nivel 200
+                  </span>
+                ) : (
+                  <span className="block text-xs text-slate-600">Aún no llega a nivel 200</span>
+                )}
               </span>
               {onQuitar && <BotonQuitar nombre={m.nickname || m.breed} onConfirm={() => onQuitar(m.id)} />}
             </li>
@@ -234,10 +235,10 @@ export const MountDetailModal: React.FC<Props> = ({
         if (e.target === dialogRef.current) dialogRef.current?.close();
       }}
       aria-labelledby="ficha-titulo"
-      className="ficha-montura w-[min(40rem,calc(100vw-1.5rem))] max-h-[min(52rem,calc(100dvh-1.5rem))] p-0 rounded-3xl bg-white text-slate-800 border-2 border-slate-300"
+      className="ficha-montura w-[min(40rem,calc(100vw-1.5rem))] max-h-[min(52rem,calc(100dvh-1.5rem))] p-0 overflow-hidden rounded-3xl bg-white text-slate-800 border-2 border-slate-300"
     >
       {actual && (
-        <div className="flex flex-col max-h-[min(52rem,calc(100dvh-1.5rem))]">
+        <div className="flex flex-col max-h-[calc(min(52rem,100dvh-1.5rem)-4px)]">
           {/* Cabecera fija con la montura */}
           <header className="flex items-start gap-3 p-4 sm:p-5 border-b border-slate-200 bg-slate-50">
             {historial.length > 1 && (
@@ -277,7 +278,7 @@ export const MountDetailModal: React.FC<Props> = ({
             </button>
           </header>
 
-          <div ref={cuerpoRef} className="overflow-y-auto p-4 sm:p-5 space-y-5">
+          <div ref={cuerpoRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-5">
             {enfoque === 'coleccion' ? (
               <>
                 {seccionEjemplares}

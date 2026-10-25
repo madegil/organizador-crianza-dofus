@@ -7,7 +7,7 @@ import { db, normalizeStoredMounts } from '../db/mountsDb';
 import { MountGrid } from './MountGrid';
 import { MountDetailModal } from './MountDetailModal';
 import { SpeciesTabs } from './SpeciesTabs';
-import { LogrosGanaderia } from './LogrosGanaderia';
+import { LogrosGanaderia, contarHechos } from './LogrosGanaderia';
 import { LOGROS } from '../data/logros';
 import { CATALOGO_POR_ESPECIE, NOMBRE_ESPECIE, coincide, ejemplaresDe, esNivel200 } from '../utils/mountCatalog';
 
@@ -209,7 +209,7 @@ export const CollectionTracker: React.FC = () => {
               <h1 className="text-xl sm:text-2xl text-slate-900 leading-tight">
                 {vista === 'razas' ? `Tu colección de ${NOMBRE_ESPECIE[especie].varios}` : 'Logros de ganadería'}
               </h1>
-              <p className="text-sm text-slate-600 mt-1 max-w-[56ch]">
+              <p className="text-sm text-slate-600 mt-1">
                 {vista === 'razas'
                   ? `Hay ${catalogo.length} razas de ${NOMBRE_ESPECIE[especie].uno}. Pulsa una para ver tus ejemplares, registrarla o quitarla.`
                   : 'Marca los logros que ya tienes en el juego y mira cuáles te faltan.'}
@@ -348,7 +348,7 @@ const ResumenLogrosOculto: React.FC<{ onResumen: (h: number, t: number) => void 
   useEffect(() => {
     db.logros
       .toArray()
-      .then((l) => onResumen(l.filter((x) => x.hecho && LOGROS.some((d) => d.id === x.id)).length, LOGROS.length))
+      .then((l) => onResumen(contarHechos(Object.fromEntries(l.map((x) => [x.id, x.hecho]))), LOGROS.length))
       .catch(() => {});
   }, [onResumen]);
   return null;
