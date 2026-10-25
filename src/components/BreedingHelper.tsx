@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { GitFork } from 'lucide-react';
+import { IconMedallon } from './DofusIcons';
+import { GenFilter } from './GenFilter';
 import type { SpeciesType } from '../types/mount';
 import { DRAGODINDES_DATA } from '../data/dragodindes';
 import { MULDOS_DATA } from '../data/muldos';
@@ -73,9 +74,7 @@ export const BreedingHelper: React.FC = () => {
         {/* Cabecera Principal */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3 sm:pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-blue-800 flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
-              <GitFork className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
-            </div>
+            <IconMedallon name="cruces" />
             <div>
               <h1 className="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
                 Árbol de cruces y guía de hibridaciones
@@ -120,31 +119,13 @@ export const BreedingHelper: React.FC = () => {
           </div>
 
           {/* Filtro por generación (desliza en horizontal en móvil) */}
-          <div
-            role="group"
-            aria-label="Filtrar por generación"
-            className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none"
-          >
-            {(['all', ...generations] as (number | 'all')[]).map((g) => {
-              const isActive = selectedGen === g;
-              return (
-                <button
-                  key={g}
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setSelectedGen(g)}
-                  title={g === 'all' ? undefined : `Generación ${g}`}
-                  className={`min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
-                    isActive
-                      ? 'bg-blue-800 text-white'
-                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  {g === 'all' ? 'Todas' : `G${g}`}
-                </button>
-              );
-            })}
-          </div>
+          <GenFilter
+            generations={generations}
+            selected={selectedGen}
+            onChange={setSelectedGen}
+            allLabel="Todas"
+            counts={Object.fromEntries(generations.map((g) => [g, catalog.filter((m) => m.generation === g).length]))}
+          />
 
           {/* Grid responsivo adaptable: 1 col (mobile), 2 cols (tablet), 3 cols (desktop), 4 cols (wide) */}
           <div

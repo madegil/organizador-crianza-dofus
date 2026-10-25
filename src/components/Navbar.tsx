@@ -1,16 +1,16 @@
 import React from 'react';
-import { Home, Calculator, BookOpen, GitFork, Sparkles } from 'lucide-react';
+import { IconGuia, IconEstablo, IconCalculadora, IconColeccion, IconCruces } from './DofusIcons';
 
 interface NavbarProps {
   currentPath?: string;
 }
 
 const navItems = [
-  { href: '/', label: 'Guía', icon: Sparkles },
-  { href: '/establo', label: 'Establo', icon: Home },
-  { href: '/calculadora', label: 'Calculadora', icon: Calculator },
-  { href: '/coleccion', label: 'Colección', icon: BookOpen },
-  { href: '/cruces', label: 'Cruces', icon: GitFork },
+  { href: '/', label: 'Guía', icon: IconGuia },
+  { href: '/establo', label: 'Establo', icon: IconEstablo },
+  { href: '/calculadora', label: 'Calculadora', icon: IconCalculadora },
+  { href: '/coleccion', label: 'Colección', icon: IconColeccion },
+  { href: '/cruces', label: 'Cruces', icon: IconCruces },
 ];
 
 const isActivePath = (currentPath: string, href: string) =>
@@ -55,10 +55,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
                     : 'text-[#f3e7c9] hover:text-white hover:bg-[#4a321d] hover:-translate-y-0.5'
                 }`}
               >
-                <Icon
-                  aria-hidden="true"
-                  className={`nav-icono w-4 h-4 ${isActive ? 'text-kama' : 'text-[#cdb98f] group-hover:text-[#a5c95e]'}`}
-                />
+                <span
+                  className={`ficha grid place-items-center w-8 h-8 -my-1 rounded-full border-2 ${
+                    isActive
+                      ? 'bg-[#fbf4e1] border-kama shadow-[0_0_0_3px_rgba(242,193,78,0.25)]'
+                      : 'bg-[#e9dbb8] border-[#25180c] group-hover:bg-[#fbf4e1]'
+                  }`}
+                >
+                  <Icon className="nav-icono w-6 h-6" />
+                </span>
                 <span>{item.label}</span>
                 {/* Sello dorado bajo la sección actual */}
                 <span
@@ -87,16 +92,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath = '/' }) => {
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
-                className={`nav-item flex flex-col items-center justify-center min-h-[48px] py-1.5 px-0.5 rounded-xl text-[10px] min-[360px]:text-[11px] font-bold active:scale-95 ${
+                className={`nav-item flex flex-col items-center justify-center min-h-[56px] py-1 px-0.5 rounded-xl text-[10px] min-[360px]:text-[11px] font-bold active:scale-95 ${
                   isActive
                     ? 'bg-[#25180c] text-kama shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]'
                     : 'text-[#f3e7c9]'
                 }`}
               >
-                <Icon
-                  aria-hidden="true"
-                  className={`nav-icono w-5 h-5 mb-0.5 ${isActive ? 'text-kama -translate-y-0.5' : 'text-[#cdb98f]'}`}
-                />
+                <span
+                  className={`ficha grid place-items-center w-8 h-8 mb-0.5 rounded-full border-2 ${
+                    isActive
+                      ? 'bg-[#fbf4e1] border-kama -translate-y-0.5 shadow-[0_0_0_3px_rgba(242,193,78,0.25)]'
+                      : 'bg-[#e9dbb8] border-[#25180c]'
+                  }`}
+                >
+                  <Icon className="nav-icono w-6 h-6" />
+                </span>
                 <span className="truncate max-w-full">{item.label}</span>
               </a>
             );

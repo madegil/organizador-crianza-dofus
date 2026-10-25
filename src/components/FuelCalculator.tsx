@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useId } from 'react';
+import { IconMedallon } from './DofusIcons';
 import { EstadoVacio } from './EstadoVacio';
-import { Clock, Check, Zap, Layers, Hourglass, Gauge, Flame } from 'lucide-react';
+import { Clock, Check, Zap, Hourglass, Gauge, Flame } from 'lucide-react';
 import {
   FUEL_VARIANTS,
   MAX_MOUNT_XP,
@@ -179,9 +180,7 @@ export const FuelCalculator: React.FC = () => {
       <div className="bg-slate-50 text-slate-900 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-2xl border border-slate-200/90 space-y-4 sm:space-y-5 relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3 sm:pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-50 text-blue-800 flex items-center justify-center border border-blue-200/80 shadow-sm flex-shrink-0">
-              <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
+            <IconMedallon name="calculadora" />
             <div>
               <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Tus monturas</h2>
               <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
