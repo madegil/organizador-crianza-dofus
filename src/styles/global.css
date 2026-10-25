@@ -211,6 +211,12 @@ progress {
 .icono-juego {
   filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.45));
 }
+.icono-plano {
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.4));
+}
+.tablon .icono-plano {
+  filter: drop-shadow(0 2px 1px rgb(0 0 0 / 0.65));
+}
 .tablon .icono-juego {
   filter: drop-shadow(0 0 1px rgb(255 236 190 / 0.55)) drop-shadow(0 2px 0 rgb(0 0 0 / 0.6));
 }
