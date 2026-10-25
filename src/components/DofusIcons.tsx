@@ -153,7 +153,7 @@ const BOLITAS = {
 } as const;
 
 export const IconCruces: React.FC<IconProps> = ({ className = '' }) => (
-  <svg viewBox="0 0 510 510" aria-hidden="true" className={`icono-plano ${className}`}>
+  <svg viewBox="-60 -60 630 630" aria-hidden="true" className={`icono-plano ${className}`}>
     <g fill="#f3e3bd">
       <path d="m78.56 34.756h352.881v11.122h-352.881z" />
       <path d="m78.56 97.294h352.881v11.122h-352.881z" />
