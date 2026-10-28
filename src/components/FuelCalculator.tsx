@@ -365,7 +365,16 @@ export const FuelCalculator: React.FC = () => {
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-8">
           {/* MEDIDOR DE 0-200.000 XP */}
           <div className="flex flex-col items-center gap-2 flex-shrink-0 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm w-full sm:w-auto">
-            <XpGauge currentXp={gaugeDisplayXp} maxGauge={MAX_ENCLOS_GAUGE} />
+            <XpGauge
+              currentXp={gaugeDisplayXp}
+              maxGauge={MAX_ENCLOS_GAUGE}
+              tiers={[
+                { name: 'Extracto', range: '0 – 80.000', upTo: 80000, color: strategy === 'tier1' ? 'bg-purple-700' : 'bg-purple-400', active: strategy === 'tier1' },
+                { name: 'Filtro', range: '80.001 – 140.000', upTo: 140000, color: strategy === 'tier2' ? 'bg-blue-700' : 'bg-blue-400', active: strategy === 'tier2' },
+                { name: 'Poción', range: '140.001 – 180.000', upTo: 180000, color: strategy === 'tier3' ? 'bg-amber-700' : 'bg-amber-400', active: strategy === 'tier3' },
+                { name: 'Elixir', range: '180.001 – 200.000', upTo: 200000, color: strategy === 'tier4' ? 'bg-rose-700' : 'bg-rose-400', active: strategy === 'tier4' },
+              ]}
+            />
             <div className="text-center pt-1">
               <span className="text-[11px] font-mono text-slate-800 font-extrabold block">
                 {gaugeDisplayXp.toLocaleString()} / 200.000 XP
@@ -440,38 +449,6 @@ export const FuelCalculator: React.FC = () => {
                     </span>
                   </div>
                 </label>
-
-                {/* Barra horizontal de tramos de 200.000 XP */}
-                <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                    <span>Tramos del medidor (200.000)</span>
-                  </div>
-                  <div className="w-full h-3 rounded-full bg-slate-100 flex overflow-hidden border border-slate-200" role="img" aria-label="Tramos del medidor de 200.000 XP">
-                    <div style={{ width: '40%' }} className={`h-full border-r border-white/60 transition ${strategy === 'tier1' ? 'bg-purple-700' : 'bg-purple-400'}`} />
-                    <div style={{ width: '30%' }} className={`h-full border-r border-white/60 transition ${strategy === 'tier2' ? 'bg-blue-700' : 'bg-blue-400'}`} />
-                    <div style={{ width: '20%' }} className={`h-full border-r border-white/60 transition ${strategy === 'tier3' ? 'bg-amber-700' : 'bg-amber-400'}`} />
-                    <div style={{ width: '10%' }} className={`h-full transition ${strategy === 'tier4' ? 'bg-rose-700' : 'bg-rose-400'}`} />
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px]">
-                    {[
-                      { tier: 1, name: 'Extracto', range: '0 - 80.000', strat: 'tier1' },
-                      { tier: 2, name: 'Filtro', range: '80.001 - 140.000', strat: 'tier2' },
-                      { tier: 3, name: 'Poción', range: '140.001 - 180.000', strat: 'tier3' },
-                      { tier: 4, name: 'Elixir', range: '180.001 - 200.000', strat: 'tier4' },
-                    ].map((item) => {
-                      const isChosen = strategy === item.strat;
-                      return (
-                        <div key={item.tier} className={`p-2 rounded-xl border transition ${isChosen ? 'bg-slate-900 text-white border-slate-900 font-bold shadow-xs' : 'bg-slate-50 text-slate-700 border-slate-200'}`}>
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold">{item.name}</span>
-                            {isChosen && <span className="text-[10px] bg-blue-500 text-white px-1 rounded">En uso</span>}
-                          </div>
-                          <p className={`text-[11px] font-mono mt-0.5 ${isChosen ? 'text-slate-200' : 'text-slate-600'}`}>{item.range}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
 
                 {/* B. SELECTOR DE ESTRATEGIA: MANTENER NIVEL FIJO VS VACIADO CONTINUO (CASCADA) */}
                 <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-2.5">
