@@ -85,7 +85,7 @@ function MountCard({
   const ready = isMountReadyToBreed(mount);
   const bars = [
     { label: 'Amor', value: mount.love, color: 'bg-pink-500' },
-    { label: 'Madurez', value: mount.maturity, color: 'bg-purple-500' },
+    { label: 'Madurez', value: mount.maturity, color: 'bg-sky-500' },
     { label: 'Resistencia', value: mount.stamina, color: 'bg-amber-500' },
   ];
 
@@ -1173,7 +1173,7 @@ export const MountTable: React.FC<MountTableProps> = ({ mounts, onDataChanged })
                               </div>
                               <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-purple-500"
+                                  className="h-full bg-sky-500"
                                   style={{ width: `${Math.min(100, (mount.maturity / 20000) * 100)}%` }}
                                 />
                               </div>

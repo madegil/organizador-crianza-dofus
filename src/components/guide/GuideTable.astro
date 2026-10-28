@@ -43,16 +43,20 @@ const rich = (c: string | number) => escape(String(c)).replace(/\*\*(.+?)\*\*/g,
                 </th>
               ) : (
                 <td class="py-2 pr-3" data-label={head[j]}>
-                  <span class="celda-objeto" title={GUIDE_ITEMS[c.item].name}>
-                    <img src={GUIDE_ITEMS[c.item].img} alt="" width="36" height="36" loading="lazy" />
-                    <span>{c.text ?? GUIDE_ITEMS[c.item].name}</span>
+                  <span class="gt-valor">
+                    <span class="celda-objeto" title={GUIDE_ITEMS[c.item].name}>
+                      <img src={GUIDE_ITEMS[c.item].img} alt="" width="36" height="36" loading="lazy" />
+                      <span>{c.text ?? GUIDE_ITEMS[c.item].name}</span>
+                    </span>
                   </span>
                 </td>
               )
             ) : j === 0 ? (
               <th scope="row" class="py-2 pr-3 font-semibold text-slate-900 min-w-[7rem]" set:html={rich(c)} />
             ) : (
-              <td class="py-2 pr-3" data-label={head[j]} set:html={rich(c)} />
+              <td class="py-2 pr-3" data-label={head[j]}>
+                <span class="gt-valor" set:html={rich(c)} />
+              </td>
             )
           )}
         </tr>
@@ -96,34 +100,52 @@ const rich = (c: string | number) => escape(String(c)).replace(/\*\*(.+?)\*\*/g,
     .gt-stack tr {
       border: 1px solid #dfcb9f;
       border-radius: 0.75rem;
-      padding: 0.625rem 0.75rem;
+      padding: 0.625rem 0.75rem 0.375rem;
     }
     .gt-stack tr:last-child {
       border-width: 1px;
     }
+    /* Cabecera de la ficha: nombre (y objeto) separado de los datos */
     .gt-stack th[scope='row'] {
-      padding: 0 0 0.25rem;
+      padding: 0 0 0.5rem;
+      margin-bottom: 0.125rem;
       min-width: 0;
-      font-size: 14px;
+      font-size: 15px;
+      line-height: 1.3;
+      border-bottom: 1px solid #ead9b4;
     }
+    /* Cada dato: etiqueta a la izquierda, valor a la derecha en un solo bloque */
     .gt-stack td {
       display: grid;
-      grid-template-columns: 8.75rem 1fr;
-      gap: 0.5rem;
-      padding: 0.2rem 0;
+      grid-template-columns: minmax(6.5rem, 40%) minmax(0, 1fr);
+      column-gap: 0.75rem;
+      align-items: baseline;
+      padding: 0.45rem 0;
+      line-height: 1.4;
     }
-    .gt-stack td .celda-objeto,
-    .gt-stack th .celda-objeto {
-      align-items: center;
-    }
-    .gt-stack td > .pos-travel {
-      justify-self: start;
+    .gt-stack td + td {
+      border-top: 1px dashed #ead9b4;
     }
     .gt-stack td::before {
       content: attr(data-label);
       color: #5e4a30;
       font-weight: 600;
       font-size: 12px;
+      line-height: 1.35;
+      text-wrap: balance;
+    }
+    .gt-stack .gt-valor {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      text-wrap: pretty;
+    }
+    /* Con objeto (icono + nombre), alinear por el centro del icono */
+    .gt-stack td:has(.celda-objeto) {
+      align-items: center;
+    }
+    .gt-stack td .celda-objeto img {
+      width: 30px;
+      height: 30px;
     }
   }
 </style>

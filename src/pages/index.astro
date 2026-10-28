@@ -5,6 +5,7 @@ import GuideTable from '../components/guide/GuideTable.astro';
 import ToolLink from '../components/guide/ToolLink.astro';
 import Objeto from '../components/guide/Objeto.astro';
 import Nota from '../components/guide/Nota.astro';
+import MedidorVertical from '../components/guide/MedidorVertical.astro';
 import { IconEstablo } from '../components/DofusIcons';
 import { SerenityChart } from '../components/guide/SerenityChart';
 import { TargetGenCalculator } from '../components/guide/TargetGenCalculator';
@@ -355,7 +356,7 @@ const heroMounts = [
           </p>
           <p class={p}>
             Las monturas capturadas salen de <strong>nivel 1 y generación 1</strong>, y ya se pueden equipar. Cada captura da
-            <strong>30 de experiencia de ganadero</strong> por montura.
+            <strong>60 de experiencia de ganadero</strong> por montura.
           </p>
           <ToolLink href="/establo" label="Establo">Registra tus capturas para seguir su serenidad y sus medidores.</ToolLink>
         </GuideSection>
@@ -652,28 +653,7 @@ const heroMounts = [
             monturas que haya dentro. Para recargarlos, arrastra el carburante del inventario a la interfaz. Cada medidor llega a
             200.000 y cada 10 segundos gasta según el tramo en que está; cada montura del cercado gana lo mismo que se gasta.
           </p>
-          <!-- Tramos dibujados a escala sobre los 200.000 del medidor -->
-          <div class="space-y-1.5" aria-hidden="true">
-            <div class="flex h-3 rounded-full overflow-hidden border border-slate-200">
-              <div class="bg-blue-200" style="width:40%"></div>
-              <div class="bg-blue-400" style="width:30%"></div>
-              <div class="bg-blue-600" style="width:20%"></div>
-              <div class="bg-blue-900" style="width:10%"></div>
-            </div>
-            <div class="flex text-[11px] font-semibold text-slate-600 whitespace-nowrap">
-              <span style="width:40%">Extracto</span><span style="width:30%">Filtro</span><span style="width:20%">Poción</span><span style="width:10%" class="text-right">Elixir</span>
-            </div>
-          </div>
-          <GuideTable
-            caption="Tramos del medidor según el carburante"
-            head={['Carburante', 'Rango del medidor', 'Gasto y ganancia cada 10 s', 'Tiempo en vaciar el tramo']}
-            rows={[
-              [{ item: 'extracto', text: 'Extracto' }, '0 a 80.000', 10, '22 h 13 min'],
-              [{ item: 'filtro', text: 'Filtro' }, '80.001 a 140.000', 20, '8 h 20 min'],
-              [{ item: 'pocima', text: 'Poción' }, '140.001 a 180.000', 30, '3 h 42 min'],
-              [{ item: 'elixir', text: 'Elixir' }, '180.001 a 200.000', 40, '1 h 23 min'],
-            ]}
-          />
+          <MedidorVertical />
           <p class={p}>
             Un medidor lleno tarda unas <strong>35 h 39 min</strong> en vaciarse del todo.
           </p>

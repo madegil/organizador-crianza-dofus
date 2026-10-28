@@ -1,0 +1,140 @@
+---
+import { GUIDE_ITEMS, type GuideItemId } from '../../data/guideItems';
+
+/**
+ * Medidor del cercado dibujado en vertical (0 abajo, 200.000 arriba), con cada tramo
+ * a su altura proporcional y, al lado, el carburante y los datos de ese tramo.
+ */
+interface Tramo {
+  item: GuideItemId;
+  nombre: string;
+  desde: string;
+  hasta: string;
+  /** Parte de los 200.000 que ocupa el tramo */
+  peso: number;
+  gasto: number;
+  tiempo: string;
+  /** Color del tramo en la barra */
+  color: string;
+}
+
+// De arriba (medidor lleno) a abajo (vacío), como se llena en el juego
+const tramos: Tramo[] = [
+  { item: 'elixir', nombre: 'Elixir', desde: '180.001', hasta: '200.000', peso: 1, gasto: 40, tiempo: '1 h 23 min', color: 'bg-blue-900' },
+  { item: 'pocima', nombre: 'Poción', desde: '140.001', hasta: '180.000', peso: 2, gasto: 30, tiempo: '3 h 42 min', color: 'bg-blue-600' },
+  { item: 'filtro', nombre: 'Filtro', desde: '80.001', hasta: '140.000', peso: 3, gasto: 20, tiempo: '8 h 20 min', color: 'bg-blue-400' },
+  { item: 'extracto', nombre: 'Extracto', desde: '0', hasta: '80.000', peso: 4, gasto: 10, tiempo: '22 h 13 min', color: 'bg-blue-200' },
+];
+---
+
+<figure class="medidor-v">
+  <figcaption class="sr-only">Tramos del medidor según el carburante, de 200.000 (lleno) a 0 (vacío)</figcaption>
+  <div class="medidor-v__marco">
+    <span class="medidor-v__tope" aria-hidden="true">200.000</span>
+    <ol class="medidor-v__lista">
+      {
+        tramos.map((t, i) => (
+          <li class="medidor-v__tramo" style={`flex-grow:${t.peso}`}>
+            <!-- Trozo del tubo: cada tramo lleva su parte de la barra, siempre alineada con su texto -->
+            <span class={`medidor-v__trozo ${t.color}`} aria-hidden="true" />
+            <div class="medidor-v__info">
+              <p class="flex items-center gap-2 leading-tight">
+                <img src={GUIDE_ITEMS[t.item].img} alt="" width="26" height="26" loading="lazy" class="w-[26px] h-[26px] object-contain shrink-0 drop-shadow-[0_1px_0_rgba(0,0,0,0.2)]" title={GUIDE_ITEMS[t.item].name} />
+                <span class="font-extrabold text-slate-900 text-[14px]">{t.nombre}</span>
+                <span class="medidor-v__dato ml-auto"><span class="sr-only">Gasto y ganancia: </span><strong>{t.gasto}</strong> cada 10 s</span>
+              </p>
+              <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12.5px] leading-tight text-slate-700">
+                <span class="whitespace-nowrap">
+                  <span class="sr-only">Rango del medidor: </span>
+                  <strong class="font-bold text-slate-900">{t.desde}</strong> a <strong class="font-bold text-slate-900">{t.hasta}</strong>
+                </span>
+                <span class="text-slate-500 whitespace-nowrap"><span aria-hidden="true">· </span><span class="sr-only">Tiempo en vaciar el tramo: </span>se vacía en {t.tiempo}</span>
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+    <span class="medidor-v__tope" aria-hidden="true">0</span>
+  </div>
+  <p class="mt-2 text-[11px] leading-snug text-slate-500">
+    Cada 10 s el medidor gasta, y cada montura gana, la cifra de su tramo. El tiempo es lo que tarda en vaciarse ese tramo.
+  </p>
+</figure>
+
+<style>
+  .medidor-v__marco {
+    display: flex;
+    flex-direction: column;
+    max-width: 36rem;
+  }
+  .medidor-v__lista {
+    display: flex;
+    flex-direction: column;
+    min-height: 34rem;
+  }
+  @media (min-width: 640px) {
+    .medidor-v__lista {
+      min-height: 30rem;
+    }
+  }
+  .medidor-v__tope {
+    width: 2.75rem;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #5e4a30;
+    line-height: 1;
+    padding: 0.25rem 0;
+  }
+  /* Cada tramo: su trozo de tubo a la izquierda y sus datos al lado */
+  .medidor-v__tramo {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    column-gap: 0.75rem;
+    flex-basis: 0;
+  }
+  .medidor-v__trozo {
+    justify-self: center;
+    width: 1.5rem;
+    border-left: 2px solid #c4ac80;
+    border-right: 2px solid #c4ac80;
+    box-shadow: inset 3px 0 0 rgb(255 255 255 / 0.25);
+  }
+  .medidor-v__tramo:first-child .medidor-v__trozo {
+    border-top: 2px solid #c4ac80;
+    border-radius: 9999px 9999px 0 0;
+  }
+  .medidor-v__tramo:last-child .medidor-v__trozo {
+    border-bottom: 2px solid #c4ac80;
+    border-radius: 0 0 9999px 9999px;
+  }
+  .medidor-v__tramo + .medidor-v__tramo .medidor-v__trozo {
+    border-top: 2px solid #fbf4e1;
+  }
+  .medidor-v__info {
+    position: relative;
+    align-self: center;
+    min-width: 0;
+    padding: 0.35rem 0;
+  }
+  /* Línea que marca el límite entre tramos, de la barra al texto */
+  .medidor-v__tramo + .medidor-v__tramo {
+    background-image: linear-gradient(to right, transparent 2.75rem, #ead9b4 2.75rem);
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+  }
+  .medidor-v__dato {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0 0.45rem;
+    line-height: 1.5;
+    border-radius: 0.5rem;
+    background: rgb(255 255 255 / 0.55);
+    border: 1px solid #ead9b4;
+    color: #3b2c1a;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+</style>

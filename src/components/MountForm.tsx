@@ -45,7 +45,7 @@ const zonaSerenidad = (s: number) => {
 
 const MEDIDORES = [
   { key: 'love', label: 'Amor', Icon: Heart, color: 'bg-pink-500', icono: 'text-pink-600' },
-  { key: 'maturity', label: 'Madurez', Icon: Droplet, color: 'bg-purple-500', icono: 'text-purple-600' },
+  { key: 'maturity', label: 'Madurez', Icon: Droplet, color: 'bg-sky-500', icono: 'text-sky-600' },
   { key: 'stamina', label: 'Resistencia', Icon: Zap, color: 'bg-amber-500', icono: 'text-amber-600' },
 ] as const;
 
